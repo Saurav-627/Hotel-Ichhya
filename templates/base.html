@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Dynamic SEO metadata from seo app context processor -->
+    <title>{{ seo.title }}</title>
+    <meta name="description" content="{{ seo.description }}">
+    <link rel="canonical" href="{{ seo.canonical }}">
+    
+    <!-- OpenGraph Tags -->
+    <meta property="og:title" content="{{ seo.og_title }}">
+    <meta property="og:description" content="{{ seo.og_description }}">
+    {% if seo.og_image %}<meta property="og:image" content="{{ seo.og_image }}">{% endif %}
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ seo.canonical }}">
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="{{ seo.twitter_card }}">
+    <meta name="twitter:title" content="{{ seo.og_title }}">
+    <meta name="twitter:description" content="{{ seo.og_description }}">
+    {% if seo.og_image %}<meta name="twitter:image" content="{{ seo.og_image }}">{% endif %}
+    
+    <!-- Structured Data JSON-LD -->
+    {% if seo.structured_data %}
+    <script type="application/ld+json">
+        {{ seo.structured_data|safe }}
+    </script>
+    {% endif %}
+
+    <!-- Google Fonts: Outfit & Playfair Display -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <!-- Tailwind CSS v4 Browser Compiler -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        luxuryGold: {
+                            50: '#FAF5E9',
+                            100: '#F3E7CA',
+                            200: '#E5CC94',
+                            300: '#D3AA5E',
+                            400: '#C48E37',
+                            500: '#B47825', // Main luxury gold
+                            600: '#99601D',
+                            700: '#784817',
+                            800: '#5D3713',
+                            900: '#4D2E11',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.13.5/dist/cdn.min.js"></script>
+
+    <style type="text/css">
+        /* Theme overrides & custom luxury styling */
+        .theme-light {
+            --bg-color: #FAFAFA;
+            --text-color: #1C1A17;
+            --border-color: #E5E5E5;
+            --accent-color: #B47825;
+            --card-bg: #FFFFFF;
+            --navbar-bg: rgba(250, 250, 250, 0.9);
+        }
+        .theme-dark {
+            --bg-color: #121212;
+            --text-color: #E5E5E5;
+            --border-color: #2D2D2D;
+            --accent-color: #D3AA5E;
+            --card-bg: #1E1E1E;
+            --navbar-bg: rgba(18, 18, 18, 0.9);
+        }
+        .theme-luxury {
+            --bg-color: #0A0908;
+            --text-color: #E5CC94;
+            --border-color: rgba(229, 204, 148, 0.2);
+            --accent-color: #D3AA5E;
+            --card-bg: #161412;
+            --navbar-bg: rgba(10, 9, 8, 0.95);
+        }
+        .theme-festival {
+            --bg-color: #3F0C10;
+            --text-color: #F3E7CA;
+            --border-color: rgba(243, 231, 202, 0.25);
+            --accent-color: #F3E7CA;
+            --card-bg: #25060A;
+            --navbar-bg: rgba(63, 12, 16, 0.95);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border-color: var(--border-color);
+            font-family: 'Outfit', sans-serif;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        .font-luxury-title {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .gold-glow {
+            box-shadow: 0 0 15px rgba(211, 170, 94, 0.2);
+        }
+        .gold-text-glow {
+            text-shadow: 0 0 8px rgba(211, 170, 94, 0.4);
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body x-data="{ 
+    currentTheme: 'light',
+    mobileMenuOpen: false,
+    bookingWidgetOpen: false,
+    searchOpen: false,
+    setTheme(theme) {
+        this.currentTheme = 'light';
+    },
+    currentCurrency: localStorage.getItem('currency') || 'USD',
+    currencyRates: {
+        USD: 1.0,
+        NPR: 133.0,
+        EUR: 0.92,
+        GBP: 0.79
+    },
+    currencySymbols: {
+        USD: '$',
+        NPR: '₨',
+        EUR: '€',
+        GBP: '£'
+    },
+    formatPrice(amount) {
+        if (amount === undefined || amount === null || isNaN(amount)) return '';
+        const rate = this.currencyRates[this.currentCurrency] || 1.0;
+        const symbol = this.currencySymbols[this.currentCurrency] || '$';
+        const converted = (parseFloat(amount) * rate).toFixed(2);
+        return symbol + converted;
+    },
+    setCurrency(currency) {
+        this.currentCurrency = currency;
+        localStorage.setItem('currency', currency);
+    }
+}" class="theme-light bg-[#FAFAFA] text-[#1C1A17] min-h-screen flex flex-col">
+
+    <!-- Django Messages / Toast Notification -->
+    {% if messages %}
+    <div class="fixed top-24 right-6 z-50 space-y-4 max-w-sm w-full pointer-events-none" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" style="display: none;">
+        {% for message in messages %}
+        <div class="p-4 rounded-xl shadow-2xl border flex items-start gap-3 pointer-events-auto animate__animated animate__fadeInRight bg-black/90 backdrop-blur-md"
+             :class="{
+                 'border-emerald-500/30 text-emerald-200': '{{ message.tags }}' === 'success',
+                 'border-rose-500/30 text-rose-200': '{{ message.tags }}' === 'error',
+                 'border-amber-500/30 text-amber-200': '{{ message.tags }}' === 'warning' || '{{ message.tags }}' === 'info'
+             }">
+            <div class="text-lg">
+                {% if message.tags == 'success' %}
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                {% elif message.tags == 'error' %}
+                    <i class="fa-solid fa-circle-exclamation text-rose-400"></i>
+                {% else %}
+                    <i class="fa-solid fa-triangle-exclamation text-amber-400"></i>
+                {% endif %}
+            </div>
+            <div class="flex-1 text-xs font-medium leading-relaxed">
+                {{ message }}
+            </div>
+            <button @click="show = false" class="opacity-60 hover:opacity-100 transition-opacity pointer-events-auto">
+                <i class="fa-solid fa-xmark text-xs"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- GLOBAL HEADER / STICKY NAVBAR -->
+    <header class="sticky top-0 z-50 border-b shadow-sm backdrop-blur-md bg-white/95 border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Brand Logo -->
+                <div class="flex-shrink-0">
+                    <a href="{% url 'homepage:home' %}" class="flex items-center">
+                        <img src="https://www.hotelichchha.com/backend/images/preference/u41t5-download.png" alt="Hotel Ichchha Logo" class="h-14 w-auto object-contain">
+                    </a>
+                </div>
+
+                <!-- Desktop Mega Menu Navigation -->
+                <nav class="hidden md:flex space-x-8 items-center">
+                    <!-- Home -->
+                    <a href="{% url 'homepage:home' %}" class="text-sm font-medium tracking-wide uppercase hover:text-luxuryGold-400 transition-colors">Home</a>
+                    
+                    <!-- Dynamic Navigation Items -->
+                    {% for item in header_menu %}
+                        {% if item.children.all %}
+                            <!-- Dropdown / Mega Menu -->
+                            <div class="relative" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
+                                <button class="flex items-center gap-1 text-sm font-medium tracking-wide uppercase hover:text-luxuryGold-400 transition-colors focus:outline-none">
+                                    {{ item.name }}
+                                    <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                                </button>
+                                <div x-show="open" 
+                                     x-transition:enter="transition ease-out duration-150"
+                                     x-transition:enter-start="opacity-0 translate-y-1"
+                                     x-transition:enter-end="opacity-100 translate-y-0"
+                                     x-transition:leave="transition ease-in duration-100"
+                                     x-transition:leave-start="opacity-100 translate-y-0"
+                                     x-transition:leave-end="opacity-0 translate-y-1"
+                                     class="absolute left-0 mt-2 w-56 rounded-md shadow-lg border backdrop-blur-lg focus:outline-none"
+                                     :class="{
+                                         'bg-white border-gray-200': currentTheme === 'light',
+                                         'bg-[#1E1E1E] border-[#2D2D2D]': currentTheme === 'dark',
+                                         'bg-[#161412] border-amber-900/30': currentTheme === 'luxury' || currentTheme === 'festival'
+                                     }">
+                                    <div class="py-1">
+                                        {% for child in item.children.all %}
+                                            <a href="{{ child.url }}" class="block px-4 py-3 text-sm tracking-wide hover:bg-luxuryGold-900/20 hover:text-luxuryGold-400 transition-colors">{{ child.name }}</a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <a href="{{ item.url }}" class="text-sm font-medium tracking-wide uppercase hover:text-luxuryGold-400 transition-colors">{{ item.name }}</a>
+                        {% endif %}
+                    {% empty %}
+                        <!-- Fallback menus if database is empty -->
+                        <a href="{% url 'rooms:room_list' %}" class="text-sm font-medium tracking-wide uppercase hover:text-luxuryGold-400 transition-colors">Rooms & Suites</a>
+                        <a href="{% url 'dining:dining_list' %}" class="text-sm font-medium tracking-wide uppercase hover:text-luxuryGold-400 transition-colors">Dining</a>
+                        <a href="{% url 'recreation:recreation_list' %}" class="text-sm font-medium tracking-wide uppercase hover:text-luxuryGold-400 transition-colors">Recreation</a>
+                        <a href="{% url 'gallery:gallery_list' %}" class="text-sm font-medium tracking-wide uppercase hover:text-luxuryGold-400 transition-colors">Gallery</a>
+                        <a href="{% url 'blogs:blog_list' %}" class="text-sm font-medium tracking-wide uppercase hover:text-luxuryGold-400 transition-colors">News</a>
+                        <a href="{% url 'contact:contact_page' %}" class="text-sm font-medium tracking-wide uppercase hover:text-luxuryGold-400 transition-colors">Contact</a>
+                    {% endfor %}
+                </nav>
+
+                <!-- Header Actions (Theme switcher, search, Booking CTA) -->
+                <div class="hidden md:flex items-center space-x-6">
+
+                    <!-- Currency Switcher Dropdown -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="p-2 rounded-full hover:bg-luxuryGold-900/10 focus:outline-none transition-colors flex items-center gap-1.5" title="Switch Currency">
+                            <i class="fa-solid fa-coins text-base"></i>
+                            <span class="text-xs font-semibold" x-text="currentCurrency">USD</span>
+                        </button>
+                        <div x-show="open" @click.away="open = false" 
+                             class="absolute right-0 mt-2 w-32 rounded-md shadow-lg border backdrop-blur-lg py-1 z-50"
+                             :class="{
+                                 'bg-white border-gray-200 text-gray-800': currentTheme === 'light',
+                                 'bg-[#1E1E1E] border-[#2D2D2D] text-gray-200': currentTheme === 'dark',
+                                 'bg-[#161412] border-amber-900/30 text-amber-200': currentTheme === 'luxury' || currentTheme === 'festival'
+                             }">
+                            <button @click="setCurrency('USD'); open = false" class="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-luxuryGold-500/10 transition-colors">
+                                <span class="w-4 text-center font-bold font-serif">$</span> USD
+                            </button>
+                            <button @click="setCurrency('NPR'); open = false" class="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-luxuryGold-500/10 transition-colors">
+                                <span class="w-4 text-center font-bold font-serif">₨</span> NPR
+                            </button>
+                            <button @click="setCurrency('EUR'); open = false" class="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-luxuryGold-500/10 transition-colors">
+                                <span class="w-4 text-center font-bold font-serif">€</span> EUR
+                            </button>
+                            <button @click="setCurrency('GBP'); open = false" class="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-luxuryGold-500/10 transition-colors">
+                                <span class="w-4 text-center font-bold font-serif">£</span> GBP
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search Button -->
+                    <button @click="searchOpen = true" class="p-2 rounded-full hover:bg-luxuryGold-900/10 transition-colors">
+                        <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                    </button>
+
+                    <!-- Primary Booking CTA -->
+                    <a href="{% url 'rooms:room_list' %}" 
+                       class="px-6 py-2.5 text-xs font-semibold uppercase tracking-widest rounded-full transition-all border border-luxuryGold-400 hover:scale-105 duration-300"
+                       :class="{
+                           'bg-amber-800 text-white hover:bg-amber-900': currentTheme === 'light',
+                           'bg-luxuryGold-500 text-[#0A0908] hover:bg-luxuryGold-400 gold-glow': currentTheme !== 'light'
+                       }">
+                        Book A Stay
+                    </a>
+                </div>
+
+                <!-- Mobile Burger Menu Trigger -->
+                <div class="md:hidden flex items-center space-x-4">
+                    <button @click="mobileMenuOpen = true" class="p-2 rounded-lg hover:bg-luxuryGold-900/10 focus:outline-none transition-colors">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- MOBILE SIDE MENU -->
+    <div x-show="mobileMenuOpen" class="fixed inset-0 z-50 flex md:hidden" style="display: none;">
+        <!-- Backdrop -->
+        <div x-show="mobileMenuOpen" 
+             x-transition:enter="transition-opacity ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition-opacity ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click="mobileMenuOpen = false" 
+             class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
+
+        <!-- Sidebar Panel -->
+        <div x-show="mobileMenuOpen"
+             x-transition:enter="transition ease-in-out duration-300 transform"
+             x-transition:enter-start="translate-x-full"
+             x-transition:enter-end="translate-x-0"
+             x-transition:leave="transition ease-in-out duration-200 transform"
+             x-transition:leave-start="translate-x-0"
+             x-transition:leave-end="translate-x-full"
+             class="relative ml-auto flex h-full w-full max-w-xs flex-col overflow-y-auto py-4 pb-12 shadow-xl border-l"
+             :class="{
+                 'bg-white border-gray-200 text-gray-800': currentTheme === 'light',
+                 'bg-[#121212] border-[#2D2D2D] text-gray-200': currentTheme === 'dark',
+                 'bg-[#0A0908] border-amber-900/30 text-amber-200': currentTheme === 'luxury' || currentTheme === 'festival'
+             }">
+            <div class="flex items-center justify-between px-4 pb-6 border-b" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/20': currentTheme !== 'light' }">
+                <span class="font-luxury-title text-xl font-bold tracking-wider">Navigation</span>
+                <button @click="mobileMenuOpen = false" class="p-2 rounded-lg hover:bg-luxuryGold-900/10">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="mt-4 px-4 space-y-3">
+                <a href="{% url 'homepage:home' %}" class="block py-2 text-base font-medium border-b border-transparent hover:text-luxuryGold-400">Home</a>
+                
+                {% for item in header_menu %}
+                    <a href="{{ item.url }}" class="block py-2 text-base font-medium border-b border-transparent hover:text-luxuryGold-400">{{ item.name }}</a>
+                {% empty %}
+                    <a href="{% url 'rooms:room_list' %}" class="block py-2 text-base font-medium hover:text-luxuryGold-400">Rooms & Suites</a>
+                    <a href="{% url 'dining:dining_list' %}" class="block py-2 text-base font-medium hover:text-luxuryGold-400">Dining</a>
+                    <a href="{% url 'recreation:recreation_list' %}" class="block py-2 text-base font-medium hover:text-luxuryGold-400">Recreation</a>
+                    <a href="{% url 'gallery:gallery_list' %}" class="block py-2 text-base font-medium hover:text-luxuryGold-400">Gallery</a>
+                    <a href="{% url 'blogs:blog_list' %}" class="block py-2 text-base font-medium hover:text-luxuryGold-400">News</a>
+                    <a href="{% url 'contact:contact_page' %}" class="block py-2 text-base font-medium hover:text-luxuryGold-400">Contact</a>
+                {% endfor %}
+
+                <div class="pt-6 border-t mt-6" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/20': currentTheme !== 'light' }">
+                    <h4 class="text-xs font-semibold tracking-widest uppercase mb-3 opacity-60">Active Theme</h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button @click="setTheme('light')" class="px-3 py-2 text-xs rounded border hover:bg-luxuryGold-900/5 transition-colors">Light</button>
+                        <button @click="setTheme('dark')" class="px-3 py-2 text-xs rounded border hover:bg-luxuryGold-900/5 transition-colors">Dark</button>
+                        <button @click="setTheme('luxury')" class="px-3 py-2 text-xs rounded border hover:bg-luxuryGold-900/5 transition-colors">Luxury</button>
+                        <button @click="setTheme('festival')" class="px-3 py-2 text-xs rounded border hover:bg-luxuryGold-900/5 transition-colors">Festival</button>
+                    </div>
+                </div>
+
+                <div class="pt-6">
+                    <a href="{% url 'rooms:room_list' %}" class="block text-center w-full py-3 text-sm font-semibold uppercase tracking-wider rounded-lg border border-luxuryGold-400"
+                       :class="{
+                           'bg-amber-800 text-white': currentTheme === 'light',
+                           'bg-luxuryGold-500 text-black': currentTheme !== 'light'
+                       }">
+                        Book A Stay
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GLOBAL SEARCH MODAL -->
+    <div x-show="searchOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display: none;">
+        <div x-show="searchOpen" @click="searchOpen = false" class="fixed inset-0 bg-black/80 backdrop-blur-sm"></div>
+        <div x-show="searchOpen" 
+             x-transition:enter="transition ease-out duration-300 transform"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200 transform"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="relative w-full max-w-2xl rounded-2xl p-6 border shadow-2xl animate__animated animate__zoomIn"
+             :class="{
+                 'bg-white border-gray-200 text-gray-800': currentTheme === 'light',
+                 'bg-[#161412] border-amber-900/30 text-amber-200': currentTheme !== 'light'
+             }">
+            <div class="flex items-center justify-between pb-4 border-b border-amber-900/10">
+                <h3 class="font-luxury-title text-xl font-medium tracking-wide">Search Resort</h3>
+                <button @click="searchOpen = false" class="p-2 rounded-lg hover:bg-luxuryGold-900/10">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form action="{% url 'rooms:room_list' %}" method="GET" class="mt-6 flex gap-3">
+                <input type="text" name="category" placeholder="Search room categories, dining, amenities..." 
+                       class="flex-1 px-4 py-3 rounded-lg border focus:outline-none focus:ring-1 focus:ring-luxuryGold-400 bg-transparent text-inherit"
+                       :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
+                <button type="submit" class="px-6 py-3 rounded-lg font-semibold text-sm uppercase tracking-wider transition-colors"
+                        :class="{ 'bg-amber-800 text-white': currentTheme === 'light', 'bg-luxuryGold-500 text-black': currentTheme !== 'light' }">
+                    Search
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN BODY CONTENT -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- DYNAMIC CMS FOOTER -->
+    <footer class="border-t py-16 bg-gray-50 border-gray-200 text-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+                
+                <!-- About Column -->
+                <div class="space-y-4">
+                    <a href="{% url 'homepage:home' %}" class="block">
+                        <img src="https://www.hotelichchha.com/backend/images/preference/u41t5-download.png" alt="Hotel Ichchha Logo" class="h-14 w-auto object-contain">
+                    </a>
+                    <p class="text-sm leading-relaxed opacity-85">
+                        {{ hotel_settings.about_text }}
+                    </p>
+                    <div class="flex space-x-4 pt-2">
+                        {% if hotel_settings.facebook_url %}
+                            <a href="{{ hotel_settings.facebook_url }}" target="_blank" class="hover:text-luxuryGold-400 transition-colors"><i class="fa-brands fa-facebook text-lg"></i></a>
+                        {% endif %}
+                        {% if hotel_settings.instagram_url %}
+                            <a href="{{ hotel_settings.instagram_url }}" target="_blank" class="hover:text-luxuryGold-400 transition-colors"><i class="fa-brands fa-instagram text-lg"></i></a>
+                        {% endif %}
+                        {% if hotel_settings.twitter_url %}
+                            <a href="{{ hotel_settings.twitter_url }}" target="_blank" class="hover:text-luxuryGold-400 transition-colors"><i class="fa-brands fa-twitter text-lg"></i></a>
+                        {% endif %}
+                        {% if hotel_settings.youtube_url %}
+                            <a href="{{ hotel_settings.youtube_url }}" target="_blank" class="hover:text-luxuryGold-400 transition-colors"><i class="fa-brands fa-youtube text-lg"></i></a>
+                        {% endif %}
+                        {% if hotel_settings.tripadvisor_url %}
+                            <a href="{{ hotel_settings.tripadvisor_url }}" target="_blank" class="hover:text-luxuryGold-400 transition-colors"><i class="fa-brands fa-tripadvisor text-lg"></i></a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Quick Links Column -->
+                <div>
+                    <h4 class="font-luxury-title text-sm font-semibold uppercase tracking-widest mb-6"
+                        :class="{ 'text-amber-800': currentTheme === 'light', 'text-luxuryGold-300': currentTheme !== 'light' }">
+                        Quick Links
+                    </h4>
+                    <ul class="space-y-3 text-sm">
+                        {% for link in footer_quick_links %}
+                            <li><a href="{{ link.url }}" class="hover:text-luxuryGold-400 transition-colors">{{ link.name }}</a></li>
+                        {% empty %}
+                            <li><a href="{% url 'rooms:room_list' %}" class="hover:text-luxuryGold-400 transition-colors">Rooms & Suites</a></li>
+                            <li><a href="{% url 'dining:dining_list' %}" class="hover:text-luxuryGold-400 transition-colors">Fine Dining</a></li>
+                            <li><a href="{% url 'recreation:recreation_list' %}" class="hover:text-luxuryGold-400 transition-colors">Wellness Spa</a></li>
+                            <li><a href="{% url 'gallery:gallery_list' %}" class="hover:text-luxuryGold-400 transition-colors">Gallery</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- OTA Partners Column -->
+                <div>
+                    <h4 class="font-luxury-title text-sm font-semibold uppercase tracking-widest mb-6"
+                        :class="{ 'text-amber-800': currentTheme === 'light', 'text-luxuryGold-300': currentTheme !== 'light' }">
+                        OTA Partners
+                    </h4>
+                    <ul class="space-y-3 text-sm">
+                        {% for link in footer_ota_links %}
+                            <li><a href="{{ link.url }}" target="_blank" class="hover:text-luxuryGold-400 transition-colors">{{ link.name }}</a></li>
+                        {% empty %}
+                            <li><a href="https://booking.com" target="_blank" class="hover:text-luxuryGold-400 transition-colors">Booking.com</a></li>
+                            <li><a href="https://agoda.com" target="_blank" class="hover:text-luxuryGold-400 transition-colors">Agoda</a></li>
+                            <li><a href="https://tripadvisor.com" target="_blank" class="hover:text-luxuryGold-400 transition-colors">Tripadvisor</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Contact & Map Column -->
+                <div class="space-y-4 text-sm">
+                    <h4 class="font-luxury-title text-sm font-semibold uppercase tracking-widest mb-6"
+                        :class="{ 'text-amber-800': currentTheme === 'light', 'text-luxuryGold-300': currentTheme !== 'light' }">
+                        Address & Contact
+                    </h4>
+                    <p class="flex items-start gap-3">
+                        <i class="fa-solid fa-location-dot mt-1 text-luxuryGold-400"></i>
+                        <span>{{ hotel_settings.address }}</span>
+                    </p>
+                    <p class="flex items-center gap-3">
+                        <i class="fa-solid fa-phone text-luxuryGold-400"></i>
+                        <span>{{ hotel_settings.contact_phone }}</span>
+                    </p>
+                    <p class="flex items-center gap-3">
+                        <i class="fa-solid fa-envelope text-luxuryGold-400"></i>
+                        <span>{{ hotel_settings.contact_email }}</span>
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- Awards / Payment methods / Copyright -->
+            <div class="mt-16 pt-8 border-t border-amber-900/10 flex flex-col md:flex-row items-center justify-between gap-6 text-xs opacity-75">
+                <div>
+                    {{ hotel_settings.copyright_text|safe }}
+                </div>
+                <div class="flex items-center gap-6">
+                    <span>Awards: World Luxury Hotel Winner 2026</span>
+                    <div class="flex items-center gap-3 text-lg opacity-80">
+                        <i class="fa-brands fa-cc-visa"></i>
+                        <i class="fa-brands fa-cc-mastercard"></i>
+                        <i class="fa-brands fa-cc-stripe"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Scroll Animation Controller -->
+    <style>
+        [data-animate] {
+            opacity: 0;
+            animation-duration: 0.8s;
+            animation-fill-mode: both;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const anim = entry.target.getAttribute('data-animate') || 'fadeInUp';
+                        entry.target.classList.add('animate__animated', `animate__${anim}`);
+                        // Custom style cleanup to let transitions take over post-animation
+                        entry.target.style.opacity = '1';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.05, rootMargin: '0px 0px -50px 0px' });
+
+            document.querySelectorAll('[data-animate]').forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

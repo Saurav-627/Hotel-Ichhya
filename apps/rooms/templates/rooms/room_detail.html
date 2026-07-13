@@ -1,0 +1,371 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- ROOM DETAILS CONTAINER -->
+<section class="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        
+        <!-- MAIN GALLERY & ROOM INFORMATION (LEFT 2 COLS) -->
+        <div class="lg:col-span-2 space-y-12">
+            
+            <!-- Gallery Slider (Alpine.js) -->
+            <div x-data="{ 
+                activeSlide: 0, 
+                slides: [
+                    {% for img in room.images.all %}
+                        '{{ img.image.url }}',
+                    {% empty %}
+                        'https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1200',
+                    {% endfor %}
+                ]
+            }" class="relative h-[450px] overflow-hidden rounded-2xl border border-amber-900/10">
+                <template x-for="(slide, index) in slides" :key="index">
+                    <div x-show="activeSlide === index" 
+                         x-transition:enter="transition ease-out duration-500"
+                         x-transition:enter-start="opacity-0 scale-102"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         class="absolute inset-0 w-full h-full bg-cover bg-center"
+                         :style="'background-image: url(' + slide + ')'"></div>
+                </template>
+
+                <!-- Navigation -->
+                <button @click="activeSlide = (activeSlide - 1 + slides.length) % slides.length" 
+                        class="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors">
+                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                </button>
+                <button @click="activeSlide = (activeSlide + 1) % slides.length" 
+                        class="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors">
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                </button>
+
+                <!-- Dots indicator -->
+                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                    <template x-for="(slide, index) in slides" :key="index">
+                        <button @click="activeSlide = index" 
+                                class="w-2.5 h-2.5 rounded-full transition-colors"
+                                :class="activeSlide === index ? 'bg-luxuryGold-500' : 'bg-white/50'"></button>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Core Specs -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">{{ room.get_category_display }}</span>
+                </div>
+                <h1 class="font-luxury-title text-4xl sm:text-5xl font-bold tracking-wide">{{ room.title }}</h1>
+                <p class="text-sm leading-relaxed opacity-85">{{ room.description }}</p>
+            </div>
+
+            <!-- Room Highlights list -->
+            {% if room.highlights %}
+            <div class="space-y-4">
+                <h3 class="font-luxury-title text-xl font-semibold">Chamber Highlights</h3>
+                <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm opacity-85">
+                    {% for highlight in room.highlights.splitlines %}
+                        {% if highlight %}
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-circle-check text-luxuryGold-500"></i>
+                            <span>{{ highlight }}</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Room Facilities Checklist -->
+            <div class="space-y-4">
+                <h3 class="font-luxury-title text-xl font-semibold">Amenities & Comforts</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-6">
+                    {% for fac in room.facilities.all %}
+                    <div class="flex items-center gap-3 p-3 rounded-lg border"
+                         :class="{ 'bg-white border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/10': currentTheme !== 'light' }">
+                        <div class="text-xl text-luxuryGold-500">
+                            {% if fac.icon_class %}
+                                <i class="{{ fac.icon_class }}"></i>
+                            {% else %}
+                                <i class="fa-solid fa-bell-concierge"></i>
+                            {% endif %}
+                        </div>
+                        <span class="text-xs font-medium tracking-wide">{{ fac.name }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Virtual 3D Tour Embed -->
+            {% if room.virtual_tour_url %}
+            <div class="space-y-4">
+                <h3 class="font-luxury-title text-xl font-semibold">Virtual 3D Space Tour</h3>
+                <div class="relative overflow-hidden rounded-2xl border border-amber-900/10 h-96">
+                    <iframe src="{{ room.virtual_tour_url }}" class="absolute inset-0 w-full h-full border-0" allowfullscreen></iframe>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Video Highlight Tour -->
+            {% if room.video_url %}
+            <div class="space-y-4">
+                <h3 class="font-luxury-title text-xl font-semibold">Video Overview</h3>
+                <div class="relative overflow-hidden rounded-2xl border border-amber-900/10 h-96">
+                    <iframe src="{{ room.video_url }}" class="absolute inset-0 w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Room Policies -->
+            {% if room.policies.all %}
+            <div class="space-y-4">
+                <h3 class="font-luxury-title text-xl font-semibold">Suite Policies & Regs</h3>
+                <div class="space-y-4">
+                    {% for policy in room.policies.all %}
+                    <div class="p-4 rounded-xl border" :class="{ 'bg-white border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/10': currentTheme !== 'light' }">
+                        <h4 class="font-semibold text-sm mb-1 text-luxuryGold-400">{{ policy.title }}</h4>
+                        <p class="text-xs opacity-75 leading-relaxed">{{ policy.description }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+
+        <!-- RIGHT RESERVATION SIDEBAR (1 COL) -->
+        <div class="space-y-8 lg:col-span-1" x-data="{
+            checkIn: new URLSearchParams(window.location.search).get('check_in') || new Date(new Date().getTime() + 24*60*60*1000).toISOString().split('T')[0],
+            checkOut: new URLSearchParams(window.location.search).get('check_out') || new Date(new Date().getTime() + 2*24*60*60*1000).toISOString().split('T')[0],
+            adults: parseInt(new URLSearchParams(window.location.search).get('adults')) || 2,
+            children: parseInt(new URLSearchParams(window.location.search).get('children')) || 0,
+            showModal: false,
+            basePrice: {{ room.base_price }},
+            taxPercentage: {{ room.tax_percentage|default:13 }},
+            
+            get nights() {
+                if (!this.checkIn || !this.checkOut) return 0;
+                const start = new Date(this.checkIn);
+                const end = new Date(this.checkOut);
+                const diffTime = end - start;
+                if (diffTime <= 0) return 0;
+                return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            },
+            get subtotal() {
+                return this.basePrice * this.nights;
+            },
+            get tax() {
+                return this.subtotal * (this.taxPercentage / 100);
+            },
+            get total() {
+                return this.subtotal + this.tax;
+            },
+            validateDates() {
+                const start = new Date(this.checkIn);
+                const end = new Date(this.checkOut);
+                const today = new Date();
+                today.setHours(0,0,0,0);
+                
+                if (start < today) {
+                    alert('Arrival date cannot be in the past.');
+                    return false;
+                }
+                if (end <= start) {
+                    alert('Departure date must be at least one day after arrival date.');
+                    return false;
+                }
+                return true;
+            },
+            submitReservation() {
+                if (!this.validateDates()) return;
+                this.showModal = true;
+            }
+        }">
+            <div class="rounded-2xl p-6 border shadow-xl sticky top-28"
+                 :class="{
+                     'bg-white border-gray-200': currentTheme === 'light',
+                     'bg-[#161412] border-amber-900/20': currentTheme !== 'light'
+                 }">
+                <div class="border-b pb-4 mb-6 border-gray-200">
+                    <span class="text-xs uppercase opacity-75 font-semibold text-gray-500">Starting from</span>
+                    <h3 class="font-luxury-title text-4xl font-extrabold text-luxuryGold-800 mt-1">
+                        <span x-text="formatPrice({{ room.base_price }})">${{ room.base_price }}</span>
+                        <span class="text-sm font-normal opacity-75">/night</span>
+                    </h3>
+                    {% if room.discount_price %}
+                    <p class="text-xs line-through opacity-50 mt-1">Was <span x-text="formatPrice({{ room.discount_price }})">${{ room.discount_price }}</span></p>
+                    {% endif %}
+                    <p class="text-[10px] opacity-75 mt-2">Prices exclude {{ room.tax_percentage }}% Local Taxes & VAT</p>
+                </div>
+
+                <!-- Initiate Booking Form -->
+                <form @submit.prevent="submitReservation()" class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Arrival</label>
+                        <input type="date" name="check_in" x-model="checkIn" required min="{% now 'Y-m-d' %}" class="w-full px-3 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
+                               :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Departure</label>
+                        <input type="date" name="check_out" x-model="checkOut" required min="{% now 'Y-m-d' %}" class="w-full px-3 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
+                               :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Adults</label>
+                            <select name="adults" x-model="adults" class="w-full px-2 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
+                                    :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
+                                <option value="1">1 Adult</option>
+                                <option value="2">2 Adults</option>
+                                <option value="3">3 Adults</option>
+                                <option value="4">4 Adults</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Children</label>
+                            <select name="children" x-model="children" class="w-full px-2 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
+                                    :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
+                                <option value="0">0 Children</option>
+                                <option value="1">1 Child</option>
+                                <option value="2">2 Children</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 mt-4 rounded-lg text-xs font-bold uppercase tracking-wider text-center cursor-pointer"
+                            :class="{
+                                'bg-amber-800 text-white': currentTheme === 'light',
+                                'bg-luxuryGold-500 text-black gold-glow': currentTheme !== 'light'
+                            }">
+                        Confirm & Reserve
+                    </button>
+                </form>
+
+                <!-- Guest Personal Details Modal -->
+                <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate__animated animate__fadeIn" style="display: none;">
+                    <div @click.away="showModal = false" class="relative w-full max-w-4xl rounded-2xl p-6 sm:p-8 border shadow-2xl overflow-y-auto max-h-[90vh] animate__animated animate__zoomIn text-left"
+                         :class="{
+                             'bg-white border-gray-200 text-gray-800': currentTheme === 'light',
+                             'bg-[#161412] border-amber-900/30 text-amber-200': currentTheme !== 'light'
+                         }">
+                        
+                        <div class="flex items-center justify-between pb-4 border-b border-amber-900/10 mb-6">
+                            <h3 class="font-luxury-title text-2xl font-bold tracking-wide">Complete Your Reservation</h3>
+                            <button @click="showModal = false" type="button" class="p-2 rounded-lg hover:bg-luxuryGold-900/10 transition-colors">
+                                <i class="fa-solid fa-xmark text-lg"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            <!-- Left: Guest Details Form (2 Cols) -->
+                            <div class="lg:col-span-2 space-y-6">
+                                <form method="POST" action="{% url 'booking:create_booking' room.id %}" class="space-y-6">
+                                    {% csrf_token %}
+                                    <!-- Hidden stay inputs -->
+                                    <input type="hidden" name="check_in" :value="checkIn">
+                                    <input type="hidden" name="check_out" :value="checkOut">
+                                    <input type="hidden" name="adults" :value="adults">
+                                    <input type="hidden" name="children" :value="children">
+                                    
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                        <div>
+                                            <label class="block text-xs font-semibold uppercase tracking-wider mb-2 opacity-80">Full Name *</label>
+                                            <input type="text" name="name" required placeholder="John Doe"
+                                                   class="w-full px-4 py-3 rounded-lg border bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
+                                                   :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold uppercase tracking-wider mb-2 opacity-80">Email Address *</label>
+                                            <input type="email" name="email" required placeholder="john.doe@example.com"
+                                                   class="w-full px-4 py-3 rounded-lg border bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
+                                                   :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                        <div>
+                                            <label class="block text-xs font-semibold uppercase tracking-wider mb-2 opacity-80">Contact Phone Number *</label>
+                                            <input type="tel" name="phone" required placeholder="+1 555-0199"
+                                                   class="w-full px-4 py-3 rounded-lg border bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
+                                                   :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold uppercase tracking-wider mb-2 opacity-80">Promo / Coupon Code</label>
+                                            <input type="text" name="promo_code" placeholder="ENTER CODE"
+                                                   class="w-full px-4 py-3 rounded-lg border bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400 font-mono uppercase"
+                                                   :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-xs font-semibold uppercase tracking-wider mb-2 opacity-80">Special Requests / Notes</label>
+                                        <textarea name="special_requests" rows="3" placeholder="Airport pickup, dietary restrictions, extra bed requests..."
+                                                  class="w-full px-4 py-3 rounded-lg border bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
+                                                  :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }"></textarea>
+                                    </div>
+                                    
+                                    <div class="pt-4 flex gap-4">
+                                        <button type="button" @click="showModal = false" class="flex-1 py-3.5 rounded-lg text-xs font-bold uppercase tracking-wider border hover:bg-luxuryGold-900/10 transition-colors">
+                                            Cancel
+                                        </button>
+                                        <button type="submit" class="flex-1 py-3.5 rounded-lg text-xs font-bold uppercase tracking-widest text-center cursor-pointer"
+                                                :class="{
+                                                    'bg-amber-800 text-white': currentTheme === 'light',
+                                                    'bg-luxuryGold-500 text-black gold-glow': currentTheme !== 'light'
+                                                }">
+                                            Confirm Booking
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                            <!-- Right: Summary (1 Col) -->
+                            <div class="rounded-xl p-5 border space-y-4 text-sm"
+                                 :class="{ 'bg-gray-50 border-gray-200': currentTheme === 'light', 'bg-[#1e1a17] border-amber-900/20': currentTheme !== 'light' }">
+                                <h4 class="font-luxury-title text-lg font-semibold border-b pb-3 mb-4">Summary</h4>
+                                
+                                <div class="flex justify-between items-center gap-2">
+                                    <span class="opacity-80">Chamber</span>
+                                    <span class="font-semibold text-right">{{ room.title }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="opacity-80">Arrival</span>
+                                    <span class="font-semibold" x-text="checkIn"></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="opacity-80">Departure</span>
+                                    <span class="font-semibold" x-text="checkOut"></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="opacity-80">Duration</span>
+                                    <span class="font-semibold"><span x-text="nights"></span> Night(s)</span>
+                                </div>
+                                <div class="flex justify-between items-center border-b pb-3" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
+                                    <span class="opacity-80">Occupancy</span>
+                                    <span class="font-semibold"><span x-text="adults"></span> Adults, <span x-text="children"></span> Children</span>
+                                </div>
+                                
+                                <div class="flex justify-between items-center">
+                                    <span class="opacity-80">Base Rate</span>
+                                    <span x-text="formatPrice(basePrice) + ' / night'"></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="opacity-80">Subtotal</span>
+                                    <span x-text="formatPrice(subtotal)"></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="opacity-80">Taxes (<span x-text="taxPercentage"></span>%)</span>
+                                    <span x-text="formatPrice(tax)"></span>
+                                </div>
+                                
+                                <div class="flex justify-between items-center text-lg font-bold text-luxuryGold-500 border-t pt-3 mt-2" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
+                                    <span>Total</span>
+                                    <span class="font-luxury-title" x-text="formatPrice(total)"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+    </div>
+</section>
+{% endblock %}

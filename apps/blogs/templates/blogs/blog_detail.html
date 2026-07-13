@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<article class="max-w-4xl mx-auto py-16 px-4 sm:px-6">
+    <div class="space-y-6 text-center">
+        <span class="text-xs uppercase font-mono tracking-widest opacity-60">{{ post.created_at|date:"M d, Y" }} | Published by {{ post.author.get_full_name|default:post.author.username }}</span>
+        <h1 class="font-luxury-title text-4xl sm:text-5xl font-bold leading-tight">{{ post.title }}</h1>
+        <div class="w-24 h-0.5 bg-luxuryGold-500 mx-auto mt-4"></div>
+    </div>
+
+    {% if post.featured_image %}
+    <div class="my-12 overflow-hidden rounded-2xl border border-amber-900/10 max-h-[500px]">
+        <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" class="w-full h-full object-cover">
+    </div>
+    {% endif %}
+
+    <div class="prose max-w-none text-sm opacity-85 leading-relaxed space-y-6">
+        {{ post.content|safe }}
+    </div>
+
+    <div class="mt-16 pt-8 border-t border-amber-900/10 flex justify-between items-center">
+        <a href="{% url 'blogs:blog_list' %}" class="text-xs font-bold uppercase tracking-wider text-luxuryGold-500 hover:underline"><i class="fa-solid fa-arrow-left mr-1.5"></i> Back to Journal</a>
+        <div class="flex items-center gap-3 text-xs opacity-75">
+            <span>Share:</span>
+            <a href="#" class="hover:text-luxuryGold-500"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="#" class="hover:text-luxuryGold-500"><i class="fa-brands fa-twitter"></i></a>
+            <a href="#" class="hover:text-luxuryGold-500"><i class="fa-brands fa-pinterest-p"></i></a>
+        </div>
+    </div>
+</article>
+{% endblock %}

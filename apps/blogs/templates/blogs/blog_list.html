@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-20 border-b border-amber-900/10 text-center relative overflow-hidden bg-cover bg-center"
+         style="background-image: url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1200');">
+    <div class="absolute inset-0 bg-black/75"></div>
+    <div class="relative z-10 space-y-4">
+        <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-300">Resort Journal</span>
+        <h1 class="font-luxury-title text-4xl sm:text-6xl font-bold text-white leading-tight">News & Luxury Insights</h1>
+        <p class="text-sm text-white/80 max-w-xl mx-auto">Stay updated with our latest festival programs, culinary launches, and travel guides.</p>
+    </div>
+</section>
+
+<section class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {% for post in posts %}
+        <div class="rounded-2xl overflow-hidden border shadow-lg group hover:translate-y-[-4px] duration-500 flex flex-col animate__animated animate__fadeInUp"
+             :class="{
+                 'bg-white border-gray-200': currentTheme === 'light',
+                 'bg-[#161412] border-amber-900/20': currentTheme !== 'light'
+             }">
+            <div class="relative h-56 overflow-hidden">
+                <img src="{% if post.featured_image %}{{ post.featured_image.url }}{% else %}https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=600{% endif %}" 
+                     alt="{{ post.title }}" class="w-full h-full object-cover group-hover:scale-105 duration-700">
+            </div>
+            
+            <div class="p-6 flex-grow flex flex-col justify-between space-y-4">
+                <div class="space-y-3">
+                    <span class="text-[10px] uppercase font-mono tracking-widest opacity-60">{{ post.created_at|date:"M d, Y" }}</span>
+                    <h3 class="font-luxury-title text-lg font-bold tracking-wide leading-snug">{{ post.title }}</h3>
+                    <p class="text-xs opacity-85 line-clamp-3 leading-relaxed">{{ post.content|striptags }}</p>
+                </div>
+
+                <div class="pt-4 border-t border-amber-900/10 flex items-center justify-between">
+                    <span class="text-xs opacity-75 font-medium">By {{ post.author.get_full_name|default:post.author.username }}</span>
+                    <a href="{% url 'blogs:blog_detail' post.slug %}" class="text-xs font-semibold uppercase tracking-wider text-luxuryGold-500 hover:underline">Read Article <i class="fa-solid fa-arrow-right ml-1"></i></a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-3 text-center py-16">
+            <p class="text-sm opacity-60">No journal posts registered yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- PAGINATION -->
+    {% if is_paginated %}
+    <nav class="flex justify-center items-center gap-2 pt-12">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 border rounded-lg hover:bg-luxuryGold-900/10 text-sm">Prev</a>
+        {% endif %}
+        <span class="text-sm px-4">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 border rounded-lg hover:bg-luxuryGold-900/10 text-sm">Next</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+</section>
+{% endblock %}

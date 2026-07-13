@@ -1,0 +1,22 @@
+from django.contrib import admin
+from unfold.admin import ModelAdmin
+from ..models.hotel_settings import HotelSettings
+from ..models.navigation import NavigationMenu
+
+@admin.register(HotelSettings)
+class HotelSettingsAdmin(ModelAdmin):
+    list_display = ('site_name', 'theme', 'contact_phone', 'contact_email')
+    
+    def has_add_permission(self, request):
+        # Don't allow adding more than one settings entry (Singleton)
+        return not HotelSettings.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+@admin.register(NavigationMenu)
+class NavigationMenuAdmin(ModelAdmin):
+    list_display = ('name', 'url', 'position', 'order', 'parent')
+    list_filter = ('position', 'parent')
+    search_fields = ('name', 'url')
+    ordering = ('position', 'order')
