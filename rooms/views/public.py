@@ -12,6 +12,24 @@ class RoomListView(ListView):
     def get_queryset(self):
         queryset = super().get_queryset().filter(is_published=True)
         
+        # Get active currency from cookie, fallback to default published currency or USD
+        from settings_manager.models.currency import Currency
+        try:
+            published_currencies = list(Currency.objects.filter(is_published=True))
+            default_currency = 'USD'
+            for c in published_currencies:
+                if c.is_default:
+                    default_currency = c.code
+                    break
+            selected_currency = self.request.COOKIES.get('currency', default_currency)
+            valid_codes = [c.code for c in published_currencies]
+            if selected_currency not in valid_codes:
+                selected_currency = default_currency
+        except Exception:
+            selected_currency = 'USD'
+
+        queryset = queryset.filter(currency=selected_currency)
+        
         # Filtering parameters
         category = self.request.GET.get('category')
         adults = self.request.GET.get('adults')
@@ -42,6 +60,22 @@ class RoomListView(ListView):
         context = super().get_context_data(**kwargs)
         context['categories'] = Room.ROOM_CATEGORIES
         context['facilities'] = RoomFacility.objects.all()
+        
+        # Resolve active currency symbol
+        from settings_manager.models.currency import Currency
+        try:
+            published_currencies = list(Currency.objects.filter(is_published=True))
+            default_currency = 'USD'
+            for c in published_currencies:
+                if c.is_default:
+                    default_currency = c.code
+                    break
+            selected_currency = self.request.COOKIES.get('currency', default_currency)
+            currency_obj = Currency.objects.filter(code=selected_currency, is_published=True).first()
+            context['selected_currency_symbol'] = currency_obj.symbol if currency_obj else '$'
+        except Exception:
+            context['selected_currency_symbol'] = '$'
+            
         return context
 
 class RoomDetailView(DetailView):

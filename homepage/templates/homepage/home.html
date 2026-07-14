@@ -225,11 +225,11 @@
                 <!-- Room Details -->
                 <div class="p-6 flex-grow flex flex-col justify-between">
                     <div class="space-y-4">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-start justify-between gap-4">
                             <h3 class="font-luxury-title text-xl font-bold tracking-wide">{{ room.title }}</h3>
-                            <div class="text-right">
+                            <div class="text-right flex-shrink-0 whitespace-nowrap">
                                 <span class="text-xs uppercase opacity-75 font-semibold text-gray-500">From</span>
-                                <p class="text-2xl font-extrabold text-luxuryGold-800 font-luxury-title" x-text="formatPrice({{ room.base_price }}, '{{ room.currency }}')">{{ room.currency }} {{ room.base_price }}</p>
+                                <p class="text-2xl font-extrabold text-luxuryGold-800 font-luxury-title whitespace-nowrap">{{ room.currency }} {{ room.base_price }}</p>
                             </div>
                         </div>
                         <p class="text-sm opacity-85 line-clamp-3 leading-relaxed">{{ room.description }}</p>

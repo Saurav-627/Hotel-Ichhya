@@ -188,11 +188,11 @@
                 <div class="border-b pb-4 mb-6 border-gray-200">
                     <span class="text-xs uppercase opacity-75 font-semibold text-gray-500">Starting from</span>
                     <h3 class="font-luxury-title text-4xl font-extrabold text-luxuryGold-800 mt-1">
-                        <span x-text="formatPrice({{ room.base_price }}, '{{ room.currency }}')">{{ room.currency }} {{ room.base_price }}</span>
+                        <span>{{ room.currency }} {{ room.base_price }}</span>
                         <span class="text-sm font-normal opacity-75">/night</span>
                     </h3>
                     {% if room.discount_price %}
-                    <p class="text-xs line-through opacity-50 mt-1">Was <span x-text="formatPrice({{ room.discount_price }}, '{{ room.currency }}')">{{ room.currency }} {{ room.discount_price }}</span></p>
+                    <p class="text-xs line-through opacity-50 mt-1">Was <span>{{ room.currency }} {{ room.discount_price }}</span></p>
                     {% endif %}
                     <p class="text-[10px] opacity-75 mt-2">Prices exclude {{ room.tax_percentage }}% Local Taxes & VAT</p>
                 </div>
@@ -347,20 +347,20 @@
                                 
                                 <div class="flex justify-between items-center">
                                     <span class="opacity-80">Base Rate</span>
-                                    <span x-text="formatPrice(basePrice, roomCurrency) + ' / night'"></span>
+                                    <span x-text="roomCurrency + ' ' + basePrice.toFixed(2) + ' / night'"></span>
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="opacity-80">Subtotal</span>
-                                    <span x-text="formatPrice(subtotal, roomCurrency)"></span>
+                                    <span x-text="roomCurrency + ' ' + subtotal.toFixed(2)"></span>
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="opacity-80">Taxes (<span x-text="taxPercentage"></span>%)</span>
-                                    <span x-text="formatPrice(tax, roomCurrency)"></span>
+                                    <span x-text="roomCurrency + ' ' + tax.toFixed(2)"></span>
                                 </div>
                                 
                                 <div class="flex justify-between items-center text-lg font-bold text-luxuryGold-500 border-t pt-3 mt-2" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
                                     <span>Total</span>
-                                    <span class="font-luxury-title" x-text="formatPrice(total, roomCurrency)"></span>
+                                    <span class="font-luxury-title" x-text="roomCurrency + ' ' + total.toFixed(2)"></span>
                                 </div>
                             </div>
                         </div>

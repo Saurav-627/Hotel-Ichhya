@@ -106,19 +106,19 @@
                     <div class="border-t pt-4 space-y-3" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
                         <div class="flex justify-between items-center">
                             <span class="opacity-80">Base Rate</span>
-                            <span x-text="formatPrice({{ daily_price }}, '{{ room.currency }}')">{{ room.currency }} {{ daily_price }} / night</span>
+                            <span>{{ room.currency }} {{ daily_price }} / night</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="opacity-80">Subtotal</span>
-                            <span x-text="formatPrice({{ subtotal }}, '{{ room.currency }}')">{{ room.currency }} {{ subtotal }}</span>
+                            <span>{{ room.currency }} {{ subtotal }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="opacity-80">Taxes ({{ room.tax_percentage }}%)</span>
-                            <span x-text="formatPrice({{ tax }}, '{{ room.currency }}')">{{ room.currency }} {{ tax|floatformat:2 }}</span>
+                            <span>{{ room.currency }} {{ tax|floatformat:2 }}</span>
                         </div>
                         <div class="flex justify-between items-center text-lg font-bold text-luxuryGold-500 border-t pt-3" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
                             <span>Total Price</span>
-                            <span class="font-luxury-title" x-text="formatPrice({{ total }}, '{{ room.currency }}')">{{ room.currency }} {{ total|floatformat:2 }}</span>
+                            <span class="font-luxury-title">{{ room.currency }} {{ total|floatformat:2 }}</span>
                         </div>
                     </div>
                 </div>

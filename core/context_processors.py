@@ -43,11 +43,26 @@ def global_settings(request):
         
         # Retrieve active currencies
         from settings_manager.models.currency import Currency
-        published_currencies = Currency.objects.filter(is_published=True)
+        published_currencies = list(Currency.objects.filter(is_published=True))
+        
+        default_currency = 'USD'
+        for c in published_currencies:
+            if c.is_default:
+                default_currency = c.code
+                break
+        
+        selected_currency = request.COOKIES.get('currency', default_currency)
+        valid_codes = [c.code for c in published_currencies]
+        if selected_currency not in valid_codes:
+            selected_currency = default_currency
+            
+        selected_theme = request.COOKIES.get('theme', 'light')
         
     except (ProgrammingError, OperationalError):
         # Database tables do not exist yet (running migrations or setup)
         published_currencies = []
+        selected_currency = 'USD'
+        selected_theme = 'light'
 
     return {
         'hotel_settings': settings_data,
@@ -56,4 +71,6 @@ def global_settings(request):
         'footer_services': footer_services,
         'footer_ota_links': footer_ota_links,
         'published_currencies': published_currencies,
+        'selected_currency': selected_currency,
+        'selected_theme': selected_theme,
     }

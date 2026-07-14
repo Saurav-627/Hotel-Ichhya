@@ -56,7 +56,7 @@
 
                     <!-- Price Min -->
                     <div class="space-y-3">
-                        <label class="block text-xs font-semibold uppercase tracking-wider opacity-85">Min Price ($)</label>
+                        <label class="block text-xs font-semibold uppercase tracking-wider opacity-85">Min Price ({{ selected_currency_symbol }})</label>
                         <input type="number" name="price_min" value="{{ request.GET.price_min }}" placeholder="Min Rate"
                                class="w-full px-3 py-2.5 rounded-lg border bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
                                :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
@@ -64,7 +64,7 @@
 
                     <!-- Price Max -->
                     <div class="space-y-3">
-                        <label class="block text-xs font-semibold uppercase tracking-wider opacity-85">Max Price ($)</label>
+                        <label class="block text-xs font-semibold uppercase tracking-wider opacity-85">Max Price ({{ selected_currency_symbol }})</label>
                         <input type="number" name="price_max" value="{{ request.GET.price_max }}" placeholder="Max Rate"
                                class="w-full px-3 py-2.5 rounded-lg border bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
                                :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
@@ -107,11 +107,11 @@
                     <!-- Details -->
                     <div class="p-6 flex-grow flex flex-col justify-between">
                         <div class="space-y-4">
-                            <div class="flex items-center justify-between">
+                            <div class="flex items-start justify-between gap-4">
                                 <h3 class="font-luxury-title text-xl font-bold tracking-wide">{{ room.title }}</h3>
-                                <div class="text-right">
+                                <div class="text-right flex-shrink-0 whitespace-nowrap">
                                     <span class="text-xs uppercase opacity-75 font-semibold text-gray-500">From</span>
-                                    <p class="text-2xl font-extrabold text-luxuryGold-800 font-luxury-title" x-text="formatPrice({{ room.base_price }}, '{{ room.currency }}')">{{ room.currency }} {{ room.base_price }}</p>
+                                    <p class="text-2xl font-extrabold text-luxuryGold-800 font-luxury-title whitespace-nowrap">{{ room.currency }} {{ room.base_price }}</p>
                                 </div>
                             </div>
                             <p class="text-sm opacity-85 line-clamp-3 leading-relaxed">{{ room.description }}</p>

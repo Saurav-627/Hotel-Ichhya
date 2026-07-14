@@ -1,0 +1,20 @@
+/* Custom styles for Unfold Admin Dashboard */
+
+/* Sidebar Navigation Items Border */
+#nav-sidebar-inner #nav-sidebar-apps a.h-\[38px\] {
+    border: 1px solid rgba(156, 163, 175, 0.2) !important;
+    transition: all 0.2s ease-in-out;
+    margin-bottom: 4px;
+}
+
+#nav-sidebar-inner #nav-sidebar-apps a.h-\[38px\]:hover {
+    border-color: rgba(180, 120, 37, 0.4) !important;
+    background-color: rgba(180, 120, 37, 0.05) !important;
+}
+
+#nav-sidebar-inner #nav-sidebar-apps a.h-\[38px\].active,
+#nav-sidebar-inner #nav-sidebar-apps a.h-\[38px\][class*="bg-base-100"],
+#nav-sidebar-inner #nav-sidebar-apps a.h-\[38px\][class*="bg-white"] {
+    border-color: rgba(180, 120, 37, 0.5) !important;
+    background-color: rgba(180, 120, 37, 0.1) !important;
+}

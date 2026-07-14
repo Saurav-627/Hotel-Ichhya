@@ -32,7 +32,7 @@
             </div>
             <div class="grid grid-cols-2 p-4 border-b" :class="{ 'border-gray-100': currentTheme === 'light', 'border-amber-900/5': currentTheme !== 'light' }">
                 <span class="text-left opacity-75">Total Paid</span>
-                <span class="text-right font-semibold text-luxuryGold-500 font-luxury-title" x-text="formatPrice({{ payment.amount }})">${{ payment.amount|floatformat:2 }}</span>
+                <span class="text-right font-semibold text-luxuryGold-500 font-luxury-title" x-text="formatPrice({{ payment.amount }}, '{{ payment.booking.room.currency }}')">{{ payment.booking.room.currency }} {{ payment.amount|floatformat:2 }}</span>
             </div>
             <div class="grid grid-cols-2 p-4" :class="{ 'border-gray-100': currentTheme === 'light', 'border-amber-900/5': currentTheme !== 'light' }">
                 <span class="text-left opacity-75">Transaction reference</span>

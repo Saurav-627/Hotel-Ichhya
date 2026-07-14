@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import environ
+from django.templatetags.static import static
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -51,7 +52,6 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'accounts.apps.AccountsConfig',
     'homepage.apps.HomepageConfig',
-    'about.apps.AboutConfig',
     'rooms.apps.RoomsConfig',
     'dining.apps.DiningConfig',
     'recreation.apps.RecreationConfig',
@@ -65,10 +65,6 @@ INSTALLED_APPS = [
     'blogs.apps.BlogsConfig',
     'seo.apps.SeoConfig',
     'settings_manager.apps.SettingsManagerConfig',
-    'notifications.apps.NotificationsConfig',
-    'analytics.apps.AnalyticsConfig',
-    'admin_dashboard.apps.AdminDashboardConfig',
-    'api.apps.ApiConfig',
 ]
 
 MIDDLEWARE = [
@@ -195,9 +191,24 @@ UNFOLD = {
     "SITE_TITLE": "Hotel Ichha Admin Portal",
     "SITE_HEADER": "Hotel Ichha",
     "SITE_SYMBOL": "hotel",
+    "SITE_LOGO": "/static/images/hotel-ichchha-logo.png",
+    "SITE_ICON": {
+        "light": lambda request: static("images/hotel-ichchha-logo.png"),
+        "dark": lambda request: static("images/hotel-ichchha-logo.png"),
+    },
+    "SITE_FAVICONS": [
+        {
+            "rel": "icon",
+            "type": "image/png",
+            "href": lambda request: static("images/hotel-ichchha-logo.png"),
+        }
+    ],
     "SHOW_HISTORY": True,
     "SHOW_SIDEBAR_FILTER": True,
-    "THEME": "dark",
+    "THEME": "light",
+    "STYLES": [
+        lambda request: static("css/admin_custom.css"),
+    ],
     "COLORS": {
         "primary": {
             "50": "250 245 233",
