@@ -13,6 +13,7 @@ class NavigationMenu(models.Model):
     position = models.CharField(max_length=20, choices=POSITION_CHOICES, default='header')
     order = models.IntegerField(default=0)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, related_name='children')
+    is_published = models.BooleanField(default=True, help_text="Designates whether this menu item is visible on the website")
 
     class Meta:
         ordering = ['order', 'id']

@@ -141,6 +141,9 @@
             basePrice: {{ room.base_price }},
             roomCurrency: '{{ room.currency }}',
             taxPercentage: {{ room.tax_percentage|default:13 }},
+            checkingAvailability: false,
+            isAvailable: true,
+            errorMessage: '',
             
             get nights() {
                 if (!this.checkIn || !this.checkOut) return 0;
@@ -175,9 +178,29 @@
                 }
                 return true;
             },
-            submitReservation() {
+            async submitReservation() {
                 if (!this.validateDates()) return;
-                this.showModal = true;
+                this.checkingAvailability = true;
+                this.errorMessage = '';
+                try {
+                    const res = await fetch(`/rooms/api/{{ room.id }}/check-availability/?check_in=${this.checkIn}&check_out=${this.checkOut}`);
+                    if (!res.ok) {
+                        throw new Error('Error checking availability');
+                    }
+                    const data = await res.json();
+                    this.isAvailable = data.available;
+                    if (data.available) {
+                        this.showModal = true;
+                    } else {
+                        this.errorMessage = 'This room is not available for the selected dates. Please adjust your dates.';
+                    }
+                } catch (e) {
+                    console.error(e);
+                    // Fallback to open modal in case of connection/server issue
+                    this.showModal = true;
+                } finally {
+                    this.checkingAvailability = false;
+                }
             }
         }">
             <div class="rounded-2xl p-6 border shadow-xl sticky top-28"
@@ -232,12 +255,19 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full py-3.5 mt-4 rounded-lg text-xs font-bold uppercase tracking-wider text-center cursor-pointer"
+                    <div x-show="errorMessage" class="p-3 rounded-lg border border-red-500/20 bg-red-500/10 text-red-500 text-xs mt-2" style="display: none;">
+                        <p x-text="errorMessage"></p>
+                    </div>
+
+                    <button type="submit" :disabled="checkingAvailability" class="w-full py-3.5 mt-4 rounded-lg text-xs font-bold uppercase tracking-wider text-center"
                             :class="{
                                 'bg-amber-800 text-white': currentTheme === 'light',
-                                'bg-luxuryGold-500 text-black gold-glow': currentTheme !== 'light'
+                                'bg-luxuryGold-500 text-black gold-glow': currentTheme !== 'light',
+                                'opacity-50 cursor-wait': checkingAvailability,
+                                'cursor-pointer': !checkingAvailability
                             }">
-                        Confirm & Reserve
+                        <span x-show="!checkingAvailability">Confirm & Reserve</span>
+                        <span x-show="checkingAvailability" style="display: none;">Checking Availability...</span>
                     </button>
                 </form>
 

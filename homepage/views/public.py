@@ -28,8 +28,8 @@ class HomeView(TemplateView):
         context['hero_slides'] = HeroSlide.objects.filter(is_active=True).order_by('order')
         context['about_preview'] = AboutPreview.objects.first()
         context['featured_rooms'] = Room.objects.filter(is_featured=True, is_published=True, currency=selected_currency)[:3]
-        context['featured_dining'] = DiningVenue.objects.filter(is_featured=True)[:3]
+        context['featured_dining'] = DiningVenue.objects.filter(is_featured=True, is_published=True)[:3]
         context['facilities'] = RoomFacility.objects.filter(is_featured=True)
-        context['testimonials'] = Testimonial.objects.filter(is_featured=True)[:5]
+        context['testimonials'] = Testimonial.objects.filter(is_featured=True, is_published=True)[:5]
         context['attractions'] = Attraction.objects.filter(is_active=True).order_by('order')[:6]
         return context

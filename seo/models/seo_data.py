@@ -1,4 +1,5 @@
 from django.db import models
+from core.utils import UploadTo, ValidateFileSize
 
 class SEOData(models.Model):
     path = models.CharField(max_length=255, unique=True, help_text="Relative path, e.g. '/' or '/rooms/' or '/contact/'")
@@ -9,7 +10,12 @@ class SEOData(models.Model):
     # OG Tags
     og_title = models.CharField(max_length=80, blank=True, null=True)
     og_description = models.TextField(max_length=160, blank=True, null=True)
-    og_image = models.ImageField(upload_to='seo/', blank=True, null=True)
+    og_image = models.ImageField(
+        upload_to=UploadTo('seo'),
+        blank=True,
+        null=True,
+        validators=[ValidateFileSize(2)]
+    )
     
     # Twitter Card
     twitter_card = models.CharField(max_length=20, default='summary_large_image', choices=[

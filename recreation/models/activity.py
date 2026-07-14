@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
+from core.utils import UploadTo, ValidateFileSize
 
 class RecreationActivity(models.Model):
     CATEGORY_CHOICES = [
@@ -20,7 +21,12 @@ class RecreationActivity(models.Model):
     timings = models.CharField(max_length=100, help_text="e.g. 6:00 AM - 10:00 PM")
     price_info = models.CharField(max_length=100, default="Complimentary for Guests", help_text="e.g. $50/Session or Free")
     capacity = models.IntegerField(blank=True, null=True, help_text="Capacity if applicable")
-    image = models.ImageField(upload_to='recreation/', blank=True, null=True)
+    image = models.ImageField(
+        upload_to=UploadTo('recreation'),
+        blank=True,
+        null=True,
+        validators=[ValidateFileSize(2)]
+    )
     is_active = models.BooleanField(default=True)
 
     class Meta:

@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        
+        <!-- VENUE INFO & GALLERY (2 COLS) -->
+        <div class="lg:col-span-2 space-y-8">
+            <div class="overflow-hidden rounded-2xl border border-amber-900/10 h-[480px]">
+                <img src="{% if venue.image %}{{ venue.image.url }}{% else %}https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=1200{% endif %}" 
+                     alt="{{ venue.name }}" class="w-full h-full object-cover">
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">Premium Event Space</span>
+                    <span class="text-sm font-bold text-luxuryGold-500 font-luxury-title">Base Price: NPR {{ venue.base_price|floatformat:0 }}</span>
+                </div>
+                <h1 class="font-luxury-title text-4xl sm:text-5xl font-bold tracking-wide">{{ venue.name }}</h1>
+                <p class="text-sm leading-relaxed opacity-85">{{ venue.description }}</p>
+            </div>
+
+            <!-- LAYOUTS AND CAPACITY SPECIFICATION TABLE -->
+            <div class="p-6 rounded-2xl border border-amber-900/10 space-y-4" :class="{ 'bg-gray-50': currentTheme === 'light', 'bg-[#161412]': currentTheme !== 'light' }">
+                <h3 class="font-luxury-title text-xl font-bold border-b pb-3" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
+                    Seating Layout Capacities
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+                    <div class="text-center p-4 rounded-xl border border-white/5 bg-black/10">
+                        <i class="fa-solid fa-users text-2xl text-luxuryGold-500 mb-2"></i>
+                        <h4 class="text-xs font-bold uppercase tracking-wider opacity-60">Max Capacity</h4>
+                        <p class="text-lg font-bold mt-1 text-luxuryGold-300">{{ venue.capacity }} pax</p>
+                    </div>
+                    {% for layout in venue.layout_options.splitlines %}
+                    <div class="text-center p-4 rounded-xl border border-white/5 bg-black/10">
+                        <i class="fa-solid fa-chair text-2xl text-luxuryGold-500 mb-2"></i>
+                        <h4 class="text-xs font-bold uppercase tracking-wider opacity-60">{{ layout|slice:":15" }}</h4>
+                        <p class="text-lg font-bold mt-1 text-luxuryGold-300">{{ layout|slice:"15:" }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- EVENT INQUIRY FORM (1 COL) -->
+        <div class="space-y-8 lg:col-span-1">
+            <div class="rounded-2xl p-6 border shadow-xl sticky top-28"
+                 :class="{
+                     'bg-white border-gray-200 text-gray-800': currentTheme === 'light',
+                     'bg-[#161412] border-amber-900/20 text-amber-100': currentTheme !== 'light'
+                 }">
+                <h3 class="font-luxury-title text-xl font-semibold mb-2 border-b pb-4" 
+                    :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
+                    Request Proposal
+                </h3>
+                
+                <p class="text-xs opacity-75 mb-6">Plan your meetings, seminars, and weddings. Fill in details and get custom quotes.</p>
+
+                <!-- Django messages rendering -->
+                {% if messages %}
+                <div class="space-y-2 mb-4">
+                    {% for msg in messages %}
+                    <div class="p-3 rounded-lg border text-xs {% if msg.tags == 'success' %}bg-emerald-500/10 border-emerald-500/25 text-emerald-400{% else %}bg-amber-500/10 border-amber-500/25 text-amber-400{% endif %}">
+                        <p>{{ msg }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Inquiry Form -->
+                <form method="POST" action="." class="space-y-4 text-xs">
+                    {% csrf_token %}
+                    
+                    <div>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Full Name</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <p class="text-red-500 text-[10px] mt-1">{{ form.name.errors.as_text }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Email Address</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                        <p class="text-red-500 text-[10px] mt-1">{{ form.email.errors.as_text }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Contact Phone</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                        <p class="text-red-500 text-[10px] mt-1">{{ form.phone.errors.as_text }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Event Date</label>
+                            {{ form.event_date }}
+                            {% if form.event_date.errors %}
+                            <p class="text-red-500 text-[10px] mt-1">{{ form.event_date.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Guest Count</label>
+                            {{ form.guest_count }}
+                            {% if form.guest_count.errors %}
+                            <p class="text-red-500 text-[10px] mt-1">{{ form.guest_count.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 py-1">
+                        {{ form.catering_required }}
+                        <label class="text-[10px] font-semibold uppercase tracking-wider opacity-85">Catering & Banquet Required</label>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Special Requirements & Remarks</label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                        <p class="text-red-500 text-[10px] mt-1">{{ form.notes.errors.as_text }}</p>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 mt-4 rounded-lg text-xs font-bold uppercase tracking-wider text-center cursor-pointer"
+                            :class="{
+                                'bg-amber-800 text-white': currentTheme === 'light',
+                                'bg-luxuryGold-500 text-black gold-glow': currentTheme !== 'light'
+                            }">
+                        Submit Proposal Inquiry
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}

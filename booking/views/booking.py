@@ -44,6 +44,14 @@ def initiate_booking(request, room_id):
     if seasonal:
         daily_price = seasonal.price_override
 
+    # Check availability for the dates
+    is_available = not RoomAvailability.objects.filter(
+        room=room,
+        date__gte=check_in,
+        date__lt=check_out,
+        is_available=False
+    ).exists()
+
     subtotal = daily_price * nights
     tax = subtotal * (room.tax_percentage / 100)
     total = subtotal + tax
@@ -59,6 +67,7 @@ def initiate_booking(request, room_id):
         'tax': tax,
         'total': total,
         'daily_price': daily_price,
+        'is_available': is_available,
     }
     return render(request, 'booking/booking_initiate.html', context)
 
@@ -157,3 +166,108 @@ def create_booking(request, room_id):
 def checkout_page(request, booking_uid):
     booking = get_object_or_404(Booking, booking_uid=booking_uid)
     return render(request, 'booking/checkout.html', {'booking': booking})
+
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+@require_POST
+def channel_manager_sync(request):
+    """
+    Mock endpoint to sync bookings with channel managers like Booking.com, Expedia, etc.
+    Exposes setup hooks for reservation delivery (OTA_HotelResNotifRQ / JSON Webhooks).
+    """
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except ValueError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+    
+    # Required channel manager payload parameters
+    ota_id = data.get('ota_reservation_id')
+    channel = data.get('channel_name', 'OTA-Sync')
+    room_id = data.get('room_id')
+    check_in_str = data.get('check_in')
+    check_out_str = data.get('check_out')
+    guest_name = data.get('guest_name')
+    guest_email = data.get('guest_email', '')
+    guest_phone = data.get('guest_phone', '')
+    
+    if not all([ota_id, room_id, check_in_str, check_out_str, guest_name]):
+        return JsonResponse({'status': 'error', 'message': 'Missing required fields'}, status=400)
+        
+    try:
+        room = Room.objects.get(id=room_id)
+    except Room.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Room not found'}, status=404)
+        
+    try:
+        check_in = datetime.datetime.strptime(check_in_str, "%Y-%m-%d").date()
+        check_out = datetime.datetime.strptime(check_out_str, "%Y-%m-%d").date()
+    except ValueError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid dates'}, status=400)
+        
+    # Check if booking already exists for this OTA reservation
+    booking = Booking.objects.filter(ota_reservation_id=ota_id, channel_name=channel).first()
+    
+    # Calculate price
+    nights = (check_out - check_in).days
+    subtotal = room.base_price * nights
+    tax = subtotal * (room.tax_percentage / 100)
+    total = subtotal + tax
+    
+    if not booking:
+        # Create new OTA Booking
+        booking = Booking.objects.create(
+            room=room,
+            guest_name=guest_name,
+            guest_email=guest_email,
+            guest_phone=guest_phone,
+            check_in=check_in,
+            check_out=check_out,
+            subtotal=subtotal,
+            tax=tax,
+            total=total,
+            status='confirmed',  # OTA bookings are usually confirmed
+            channel_name=channel,
+            ota_reservation_id=ota_id,
+            channel_raw_payload=data
+        )
+        
+        # Block dates
+        current_date = check_in
+        while current_date < check_out:
+            RoomAvailability.objects.get_or_create(
+                room=room,
+                date=current_date,
+                defaults={'is_available': False, 'booking': booking}
+            )
+            current_date += datetime.timedelta(days=1)
+            
+        return JsonResponse({'status': 'success', 'message': 'Booking created successfully', 'booking_id': booking.id})
+    else:
+        # Update existing booking details/dates
+        booking.guest_name = guest_name
+        booking.guest_email = guest_email
+        booking.guest_phone = guest_phone
+        booking.check_in = check_in
+        booking.check_out = check_out
+        booking.subtotal = subtotal
+        booking.tax = tax
+        booking.total = total
+        booking.channel_raw_payload = data
+        booking.save()
+        
+        # Reset and block dates
+        RoomAvailability.objects.filter(booking=booking).delete()
+        current_date = check_in
+        while current_date < check_out:
+            RoomAvailability.objects.get_or_create(
+                room=room,
+                date=current_date,
+                defaults={'is_available': False, 'booking': booking}
+            )
+            current_date += datetime.timedelta(days=1)
+            
+        return JsonResponse({'status': 'success', 'message': 'Booking updated successfully', 'booking_id': booking.id})
+

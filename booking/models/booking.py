@@ -35,6 +35,13 @@ class Booking(models.Model):
     
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     special_requests = models.TextField(blank=True, null=True)
+
+    # Channel Manager / OTA Sync Fields (Setup Only)
+    channel_name = models.CharField(max_length=50, default='direct', help_text="e.g. direct, booking.com, expedia, agoda")
+    ota_reservation_id = models.CharField(max_length=100, blank=True, null=True, help_text="Reservation ID from the OTA/channel manager")
+    promo_code = models.CharField(max_length=50, blank=True, null=True)
+    payment_method = models.CharField(max_length=50, default='pay_later', choices=[('card', 'Visa/Mastercard'), ('pay_later', 'Pay at Hotel')])
+    channel_raw_payload = models.JSONField(blank=True, null=True, help_text="Raw payload received from the channel manager/OTA API")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

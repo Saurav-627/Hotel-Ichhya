@@ -6,5 +6,5 @@ class ContactView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['branches'] = Branch.objects.all().order_by('-is_main')
+        context['branches'] = Branch.objects.filter(is_published=True).order_by('-is_main')
         return context

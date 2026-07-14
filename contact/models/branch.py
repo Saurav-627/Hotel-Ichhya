@@ -7,6 +7,7 @@ class Branch(models.Model):
     email = models.EmailField()
     maps_iframe = models.TextField(blank=True, null=True, help_text="Google Maps iframe embed code")
     is_main = models.BooleanField(default=False)
+    is_published = models.BooleanField(default=True, help_text="Designates whether this branch is visible on the website")
 
     class Meta:
         verbose_name = "Hotel Branch"

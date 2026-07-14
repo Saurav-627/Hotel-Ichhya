@@ -7,7 +7,7 @@ import datetime
 
 @require_POST
 def book_table_ajax(request, venue_id):
-    venue = get_object_or_404(DiningVenue, id=venue_id)
+    venue = get_object_or_404(DiningVenue, id=venue_id, is_published=True)
     
     # Retrieve POST data
     name = request.POST.get('name')

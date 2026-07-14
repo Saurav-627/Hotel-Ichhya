@@ -1,10 +1,16 @@
 from django.db import models
+from core.utils import UploadTo, ValidateFileSize
 
 class AboutPreview(models.Model):
     title = models.CharField(max_length=150, default="About Hotel Ichha")
     subtitle = models.CharField(max_length=250, default="A Haven of Luxury & Hospitality")
     content = models.TextField(help_text="Introductory text about the hotel")
-    image = models.ImageField(upload_to='homepage/about/', blank=True, null=True)
+    image = models.ImageField(
+        upload_to=UploadTo('homepage/about'),
+        blank=True,
+        null=True,
+        validators=[ValidateFileSize(2)]
+    )
     video_url = models.URLField(blank=True, null=True, help_text="Promo video YouTube/Vimeo link")
 
     # Statistics Counters

@@ -44,7 +44,7 @@ def payment_callback(request, payment_id):
     booking.save()
 
     # Trigger background tasks (send email confirmation/SMS notification via Celery) here if desired!
-    messages_success_html = f"Payment of ${payment.amount} successful via {payment.gateway.upper()}!"
+    messages_success_html = f"Payment of {booking.room.currency} {payment.amount} successful via {payment.gateway.upper()}!"
     
     return render(request, 'payments/success.html', {'booking': booking, 'payment': payment, 'message': messages_success_html})
 

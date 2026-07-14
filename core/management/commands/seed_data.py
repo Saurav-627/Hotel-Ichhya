@@ -30,11 +30,11 @@ class Command(BaseCommand):
 
         # 1b. Seed Currencies
         from settings_manager.models.currency import Currency
-        Currency.objects.all().delete()
-        Currency.objects.create(code="USD", name="US Dollar", symbol="$", rate=1.0000, is_published=True, is_default=True)
-        Currency.objects.create(code="NPR", name="Nepalese Rupee", symbol="₨", rate=133.0000, is_published=True, is_default=False)
-        Currency.objects.create(code="EUR", name="Euro", symbol="€", rate=0.9200, is_published=True, is_default=False)
-        Currency.objects.create(code="GBP", name="British Pound", symbol="£", rate=0.7900, is_published=True, is_default=False)
+        Currency.objects.get_queryset().set_active_test(enabled=False).delete(is_soft=False)
+        Currency.objects.create(iso_code="USD", name="US Dollar", symbol="$", sequence=1, is_published=True, is_custom=False)
+        Currency.objects.create(iso_code="NPR", name="Nepalese Rupee", symbol="₨", sequence=2, is_published=True, is_custom=False)
+        Currency.objects.create(iso_code="EUR", name="Euro", symbol="€", sequence=3, is_published=True, is_custom=False)
+        Currency.objects.create(iso_code="GBP", name="British Pound", symbol="£", sequence=4, is_published=True, is_custom=False)
         self.stdout.write("Seeded Currencies.")
 
         # 2. Hotel Settings (Singleton)

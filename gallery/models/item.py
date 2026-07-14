@@ -1,16 +1,23 @@
 from django.db import models
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
+from core.utils import UploadTo, ValidateFileSize
 
 class GalleryItem(models.Model):
     category = models.ForeignKey('GalleryCategory', on_delete=models.CASCADE, related_name='items')
-    image = models.ImageField(upload_to='gallery/', blank=True, null=True)
+    image = models.ImageField(
+        upload_to=UploadTo('gallery'),
+        blank=True,
+        null=True,
+        validators=[ValidateFileSize(2)]
+    )
     caption = models.CharField(max_length=200, blank=True)
     
     is_video = models.BooleanField(default=False)
     is_drone = models.BooleanField(default=False)
     video_url = models.URLField(blank=True, null=True, help_text="YouTube, Vimeo, or direct video URL")
     virtual_tour_url = models.URLField(blank=True, null=True, help_text="Virtual tour embed link")
+    is_published = models.BooleanField(default=True, help_text="Designates whether this gallery item is visible on the website")
 
     created_at = models.DateTimeField(auto_now_add=True)
 

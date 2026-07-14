@@ -1,10 +1,16 @@
 from django.db import models
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
+from core.utils import UploadTo, ValidateFileSize
 
 class RoomImage(models.Model):
     room = models.ForeignKey('Room', on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='rooms/gallery/', blank=True, null=True)
+    image = models.ImageField(
+        upload_to=UploadTo('rooms/gallery'),
+        blank=True,
+        null=True,
+        validators=[ValidateFileSize(2)]
+    )
     is_primary = models.BooleanField(default=False)
     alt_text = models.CharField(max_length=200, blank=True, help_text="Accessibility alt text for screen readers")
     

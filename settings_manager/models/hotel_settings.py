@@ -1,4 +1,5 @@
 from django.db import models
+from core.utils import UploadTo, ValidateFileSize
 
 class HotelSettings(models.Model):
     THEME_CHOICES = [
@@ -9,8 +10,19 @@ class HotelSettings(models.Model):
     ]
 
     site_name = models.CharField(max_length=100, default="Hotel Ichha")
-    logo = models.ImageField(upload_to='settings/logos/', blank=True, null=True)
-    logo_dark = models.ImageField(upload_to='settings/logos/', blank=True, null=True, help_text="Dark mode logo version")
+    logo = models.ImageField(
+        upload_to=UploadTo('settings/logos'),
+        blank=True,
+        null=True,
+        validators=[ValidateFileSize(2)]
+    )
+    logo_dark = models.ImageField(
+        upload_to=UploadTo('settings/logos'),
+        blank=True,
+        null=True,
+        help_text="Dark mode logo version",
+        validators=[ValidateFileSize(2)]
+    )
     theme = models.CharField(max_length=20, choices=THEME_CHOICES, default='luxury')
     
     # Contact Info

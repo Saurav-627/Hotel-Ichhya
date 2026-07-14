@@ -1,4 +1,5 @@
 from django.db import models
+from core.utils import UploadTo, ValidateFileSize
 
 class Attraction(models.Model):
     CATEGORY_CHOICES = [
@@ -15,7 +16,12 @@ class Attraction(models.Model):
     distance = models.CharField(max_length=50, help_text="e.g. 15 km or 500 meters")
     travel_time = models.CharField(max_length=100, help_text="e.g. 20 minutes drive or 5 minutes walk")
     maps_url = models.URLField(blank=True, null=True, help_text="Google Maps direction link")
-    image = models.ImageField(upload_to='attractions/', blank=True, null=True)
+    image = models.ImageField(
+        upload_to=UploadTo('attractions'),
+        blank=True,
+        null=True,
+        validators=[ValidateFileSize(2)]
+    )
     description = models.TextField()
     order = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)

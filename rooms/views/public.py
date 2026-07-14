@@ -78,3 +78,34 @@ class RoomDetailView(DetailView):
 
     def get_queryset(self):
         return super().get_queryset().filter(is_published=True).prefetch_related('images', 'facilities', 'policies', 'seasonal_prices')
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+import datetime
+from ..models.room_availability import RoomAvailability
+
+@require_GET
+def check_room_availability(request, room_id):
+    check_in_str = request.GET.get('check_in')
+    check_out_str = request.GET.get('check_out')
+    
+    if not check_in_str or not check_out_str:
+        return JsonResponse({'available': False, 'message': 'Missing date parameters.'}, status=400)
+        
+    try:
+        check_in = datetime.datetime.strptime(check_in_str, "%Y-%m-%d").date()
+        check_out = datetime.datetime.strptime(check_out_str, "%Y-%m-%d").date()
+    except ValueError:
+        return JsonResponse({'available': False, 'message': 'Invalid date format.'}, status=400)
+        
+    if check_out <= check_in:
+        return JsonResponse({'available': False, 'message': 'Departure must be after arrival.'}, status=400)
+        
+    blocked = RoomAvailability.objects.filter(
+        room_id=room_id,
+        date__gte=check_in,
+        date__lt=check_out,
+        is_available=False
+    ).exists()
+    
+    return JsonResponse({'available': not blocked})

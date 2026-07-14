@@ -31,6 +31,7 @@
             <h3 class="text-xs font-semibold tracking-widest uppercase opacity-75">Choose Payment Gateway</h3>
             
             <!-- Stripe -->
+            {% if booking.room.currency|upper != 'NPR' %}
             <a href="{% url 'payments:process_payment' booking.booking_uid 'stripe' %}" 
                @click.prevent="gatewayName = 'Stripe'; redirectUrl = $el.getAttribute('href'); showModal = true; statusText = 'Initializing secure handshake...'; setTimeout(() => { statusText = 'Establishing PCI-DSS secure connection...'; }, 1000); setTimeout(() => { window.location.href = redirectUrl; }, 2500)"
                class="flex items-center justify-between p-4 rounded-xl border hover:scale-[1.03] hover:shadow-lg duration-300 transition-all cursor-pointer bg-blue-900/10 border-blue-900/30 group animate__animated animate__fadeInUp"
@@ -65,8 +66,10 @@
                 </div>
                 <i class="fa-solid fa-chevron-right opacity-60 group-hover:translate-x-1 duration-300"></i>
             </a>
+            {% endif %}
 
             <!-- eSewa -->
+            {% if booking.room.currency|upper == 'NPR' %}
             <a href="{% url 'payments:process_payment' booking.booking_uid 'esewa' %}" 
                @click.prevent="gatewayName = 'eSewa Wallet'; redirectUrl = $el.getAttribute('href'); showModal = true; statusText = 'Connecting to eSewa API...'; setTimeout(() => { statusText = 'Verifying merchant wallet handshake...'; }, 1000); setTimeout(() => { window.location.href = redirectUrl; }, 2500)"
                class="flex items-center justify-between p-4 rounded-xl border hover:scale-[1.03] hover:shadow-lg duration-300 transition-all cursor-pointer bg-green-900/10 border-green-900/30 group animate__animated animate__fadeInUp"
@@ -185,8 +188,10 @@
                 </div>
                 <i class="fa-solid fa-chevron-right opacity-60 group-hover:translate-x-1 duration-300"></i>
             </a>
+            {% endif %}
 
             <!-- Khalti -->
+            {% if booking.room.currency|upper == 'NPR' %}
             <a href="{% url 'payments:process_payment' booking.booking_uid 'khalti' %}" 
                @click.prevent="gatewayName = 'Khalti SDK'; redirectUrl = $el.getAttribute('href'); showModal = true; statusText = 'Initializing Khalti payment session...'; setTimeout(() => { statusText = 'Authorizing secure transaction portal...'; }, 1000); setTimeout(() => { window.location.href = redirectUrl; }, 2500)"
                class="flex items-center justify-between p-4 rounded-xl border hover:scale-[1.03] hover:shadow-lg duration-300 transition-all cursor-pointer bg-purple-900/10 border-purple-900/30 group animate__animated animate__fadeInUp"
@@ -241,6 +246,7 @@
                 </div>
                 <i class="fa-solid fa-chevron-right opacity-60 group-hover:translate-x-1 duration-300"></i>
             </a>
+            {% endif %}
 
         </div>
 

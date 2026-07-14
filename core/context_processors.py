@@ -35,11 +35,14 @@ def global_settings(request):
             )
 
         # Retrieve menus
-        menus = NavigationMenu.objects.filter(parent__isnull=True).prefetch_related('children')
+        from django.db.models import Prefetch
+        menus = NavigationMenu.objects.filter(parent__isnull=True, is_published=True).prefetch_related(
+            Prefetch('children', queryset=NavigationMenu.objects.filter(is_published=True))
+        )
         header_menu = menus.filter(position='header')
-        footer_quick_links = NavigationMenu.objects.filter(position='footer_links')
-        footer_services = NavigationMenu.objects.filter(position='footer_services')
-        footer_ota_links = NavigationMenu.objects.filter(position='footer_ota')
+        footer_quick_links = NavigationMenu.objects.filter(position='footer_links', is_published=True)
+        footer_services = NavigationMenu.objects.filter(position='footer_services', is_published=True)
+        footer_ota_links = NavigationMenu.objects.filter(position='footer_ota', is_published=True)
         
         # Retrieve active currencies
         from settings_manager.models.currency import Currency

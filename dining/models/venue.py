@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
+from core.utils import UploadTo, ValidateFileSize
 
 class DiningVenue(models.Model):
     CATEGORY_CHOICES = [
@@ -21,13 +22,24 @@ class DiningVenue(models.Model):
     # Chef Details
     chef_name = models.CharField(max_length=100, blank=True, null=True)
     chef_bio = models.TextField(blank=True, null=True)
-    chef_image = models.ImageField(upload_to='dining/chefs/', blank=True, null=True)
+    chef_image = models.ImageField(
+        upload_to=UploadTo('dining/chefs'),
+        blank=True,
+        null=True,
+        validators=[ValidateFileSize(2)]
+    )
     
     capacity = models.IntegerField(help_text="Guest capacity")
     featured_dishes = models.TextField(blank=True, help_text="Comma-separated list of featured dishes")
     video_url = models.URLField(blank=True, null=True, help_text="Virtual tour or venue intro video")
-    image = models.ImageField(upload_to='dining/venues/', blank=True, null=True)
+    image = models.ImageField(
+        upload_to=UploadTo('dining/venues'),
+        blank=True,
+        null=True,
+        validators=[ValidateFileSize(2)]
+    )
     is_featured = models.BooleanField(default=False)
+    is_published = models.BooleanField(default=True, help_text="Designates whether this dining venue is visible on the website")
 
     def save(self, *args, **kwargs):
         if not self.slug:

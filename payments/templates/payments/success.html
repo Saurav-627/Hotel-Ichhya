@@ -16,6 +16,19 @@
             <p class="text-xs opacity-75">Thank you! Your stay at Hotel Ichha has been successfully booked.</p>
         </div>
 
+        <!-- Prominent Paid Amount Section -->
+        <div class="py-6 border-y border-dashed" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/20': currentTheme !== 'light' }">
+            <span class="text-xs uppercase tracking-widest opacity-60 block mb-1">Total Amount Paid</span>
+            <span class="text-4xl sm:text-5xl font-extrabold tracking-wide text-luxuryGold-500 font-luxury-title block">
+                {{ payment.booking.room.currency }} {{ payment.amount|floatformat:2 }}
+            </span>
+            {% if payment.gateway %}
+            <span class="inline-block mt-3 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                Payment Method: {{ payment.gateway|upper }}
+            </span>
+            {% endif %}
+        </div>
+
         <!-- Receipt Table -->
         <div class="border rounded-xl overflow-hidden text-sm" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
             <div class="grid grid-cols-2 p-4 border-b opacity-85" :class="{ 'border-gray-100 bg-gray-50': currentTheme === 'light', 'border-amber-900/5 bg-[#0A0908]': currentTheme !== 'light' }">
@@ -30,9 +43,18 @@
                 <span class="text-left opacity-75">Room Booked</span>
                 <span class="text-right font-semibold">{{ booking.room.title }}</span>
             </div>
-            <div class="grid grid-cols-2 p-4 border-b" :class="{ 'border-gray-100': currentTheme === 'light', 'border-amber-900/5': currentTheme !== 'light' }">
-                <span class="text-left opacity-75">Total Paid</span>
-                <span class="text-right font-semibold text-luxuryGold-500 font-luxury-title" x-text="formatPrice({{ payment.amount }}, '{{ payment.booking.room.currency }}')">{{ payment.booking.room.currency }} {{ payment.amount|floatformat:2 }}</span>
+            <div class="grid grid-cols-2 p-4 border-b transition-all" 
+                 :class="{ 
+                     'border-gray-200 bg-amber-500/5': currentTheme === 'light', 
+                     'border-amber-900/20 bg-luxuryGold-500/5': currentTheme !== 'light' 
+                 }">
+                <span class="text-left font-bold" 
+                      :class="{ 'text-amber-900': currentTheme === 'light', 'text-luxuryGold-300': currentTheme !== 'light' }">
+                    Total Paid
+                </span>
+                <span class="text-right font-bold text-luxuryGold-500 font-luxury-title text-base sm:text-lg">
+                    {{ payment.booking.room.currency }} {{ payment.amount|floatformat:2 }}
+                </span>
             </div>
             <div class="grid grid-cols-2 p-4" :class="{ 'border-gray-100': currentTheme === 'light', 'border-amber-900/5': currentTheme !== 'light' }">
                 <span class="text-left opacity-75">Transaction reference</span>
