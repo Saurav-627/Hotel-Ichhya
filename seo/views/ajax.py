@@ -1,1 +1,0 @@
-# Views for seo - ajax
