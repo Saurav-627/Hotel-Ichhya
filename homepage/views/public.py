@@ -18,12 +18,8 @@ class HomeView(TemplateView):
         try:
             published_currencies = list(Currency.objects.filter(is_published=True))
             default_currency = 'USD'
-            for c in published_currencies:
-                if c.is_default:
-                    default_currency = c.code
-                    break
             selected_currency = self.request.COOKIES.get('currency', default_currency)
-            valid_codes = [c.code for c in published_currencies]
+            valid_codes = [c.iso_code for c in published_currencies]
             if selected_currency not in valid_codes:
                 selected_currency = default_currency
         except Exception:

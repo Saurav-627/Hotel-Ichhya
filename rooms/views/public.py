@@ -17,12 +17,8 @@ class RoomListView(ListView):
         try:
             published_currencies = list(Currency.objects.filter(is_published=True))
             default_currency = 'USD'
-            for c in published_currencies:
-                if c.is_default:
-                    default_currency = c.code
-                    break
             selected_currency = self.request.COOKIES.get('currency', default_currency)
-            valid_codes = [c.code for c in published_currencies]
+            valid_codes = [c.iso_code for c in published_currencies]
             if selected_currency not in valid_codes:
                 selected_currency = default_currency
         except Exception:
@@ -66,12 +62,8 @@ class RoomListView(ListView):
         try:
             published_currencies = list(Currency.objects.filter(is_published=True))
             default_currency = 'USD'
-            for c in published_currencies:
-                if c.is_default:
-                    default_currency = c.code
-                    break
             selected_currency = self.request.COOKIES.get('currency', default_currency)
-            currency_obj = Currency.objects.filter(code=selected_currency, is_published=True).first()
+            currency_obj = Currency.objects.filter(iso_code=selected_currency, is_published=True).first()
             context['selected_currency_symbol'] = currency_obj.symbol if currency_obj else '$'
         except Exception:
             context['selected_currency_symbol'] = '$'

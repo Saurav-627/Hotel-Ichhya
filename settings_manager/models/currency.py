@@ -1,22 +1,41 @@
 from django.db import models
+from .base import BaseModel
 
-class Currency(models.Model):
-    code = models.CharField(max_length=3, unique=True, help_text="e.g. USD, NPR, EUR, GBP")
-    name = models.CharField(max_length=50, help_text="e.g. US Dollar, Nepalese Rupee")
-    symbol = models.CharField(max_length=5, help_text="e.g. $, ₨, €, £")
-    rate = models.DecimalField(max_digits=10, decimal_places=4, default=1.0, help_text="Conversion rate relative to 1 USD (base)")
-    is_published = models.BooleanField(default=True, help_text="Unpublishing a currency hides it from the UI switcher and uses fallback")
-    is_default = models.BooleanField(default=False, help_text="Use this as the default fallback currency if user has not selected one")
+class Currency(BaseModel):
+    name = models.CharField(max_length=128)
+    iso_code = models.CharField(max_length=10, unique=True)
+    symbol = models.CharField(max_length=10)
+    is_custom = models.BooleanField(default=False)
+    sequence = models.SmallIntegerField(blank=False, null=True)
+    is_published = models.BooleanField(default=False)
 
+    display_name = models.GeneratedField(
+        expression=models.F("name"),
+        output_field=models.CharField(max_length=128),
+        db_persist=True,
+    )
+
+    def __str__(self) -> str:
+        return self.display_name
+    
     class Meta:
-        verbose_name = "Currency"
-        verbose_name_plural = "Currencies"
-        ordering = ['code']
+        ordering = ["sequence", "id"]
+        indexes = [
+            models.Index(fields=["iso_code"]),
+        ]
 
-    def __str__(self):
-        return f"{self.code} ({self.symbol}) - Rate: {self.rate}"
-
-    def save(self, *args, **kwargs):
-        if self.is_default:
-            Currency.objects.filter(is_default=True).exclude(pk=self.pk).update(is_default=False)
-        super().save(*args, **kwargs)
+    @classmethod
+    def get_by_iso_code(cls, iso_code):
+        return cls.objects.filter(iso_code=iso_code).first()
+    
+    @classmethod
+    def get_default_currency(cls):
+        return cls.objects.filter(iso_code="USD").first()
+    
+    @classmethod
+    def get_pesa_currency(cls):
+        return cls.objects.filter(iso_code="XPESA").first()
+    
+    @classmethod
+    def get_npr_currency(cls):
+        return cls.objects.filter(iso_code="NPR").first()

@@ -276,14 +276,14 @@
                              }"
                              style="display: none;">
                             {% for c in published_currencies %}
-                            <button @click="setCurrency('{{ c.code }}'); open = false" 
+                            <button @click="setCurrency('{{ c.iso_code }}'); open = false" 
                                     class="flex w-full items-center justify-between px-4 py-2.5 text-left transition-colors text-xs"
                                     :class="currentTheme === 'light' ? 'hover:bg-gray-100' : 'hover:bg-luxuryGold-900/20'">
                                 <div class="flex items-center gap-2">
                                     <span class="font-serif font-bold text-xs opacity-75 w-5 text-center">{{ c.symbol }}</span>
-                                    <span>{{ c.name }} ({{ c.code }})</span>
+                                    <span>{{ c.name }} ({{ c.iso_code }})</span>
                                 </div>
-                                <span class="text-xs font-bold text-luxuryGold-500" x-show="currentCurrency === '{{ c.code }}'">✓</span>
+                                <span class="text-xs font-bold text-luxuryGold-500" x-show="currentCurrency === '{{ c.iso_code }}'">✓</span>
                             </button>
                             {% empty %}
                             <button @click="setCurrency('USD'); open = false" 
@@ -381,7 +381,7 @@
                                 class="w-full appearance-none px-3 py-2.5 text-xs rounded border bg-transparent focus:outline-none focus:ring-1 focus:ring-luxuryGold-400 font-medium"
                                 :class="currentTheme === 'light' ? 'border-gray-300 text-gray-800 bg-white' : 'border-amber-900/40 text-amber-200 bg-[#161412]'">
                             {% for c in published_currencies %}
-                                <option value="{{ c.code }}" {% if c.code == selected_currency %}selected{% endif %} :selected="currentCurrency === '{{ c.code }}'">{{ c.name }} ({{ c.code }})</option>
+                                <option value="{{ c.iso_code }}" {% if c.iso_code == selected_currency %}selected{% endif %} :selected="currentCurrency === '{{ c.iso_code }}'">{{ c.name }} ({{ c.iso_code }})</option>
                             {% empty %}
                                 <option value="USD" {% if selected_currency == 'USD' %}selected{% endif %} :selected="currentCurrency === 'USD'">US Dollar (USD)</option>
                             {% endfor %}

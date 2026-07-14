@@ -1,0 +1,60 @@
+hotel_settings:
+  site_name: "Hotel Ichha"
+  theme: "light"
+  contact_phone: "+977-1-4XXXXXX"
+  contact_email: "info@hotelichha.com"
+  address: "Bara, Nepal"
+  about_text: "A premium 5-star experience of hospitality and luxury."
+  copyright_text: "&copy; 2026 Hotel Ichha. All Rights Reserved."
+
+currencies:
+  - iso_code: "USD"
+    name: "US Dollar"
+    symbol: "$"
+    is_published: true
+    sequence: 1
+    is_custom: false
+  - iso_code: "NPR"
+    name: "Nepalese Rupee"
+    symbol: "₨"
+    is_published: true
+    sequence: 2
+    is_custom: false
+  - iso_code: "EUR"
+    name: "Euro"
+    symbol: "€"
+    is_published: true
+    sequence: 3
+    is_custom: false
+  - iso_code: "GBP"
+    name: "British Pound"
+    symbol: "£"
+    is_published: true
+    sequence: 4
+    is_custom: false
+
+navigation_menus:
+  - name: "Rooms & Suites"
+    url: "/rooms/"
+    position: "header"
+    order: 1
+  - name: "Dining"
+    url: "/dining/"
+    position: "header"
+    order: 2
+  - name: "Recreation"
+    url: "/recreation/"
+    position: "header"
+    order: 3
+  - name: "Gallery"
+    url: "/gallery/"
+    position: "header"
+    order: 4
+  - name: "News"
+    url: "/blogs/"
+    position: "header"
+    order: 5
+  - name: "Contact"
+    url: "/contact/"
+    position: "header"
+    order: 6

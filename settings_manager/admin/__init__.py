@@ -24,7 +24,7 @@ class NavigationMenuAdmin(ModelAdmin):
 
 @admin.register(Currency)
 class CurrencyAdmin(ModelAdmin):
-    list_display = ('code', 'name', 'symbol', 'rate', 'is_published', 'is_default')
-    list_filter = ('is_published', 'is_default')
-    search_fields = ('code', 'name')
-    list_editable = ('rate', 'is_published', 'is_default')
+    list_display = ('iso_code', 'name', 'symbol', 'sequence', 'is_custom', 'is_published')
+    list_filter = ('is_custom', 'is_published')
+    search_fields = ('iso_code', 'name')
+    list_editable = ('sequence', 'is_published')
