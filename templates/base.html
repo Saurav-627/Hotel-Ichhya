@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
@@ -138,27 +139,38 @@
     mobileMenuOpen: false,
     bookingWidgetOpen: false,
     searchOpen: false,
+    currencyModalOpen: false,
     setTheme(theme) {
         this.currentTheme = 'light';
     },
-    currentCurrency: localStorage.getItem('currency') || 'USD',
+    currentCurrency: localStorage.getItem('currency') || '{% for c in published_currencies %}{% if c.is_default %}{{ c.code }}{% endif %}{% empty %}USD{% endfor %}' || 'USD',
     currencyRates: {
+        {% for c in published_currencies %}
+        '{{ c.code }}': {{ c.rate }},
+        {% empty %}
         USD: 1.0,
         NPR: 133.0,
         EUR: 0.92,
         GBP: 0.79
+        {% endfor %}
     },
     currencySymbols: {
+        {% for c in published_currencies %}
+        '{{ c.code }}': '{{ c.symbol }}',
+        {% empty %}
         USD: '$',
         NPR: '₨',
         EUR: '€',
         GBP: '£'
+        {% endfor %}
     },
-    formatPrice(amount) {
+    formatPrice(amount, fromCurrency = 'USD') {
         if (amount === undefined || amount === null || isNaN(amount)) return '';
-        const rate = this.currencyRates[this.currentCurrency] || 1.0;
+        const fromRate = this.currencyRates[fromCurrency] || 1.0;
+        const toRate = this.currencyRates[this.currentCurrency] || 1.0;
         const symbol = this.currencySymbols[this.currentCurrency] || '$';
-        const converted = (parseFloat(amount) * rate).toFixed(2);
+        const usdAmount = parseFloat(amount) / fromRate;
+        const converted = (usdAmount * toRate).toFixed(2);
         return symbol + converted;
     },
     setCurrency(currency) {
@@ -205,7 +217,7 @@
                 <!-- Brand Logo -->
                 <div class="flex-shrink-0">
                     <a href="{% url 'homepage:home' %}" class="flex items-center">
-                        <img src="https://www.hotelichchha.com/backend/images/preference/u41t5-download.png" alt="Hotel Ichchha Logo" class="h-14 w-auto object-contain">
+                        <img src="{% static 'images/hotel-ichchha-logo.png' %}" alt="Hotel Ichchha Logo" class="h-14 w-auto object-contain">
                     </a>
                 </div>
 
@@ -260,32 +272,12 @@
                 <!-- Header Actions (Theme switcher, search, Booking CTA) -->
                 <div class="hidden md:flex items-center space-x-6">
 
-                    <!-- Currency Switcher Dropdown -->
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="p-2 rounded-full hover:bg-luxuryGold-900/10 focus:outline-none transition-colors flex items-center gap-1.5" title="Switch Currency">
+                    <!-- Currency Switcher Modal Button -->
+                    <div>
+                        <button @click="currencyModalOpen = true" class="p-2 rounded-full hover:bg-luxuryGold-900/10 focus:outline-none transition-colors flex items-center gap-1.5" title="Switch Currency">
                             <i class="fa-solid fa-coins text-base"></i>
                             <span class="text-xs font-semibold" x-text="currentCurrency">USD</span>
                         </button>
-                        <div x-show="open" @click.away="open = false" 
-                             class="absolute right-0 mt-2 w-32 rounded-md shadow-lg border backdrop-blur-lg py-1 z-50"
-                             :class="{
-                                 'bg-white border-gray-200 text-gray-800': currentTheme === 'light',
-                                 'bg-[#1E1E1E] border-[#2D2D2D] text-gray-200': currentTheme === 'dark',
-                                 'bg-[#161412] border-amber-900/30 text-amber-200': currentTheme === 'luxury' || currentTheme === 'festival'
-                             }">
-                            <button @click="setCurrency('USD'); open = false" class="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-luxuryGold-500/10 transition-colors">
-                                <span class="w-4 text-center font-bold font-serif">$</span> USD
-                            </button>
-                            <button @click="setCurrency('NPR'); open = false" class="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-luxuryGold-500/10 transition-colors">
-                                <span class="w-4 text-center font-bold font-serif">₨</span> NPR
-                            </button>
-                            <button @click="setCurrency('EUR'); open = false" class="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-luxuryGold-500/10 transition-colors">
-                                <span class="w-4 text-center font-bold font-serif">€</span> EUR
-                            </button>
-                            <button @click="setCurrency('GBP'); open = false" class="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-luxuryGold-500/10 transition-colors">
-                                <span class="w-4 text-center font-bold font-serif">£</span> GBP
-                            </button>
-                        </div>
                     </div>
 
                     <!-- Search Button -->
@@ -364,6 +356,17 @@
                 {% endfor %}
 
                 <div class="pt-6 border-t mt-6" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/20': currentTheme !== 'light' }">
+                    <h4 class="text-xs font-semibold tracking-widest uppercase mb-3 opacity-60">Currency</h4>
+                    <button @click="currencyModalOpen = true; mobileMenuOpen = false" class="w-full flex items-center justify-between px-3 py-2.5 text-xs rounded border hover:bg-luxuryGold-900/5 transition-colors border-gray-300">
+                        <span class="flex items-center gap-2 font-medium">
+                            <i class="fa-solid fa-coins text-luxuryGold-500"></i>
+                            Select Currency
+                        </span>
+                        <span class="font-bold text-luxuryGold-500" x-text="currentCurrency">USD</span>
+                    </button>
+                </div>
+
+                <div class="pt-6 border-t mt-6" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/20': currentTheme !== 'light' }">
                     <h4 class="text-xs font-semibold tracking-widest uppercase mb-3 opacity-60">Active Theme</h4>
                     <div class="grid grid-cols-2 gap-2">
                         <button @click="setTheme('light')" class="px-3 py-2 text-xs rounded border hover:bg-luxuryGold-900/5 transition-colors">Light</button>
@@ -432,7 +435,7 @@
                 <!-- About Column -->
                 <div class="space-y-4">
                     <a href="{% url 'homepage:home' %}" class="block">
-                        <img src="https://www.hotelichchha.com/backend/images/preference/u41t5-download.png" alt="Hotel Ichchha Logo" class="h-14 w-auto object-contain">
+                        <img src="{% static 'images/hotel-ichchha-logo.png' %}" alt="Hotel Ichchha Logo" class="h-14 w-auto object-contain">
                     </a>
                     <p class="text-sm leading-relaxed opacity-85">
                         {{ hotel_settings.about_text }}
@@ -557,6 +560,65 @@
             });
         });
     </script>
+    <!-- Currency Switcher Modal -->
+    <div x-show="currencyModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate__animated animate__fadeIn" style="display: none;">
+        <div @click.away="currencyModalOpen = false" class="relative w-full max-w-md rounded-2xl p-6 sm:p-8 border shadow-2xl overflow-y-auto text-left animate__animated animate__zoomIn"
+             :class="{
+                 'bg-white border-gray-200 text-gray-800': currentTheme === 'light',
+                 'bg-[#1E1E1E] border-[#2D2D2D] text-gray-200': currentTheme === 'dark',
+                 'bg-[#161412] border-amber-900/30 text-amber-200': currentTheme === 'luxury' || currentTheme === 'festival'
+             }">
+            
+            <div class="flex items-center justify-between pb-4 border-b mb-6"
+                 :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/20': currentTheme !== 'light' }">
+                <h3 class="font-luxury-title text-2xl font-bold tracking-wide"
+                    :class="{ 'text-gray-900': currentTheme === 'light', 'text-luxuryGold-400': currentTheme !== 'light' }">Select Currency</h3>
+                <button @click="currencyModalOpen = false" type="button" class="p-2 rounded-lg hover:bg-luxuryGold-900/10 transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 gap-4">
+                {% for c in published_currencies %}
+                <button @click="setCurrency('{{ c.code }}'); currencyModalOpen = false" 
+                        class="flex w-full items-center justify-between p-4 rounded-xl border transition-all text-left group hover:border-luxuryGold-500 hover:bg-luxuryGold-500/5"
+                        :class="currentCurrency === '{{ c.code }}' 
+                            ? 'border-luxuryGold-500 bg-luxuryGold-500/10 ring-2 ring-luxuryGold-500' 
+                            : (currentTheme === 'light' ? 'border-gray-200 bg-gray-50/50' : 'border-[#2D2D2D] bg-[#1a1816]/50')">
+                    <div class="flex items-center gap-3">
+                        <span class="text-lg font-bold font-serif w-10 h-10 rounded-full flex items-center justify-center"
+                              :class="{ 'bg-gray-100 text-gray-800': currentTheme === 'light', 'bg-luxuryGold-950/20 text-luxuryGold-400': currentTheme !== 'light' }">{{ c.symbol }}</span>
+                        <div>
+                            <p class="font-semibold text-sm" :class="{ 'text-gray-900': currentTheme === 'light', 'text-white': currentTheme !== 'light' }">{{ c.name }}</p>
+                            <p class="text-xs opacity-60">1 USD = {{ c.rate }} {{ c.code }}</p>
+                        </div>
+                    </div>
+                    <span class="text-xs font-bold text-luxuryGold-500" x-show="currentCurrency === '{{ c.code }}'">Active</span>
+                </button>
+                {% empty %}
+                <button @click="setCurrency('USD'); currencyModalOpen = false" 
+                        class="flex w-full items-center justify-between p-4 rounded-xl border transition-all text-left"
+                        :class="currentCurrency === 'USD' ? 'border-luxuryGold-500 bg-luxuryGold-500/10 ring-2' : 'border-gray-200'">
+                    <div class="flex items-center gap-3">
+                        <span class="text-lg font-bold font-serif w-8 h-8 rounded-full bg-luxuryGold-950/10 text-luxuryGold-900 flex items-center justify-center">$</span>
+                        <div>
+                            <p class="font-semibold text-sm">US Dollar</p>
+                            <p class="text-xs text-gray-500">1 USD = 1.00 USD</p>
+                        </div>
+                    </div>
+                </button>
+                {% endfor %}
+            </div>
+            
+            <div class="mt-6 pt-4 border-t text-center flex justify-end gap-3"
+                 :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/20': currentTheme !== 'light' }">
+                <button @click="currencyModalOpen = false" class="px-5 py-2.5 bg-amber-800 text-white rounded-lg text-xs font-bold uppercase tracking-wider shadow hover:bg-amber-900 transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

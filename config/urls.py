@@ -8,15 +8,15 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     # Modular Apps
-    path('', include('apps.homepage.urls', namespace='homepage')),
-    path('rooms/', include('apps.rooms.urls', namespace='rooms')),
-    path('dining/', include('apps.dining.urls', namespace='dining')),
-    path('recreation/', include('apps.recreation.urls', namespace='recreation')),
-    path('gallery/', include('apps.gallery.urls', namespace='gallery')),
-    path('booking/', include('apps.booking.urls', namespace='booking')),
-    path('payments/', include('apps.payments.urls', namespace='payments')),
-    path('contact/', include('apps.contact.urls', namespace='contact')),
-    path('blogs/', include('apps.blogs.urls', namespace='blogs')),
+    path('', include('homepage.urls', namespace='homepage')),
+    path('rooms/', include('rooms.urls', namespace='rooms')),
+    path('dining/', include('dining.urls', namespace='dining')),
+    path('recreation/', include('recreation.urls', namespace='recreation')),
+    path('gallery/', include('gallery.urls', namespace='gallery')),
+    path('booking/', include('booking.urls', namespace='booking')),
+    path('payments/', include('payments.urls', namespace='payments')),
+    path('contact/', include('contact.urls', namespace='contact')),
+    path('blogs/', include('blogs.urls', namespace='blogs')),
 ]
 
 # Serve media files in development

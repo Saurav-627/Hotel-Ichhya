@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        
+        <!-- GUEST INFORMATION FORM (2 COLS) -->
+        <div class="lg:col-span-2 space-y-8">
+            <div class="rounded-2xl p-6 sm:p-8 border shadow-sm"
+                 :class="{
+                     'bg-white border-gray-200': currentTheme === 'light',
+                     'bg-[#161412] border-amber-900/20': currentTheme !== 'light'
+                 }">
+                <h2 class="font-luxury-title text-2xl font-semibold mb-6">Guest Personal Details</h2>
+                
+                <form method="POST" action="{% url 'booking:create_booking' room.id %}" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- Hidden inputs preserving dates and occupancy -->
+                    <input type="hidden" name="check_in" value="{{ check_in|date:'Y-m-d' }}">
+                    <input type="hidden" name="check_out" value="{{ check_out|date:'Y-m-d' }}">
+                    <input type="hidden" name="adults" value="{{ adults }}">
+                    <input type="hidden" name="children" value="{{ children }}">
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider mb-2 opacity-80">Full Name *</label>
+                            <input type="text" name="name" required placeholder="John Doe"
+                                   class="w-full px-4 py-3 rounded-lg border bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
+                                   :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider mb-2 opacity-80">Email Address *</label>
+                            <input type="email" name="email" required placeholder="john.doe@example.com"
+                                   class="w-full px-4 py-3 rounded-lg border bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
+                                   :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider mb-2 opacity-80">Contact Phone Number *</label>
+                            <input type="tel" name="phone" required placeholder="+1 555-0199"
+                                   class="w-full px-4 py-3 rounded-lg border bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
+                                   :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider mb-2 opacity-80">Promo / Coupon Code</label>
+                            <input type="text" name="promo_code" placeholder="ENTER CODE"
+                                   class="w-full px-4 py-3 rounded-lg border bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400 font-mono uppercase"
+                                   :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider mb-2 opacity-80">Special Requests / Notes</label>
+                        <textarea name="special_requests" rows="4" placeholder="Let us know if you require airport pickups, dietary custom restrictions, or twin beds..."
+                                  class="w-full px-4 py-3 rounded-lg border bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
+                                  :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }"></textarea>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" class="w-full py-4 rounded-lg text-xs font-bold uppercase tracking-widest text-center cursor-pointer"
+                                :class="{
+                                    'bg-amber-800 text-white': currentTheme === 'light',
+                                    'bg-luxuryGold-500 text-black gold-glow': currentTheme !== 'light'
+                                }">
+                            Proceed to Check-out
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- STAY BOOKING SUMMARY (1 COL) -->
+        <div class="space-y-8 lg:col-span-1">
+            <div class="rounded-2xl p-6 border shadow-lg"
+                 :class="{
+                     'bg-white border-gray-200': currentTheme === 'light',
+                     'bg-[#161412] border-amber-900/20': currentTheme !== 'light'
+                 }">
+                <h3 class="font-luxury-title text-xl font-semibold mb-6 border-b pb-4" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">Chamber Booking Info</h3>
+                
+                <div class="space-y-4 text-sm">
+                    <div class="flex justify-between items-center">
+                        <span class="opacity-80">Room Type</span>
+                        <span class="font-semibold">{{ room.title }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="opacity-80">Check In</span>
+                        <span class="font-semibold">{{ check_in|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="opacity-80">Check Out</span>
+                        <span class="font-semibold">{{ check_out|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="opacity-80">Total Duration</span>
+                        <span class="font-semibold">{{ nights }} Night(s)</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="opacity-80">Guests count</span>
+                        <span class="font-semibold">{{ adults }} Adults, {{ children }} Children</span>
+                    </div>
+                    
+                    <div class="border-t pt-4 space-y-3" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
+                        <div class="flex justify-between items-center">
+                            <span class="opacity-80">Base Rate</span>
+                            <span x-text="formatPrice({{ daily_price }}, '{{ room.currency }}')">{{ room.currency }} {{ daily_price }} / night</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="opacity-80">Subtotal</span>
+                            <span x-text="formatPrice({{ subtotal }}, '{{ room.currency }}')">{{ room.currency }} {{ subtotal }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="opacity-80">Taxes ({{ room.tax_percentage }}%)</span>
+                            <span x-text="formatPrice({{ tax }}, '{{ room.currency }}')">{{ room.currency }} {{ tax|floatformat:2 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-lg font-bold text-luxuryGold-500 border-t pt-3" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
+                            <span>Total Price</span>
+                            <span class="font-luxury-title" x-text="formatPrice({{ total }}, '{{ room.currency }}')">{{ room.currency }} {{ total|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
