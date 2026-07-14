@@ -45,9 +45,9 @@
                         <p><i class="fa-solid fa-envelope text-luxuryGold-500 mr-2"></i>{{ branch.email }}</p>
                     </div>
 
-                    {% if branch.map_iframe %}
-                    <div class="relative overflow-hidden rounded-xl h-48 border border-amber-900/10 mt-4">
-                        {{ branch.map_iframe|safe }}
+                    {% if branch.maps_iframe %}
+                    <div class="relative overflow-hidden rounded-xl h-80 border border-amber-900/10 mt-4">
+                        {{ branch.maps_iframe|safe }}
                     </div>
                     {% endif %}
                 </div>
