@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="scroll-smooth" style="background-color:{% if selected_theme == 'light' %}#FAFAFA{% elif selected_theme == 'dark' %}#121212{% elif selected_theme == 'festival' %}#3F0C10{% else %}#0A0908{% endif %};">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -134,6 +134,22 @@
         .gold-text-glow {
             text-shadow: 0 0 8px rgba(211, 170, 94, 0.4);
         }
+
+        /* Suppress browser default click/tap fill on all links & buttons */
+        *, *::before, *::after {
+            -webkit-tap-highlight-color: transparent;
+        }
+        a, button {
+            outline: none;
+        }
+        a:focus-visible, button:focus-visible {
+            outline: 2px solid rgba(211, 170, 94, 0.6);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+        a:active, button:active {
+            background-color: transparent;
+        }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
@@ -201,7 +217,7 @@
                 <!-- Desktop Mega Menu Navigation -->
                 <nav class="hidden md:flex space-x-8 items-center">
                     <!-- Home -->
-                    <a href="{% url 'homepage:home' %}" class="text-sm font-medium tracking-wide uppercase hover:text-luxuryGold-400 transition-colors">Home</a>
+                    <a href="{% url 'homepage:home' %}" data-nav class="text-sm font-medium tracking-wide uppercase hover:text-luxuryGold-400 transition-colors pb-1">Home</a>
                     
                     <!-- Dynamic Navigation Items -->
                     {% for item in header_menu %}
@@ -233,7 +249,7 @@
                                 </div>
                             </div>
                         {% else %}
-                            <a href="{{ item.url }}" class="text-sm font-medium tracking-wide uppercase hover:text-luxuryGold-400 transition-colors">{{ item.name }}</a>
+                            <a href="{{ item.url }}" data-nav class="text-sm font-medium tracking-wide uppercase hover:text-luxuryGold-400 transition-colors pb-1">{{ item.name }}</a>
                         {% endif %}
                     {% empty %}
                         <!-- Fallback menus if database is empty -->
@@ -307,7 +323,7 @@
 
                     <!-- Primary Booking CTA -->
                     <a href="{% url 'rooms:room_list' %}" 
-                       class="px-6 py-2.5 text-xs font-semibold uppercase tracking-widest rounded-full transition-all border border-luxuryGold-400 hover:scale-105 duration-300"
+                       class="px-6 py-2.5 text-xs font-semibold uppercase tracking-widest rounded-full transition-all border border-luxuryGold-400 hover:scale-105 duration-300 {% if selected_theme == 'light' %}bg-amber-800 text-white hover:bg-amber-900{% else %}bg-luxuryGold-500 text-[#0A0908] hover:bg-luxuryGold-400 gold-glow{% endif %}"
                        :class="{
                            'bg-amber-800 text-white hover:bg-amber-900': currentTheme === 'light',
                            'bg-luxuryGold-500 text-[#0A0908] hover:bg-luxuryGold-400 gold-glow': currentTheme !== 'light'
@@ -362,10 +378,10 @@
             </div>
 
             <div class="mt-4 px-4 space-y-3">
-                <a href="{% url 'homepage:home' %}" class="block py-2 text-base font-medium border-b border-transparent hover:text-luxuryGold-400">Home</a>
+                <a href="{% url 'homepage:home' %}" data-nav-mobile class="block py-2 text-base font-medium border-b border-transparent hover:text-luxuryGold-400">Home</a>
                 
                 {% for item in header_menu %}
-                    <a href="{{ item.url }}" class="block py-2 text-base font-medium border-b border-transparent hover:text-luxuryGold-400">{{ item.name }}</a>
+                    <a href="{{ item.url }}" data-nav-mobile class="block py-2 text-base font-medium border-b border-transparent hover:text-luxuryGold-400">{{ item.name }}</a>
                 {% empty %}
                     <a href="{% url 'rooms:room_list' %}" class="block py-2 text-base font-medium hover:text-luxuryGold-400">Rooms & Suites</a>
                     <a href="{% url 'dining:dining_list' %}" class="block py-2 text-base font-medium hover:text-luxuryGold-400">Dining</a>
@@ -395,7 +411,7 @@
                 </div>
 
                 <div class="pt-6">
-                    <a href="{% url 'rooms:room_list' %}" class="block text-center w-full py-3 text-sm font-semibold uppercase tracking-wider rounded-lg border border-luxuryGold-400"
+                    <a href="{% url 'rooms:room_list' %}" class="block text-center w-full py-3 text-sm font-semibold uppercase tracking-wider rounded-lg border border-luxuryGold-400 {% if selected_theme == 'light' %}bg-amber-800 text-white{% else %}bg-luxuryGold-500 text-black{% endif %}"
                        :class="{
                            'bg-amber-800 text-white': currentTheme === 'light',
                            'bg-luxuryGold-500 text-black': currentTheme !== 'light'
@@ -581,6 +597,29 @@
 
             document.querySelectorAll('[data-animate]').forEach(el => {
                 observer.observe(el);
+            });
+
+            // Active navigation highlighting
+            const path = window.location.pathname;
+            // Desktop nav
+            document.querySelectorAll('[data-nav]').forEach(a => {
+                const href = a.getAttribute('href');
+                const isHome = href === '/' && path === '/';
+                const isActive = isHome || (href !== '/' && path.startsWith(href));
+                if (isActive) {
+                    a.style.color = '#D3AA5E';
+                    a.style.borderBottom = '2px solid #D3AA5E';
+                }
+            });
+            // Mobile nav
+            document.querySelectorAll('[data-nav-mobile]').forEach(a => {
+                const href = a.getAttribute('href');
+                const isHome = href === '/' && path === '/';
+                const isActive = isHome || (href !== '/' && path.startsWith(href));
+                if (isActive) {
+                    a.style.color = '#D3AA5E';
+                    a.style.borderBottom = '2px solid #D3AA5E';
+                }
             });
         });
     </script>
