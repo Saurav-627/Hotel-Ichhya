@@ -1,300 +1,498 @@
 # ============================================================
-# Hotel Ichchha — Main Seed Data
-# Used by: python manage.py seed_data
-# Behaviour: get_or_create — skips existing records, never deletes
+# Hotel Ichchha — Live Production Seed Data (Auto-generated)
 # ============================================================
 
 hotel_settings:
-  site_name: "Hotel Ichchha"
-  theme: "luxury"
-  contact_phone: "+977-51-590011"
-  contact_email: "concierge@hotelichchha.com"
-  address: "Simara, Bara, Nepal"
-  about_text: "Hotel Ichchha is a premier 5-star sanctuary located in the heart of Simara, Bara. Designed to blend modern grandeur with warm Nepalese hospitality, we provide luxury chambers, elite wellness spas, fine dining lounges, and world-class conference facilities."
-  copyright_text: "&copy; 2026 Hotel Ichchha Resort. All Rights Reserved."
-  facebook_url: "https://facebook.com"
-  instagram_url: "https://instagram.com"
-  twitter_url: "https://twitter.com"
-
+  site_name: Hotel Ichchha
+  theme: luxury
+  contact_phone: +977-53-520591
+  contact_email: info@hotelichchha.com
+  address: Simara-03, Bara, Nepal
+  about_text: Hotel Ichchha is a luxury five-star hotel in Simara, Bara, Nepal offering premium accommodation, conference halls, destination wedding facilities, spa, swimming pool, restaurant, and hospitality services.
+  copyright_text: '&copy; 2026 Hotel Ichchha Resort. All Rights Reserved.'
+  facebook_url: https://www.facebook.com/HotelIchchha/
+  instagram_url: https://www.instagram.com/hotel_ichchha/
+  twitter_url: https://x.com/IchchhaHotel
 about_preview:
-  title: "Discover A Sanctuary Of Grandeur"
-  subtitle: "Welcome to Hotel Ichchha"
-  content: "Nestled in the lush greenery of Simara, Bara, Hotel Ichchha is your gate to exquisite peace and premium relaxation. We boast masterfully curated accommodations, state-of-the-art recreation facilities, and distinct dining venue options that cater to international guests and delegates alike.\n\nFrom our infinity pool deck to the therapeutic Golden Lotus Spa, every corner of our property is designed to inspire comfort and wonder."
-  video_url: "https://www.youtube.com/embed/dQw4w9WgXcQ"
-  stat1_value: "80+"
-  stat1_label: "Luxury Chambers"
-  stat2_value: "4"
-  stat2_label: "Event Venues"
-  stat3_value: "5-Star"
-  stat3_label: "Star Rating"
-  stat4_value: "25k+"
-  stat4_label: "Satisfied Guests"
+  title: Nepal's First 5-Star Hotel in Simara
+  subtitle: Hotel Ichchha
+  content: 'Being a top hospitality provider, we guarantee our finest offerings due to its convenient location, it is a great option for business, leisure, and pilgrimage trips. The ideal option for a destination wedding that will enhance the memory of your special moments. Hotel Ichchha is perfectly suited for all your needs with a total of 96 rooms.
 
+
+    Epitomizes luxury and sophistication, offering exceptional comfort, convenience, enjoyment, and services.'
+  video_url: https://hotelichchha.com/backend/images/articles/video/LAeuf-intro_video--hqhIzqZ.mp4
+  stat1_value: 80+
+  stat1_label: Luxury Chambers
+  stat2_value: '4'
+  stat2_label: Event Venues
+  stat3_value: 5-Star
+  stat3_label: Star Rating
+  stat4_value: 25k+
+  stat4_label: Satisfied Guests
 room_categories:
-  - name: "Deluxe Room"
-    slug: "deluxe"
-    order: 1
-    is_published: true
-  - name: "Super Deluxe Room"
-    slug: "super_deluxe"
-    order: 2
-    is_published: true
-  - name: "Premium Room"
-    slug: "premium"
-    order: 3
-    is_published: true
-  - name: "Premium Junior Suite"
-    slug: "premium_suite"
-    order: 4
-    is_published: true
-  - name: "Deluxe Suite"
-    slug: "deluxe_suite"
-    order: 5
-    is_published: true
-  - name: "Honeymoon Suite"
-    slug: "honeymoon_suite"
-    order: 6
-    is_published: true
-  - name: "Executive Room"
-    slug: "executive"
-    order: 7
-    is_published: true
-
+- name: Deluxe Room
+  slug: deluxe
+  order: 1
+  is_published: true
+- name: Super Deluxe Room
+  slug: super_deluxe
+  order: 2
+  is_published: true
+- name: Premium Room
+  slug: premium
+  order: 3
+  is_published: true
+- name: Premium Junior Suite
+  slug: premium_suite
+  order: 4
+  is_published: true
+- name: Deluxe Suite
+  slug: deluxe_suite
+  order: 5
+  is_published: true
+- name: Honeymoon Suite
+  slug: honeymoon_suite
+  order: 6
+  is_published: true
+- name: Executive Room
+  slug: executive
+  order: 7
+  is_published: true
 hero_slides:
-  - title: "A Haven of Elite Luxury & Calm"
-    subtitle: "Hotel Ichchha Resort"
-    cta_text: "Book Your Stay"
-    cta_url: "/rooms/"
-    cta2_text: "Explore Dining"
-    cta2_url: "/dining/"
-    order: 1
-    overlay_opacity: 0.60
-    is_active: true
-  - title: "Savor Award-Winning Gastronomy"
-    subtitle: "The Royal Orchid Restaurant"
-    cta_text: "Reserve Table"
-    cta_url: "/dining/"
-    order: 2
-    overlay_opacity: 0.60
-    is_active: true
-
+- title: Hotel Ichchha, Hospitality at its best!
+  subtitle: Hotel Ichchha
+  cta_text: Book Your Stay
+  cta_url: /rooms/
+  order: 1
+  overlay_opacity: 0.6
+  is_active: true
+- title: 'Crafting Dreams into Concrete Realities: Your Ultimate Destination'
+  subtitle: Hotel Ichchha
+  cta_text: Book Your Stay
+  cta_url: /rooms/
+  order: 2
+  overlay_opacity: 0.6
+  is_active: true
+- title: 'Rooms Designed for Comfort, Styled for Luxury: Unwind Here!'
+  subtitle: Hotel Ichchha
+  cta_text: Book Your Stay
+  cta_url: /rooms/
+  order: 3
+  overlay_opacity: 0.6
+  is_active: true
+- title: 'Elegant Halls, Timeless Memories: Celebrate Life''s Special Moments Here'
+  subtitle: Hotel Ichchha
+  cta_text: Book Your Stay
+  cta_url: /rooms/
+  order: 4
+  overlay_opacity: 0.6
+  is_active: true
+- title: 'Savor Every Bite, Indulge in Culinary Delights: Our Restaurant Beckons'
+  subtitle: Hotel Ichchha
+  cta_text: Book Your Stay
+  cta_url: /rooms/
+  order: 5
+  overlay_opacity: 0.6
+  is_active: true
+- title: 'Seamless Transitions: Our Indoor-Outdoor Spaces Embrace Nature''s Beauty'
+  subtitle: Hotel Ichchha
+  cta_text: Book Your Stay
+  cta_url: /rooms/
+  order: 6
+  overlay_opacity: 0.6
+  is_active: true
 room_facilities:
-  - name: "Ultra High-Speed Wifi"
-    icon_class: "fa-solid fa-wifi"
-    is_featured: true
-  - name: "Valet Parking"
-    icon_class: "fa-solid fa-square-parking"
-    is_featured: true
-  - name: "Infinity Pool"
-    icon_class: "fa-solid fa-swimming-pool"
-    is_featured: true
-  - name: "Elite Fitness Gym"
-    icon_class: "fa-solid fa-dumbbell"
-    is_featured: true
-  - name: "Golden Lotus Spa"
-    icon_class: "fa-solid fa-spa"
-    is_featured: true
-  - name: "24/7 Room Service"
-    icon_class: "fa-solid fa-bell-concierge"
-    is_featured: true
-
+- name: Ultra High-Speed Wifi
+  icon_class: fa-solid fa-wifi
+  is_featured: true
+- name: Valet Parking
+  icon_class: fa-solid fa-square-parking
+  is_featured: true
+- name: Infinity Pool
+  icon_class: fa-solid fa-swimming-pool
+  is_featured: true
+- name: Elite Fitness Gym
+  icon_class: fa-solid fa-dumbbell
+  is_featured: true
+- name: Golden Lotus Spa
+  icon_class: fa-solid fa-spa
+  is_featured: true
+- name: 24/7 Room Service
+  icon_class: fa-solid fa-bell-concierge
+  is_featured: true
 rooms:
-  - title: "Deluxe Royal Chamber"
-    slug: "deluxe-royal-chamber"
-    category: "deluxe"
-    description: "Our Deluxe Royal Chambers offer absolute serenity and comfort. Adorned with plush kingsize beds, local handcrafted wood furnishings, and panoramic garden views, they are the ideal escape for leisure travelers."
-    highlights: "King Size Pillow-Top Bed\nMini Bar & Espresso Maker\nHigh-definition Smart LED TV\nSpacious work desk"
-    base_price: 120.00
-    currency: "USD"
-    room_size: 420
-    max_adults: 2
-    max_children: 1
-    bed_type: "King Size Bed"
-    is_featured: true
-    facilities:
-      - "Ultra High-Speed Wifi"
-      - "24/7 Room Service"
-      - "Valet Parking"
-  - title: "Executive Diplomatic Suite"
-    slug: "executive-diplomatic-suite"
-    category: "executive"
-    description: "Designed for delegates and corporate high-flyers, our Executive Suites feature a separate grand living lounge, private dining setup, and direct workstation desks. Includes access to our premium lounge club."
-    highlights: "Separate grand lounge section\nPrivate dining room space\nPre-stocked luxury mini bar\nComplementary spa access"
-    base_price: 250.00
-    currency: "EUR"
-    room_size: 680
-    max_adults: 3
-    max_children: 1
-    bed_type: "Grand King Bed"
-    is_featured: true
-    facilities:
-      - "Ultra High-Speed Wifi"
-      - "24/7 Room Service"
-      - "Valet Parking"
-      - "Elite Fitness Gym"
-      - "Golden Lotus Spa"
-  - title: "Honeymoon Sanctuary Suite"
-    slug: "honeymoon-sanctuary-suite"
-    category: "honeymoon_suite"
-    description: "Celebrate love in our exquisite Honeymoon Sanctuary. Featuring candle-lit ambiance accents, an in-room private jacuzzi pool, custom velvet drapery, and complimentary champagne service upon arrival."
-    highlights: "In-suite private jacuzzi bath\nComplimentary champagne on ice\nBreakfast in bed service\nPrivate balcony overlook"
-    base_price: 42000.00
-    currency: "NPR"
-    room_size: 550
-    max_adults: 2
-    max_children: 0
-    bed_type: "King Velvet Bed"
-    is_featured: true
-    facilities:
-      - "Ultra High-Speed Wifi"
-      - "24/7 Room Service"
-      - "Infinity Pool"
-      - "Golden Lotus Spa"
-      - "Valet Parking"
-      - "Elite Fitness Gym"
+- title: Deluxe Room
+  slug: deluxe-room
+  category: deluxe
+  description: |-
+    Step into the embrace of elegance with Hotel Ichchha Deluxe Rooms. Designed for discerning travelers, these rooms blend exquisite comfort with state-of-the-art facilities. Revel in the sumptuous bedding, soak in the serene ambiance, and let our attentive service elevate your stay to a realm of unparalleled luxury.
+  highlights: 'Wi-Fi
 
+    Air conditioning
+
+    Coffee and tea set
+
+    Desk
+
+    Hairdryer'
+  base_price: 70.0
+  currency: USD
+  room_size: 205
+  max_adults: 1
+  max_children: 1
+  bed_type: Twin Bed
+  is_featured: true
+  facilities:
+  - Ultra High-Speed Wifi
+  - Valet Parking
+  - Elite Fitness Gym
+  - Infinity Pool
+  - 24/7 Room Service
+- title: Super Deluxe Room
+  slug: super-deluxe-room
+  category: super_deluxe
+  description: |-
+    Discover unparalleled opulence in Hotel Ichchha Super Deluxe Rooms, where global standards of luxury meet personalized comfort. Each room is a masterpiece of design, featuring lavish furnishings, cutting-edge technology, and panoramic views that promise to leave you spellbound. Our commitment to excellence ensures every moment is imbued with splendor and sophistication.
+  highlights: 'Wi-Fi
+
+    Air conditioning
+
+    Coffee and tea set
+
+    Desk
+
+    Hairdryer'
+  base_price: 75.0
+  currency: USD
+  room_size: 215
+  max_adults: 1
+  max_children: 1
+  bed_type: Twin Bed
+  is_featured: true
+  facilities:
+  - Ultra High-Speed Wifi
+  - Valet Parking
+  - Elite Fitness Gym
+  - Infinity Pool
+  - 24/7 Room Service
+- title: Premium Room
+  slug: premium-room
+  category: premium
+  description: |-
+    Immerse yourself in the epitome of elegance with Hotel Ichchha Premium Rooms. Tailored for the world traveler, these rooms boast an exquisite fusion of comfort and style, complete with luxurious amenities and impeccable service. Surrender to the allure of sophistication and let us redefine your travel experience.
+  highlights: 'Fruits Basket
+
+    Minibar
+
+    Wi-Fi
+
+    Air conditioning
+
+    Coffee and tea set'
+  base_price: 80.0
+  currency: USD
+  room_size: 215
+  max_adults: 2
+  max_children: 1
+  bed_type: Twin Bed
+  is_featured: true
+  facilities:
+  - Ultra High-Speed Wifi
+  - Valet Parking
+  - Elite Fitness Gym
+  - Infinity Pool
+  - 24/7 Room Service
+- title: Premium Junior Suite
+  slug: premium-junior-suite
+  category: premium_suite
+  description: |-
+    Immerse yourself in the epitome of elegance with Hotel Ichchha Premium Junior Suites. Tailored for the world traveler, these rooms boast an exquisite fusion of comfort and style, complete with luxurious amenities and impeccable service. Surrender to the allure of sophistication and let us redefine your travel experience.
+  highlights: 'Wi-Fi
+
+    Air conditioning
+
+    Coffee and tea set
+
+    Desk
+
+    Hairdryer'
+  base_price: 250.0
+  currency: USD
+  room_size: 215
+  max_adults: 2
+  max_children: 1
+  bed_type: Twin Bed
+  is_featured: true
+  facilities:
+  - Ultra High-Speed Wifi
+  - Valet Parking
+  - Elite Fitness Gym
+  - Infinity Pool
+  - 24/7 Room Service
+- title: Deluxe Suite
+  slug: deluxe-suite
+  category: deluxe_suite
+  description: |-
+    Indulge in the epitome of luxury with Hotel Ichchha Deluxe Suites. Designed to offer a lavish experience, these suites feature opulent interiors, modern amenities, and personalized service. Revel in the spacious layout, savor the exquisite decor, and let us craft a dreamy escape for you and your beloved.
+  highlights: 'Fruits Basket
+
+    Minibar
+
+    Wi-Fi
+
+    Air conditioning
+
+    Coffee and tea set'
+  base_price: 250.0
+  currency: USD
+  room_size: 215
+  max_adults: 2
+  max_children: 1
+  bed_type: Twin Bed
+  is_featured: true
+  facilities:
+  - Ultra High-Speed Wifi
+  - Valet Parking
+  - Elite Fitness Gym
+  - Infinity Pool
+  - 24/7 Room Service
+- title: Honeymoon Suite
+  slug: honeymoon-suite
+  category: honeymoon_suite
+  description: |-
+    Celebrate love in the lap of luxury with Hotel Ichchha Honeymoon Suites. Designed to create unforgettable memories, these suites offer an intimate setting with plush furnishings, modern amenities, and personalized service. Revel in the romantic ambiance, savor the exquisite decor, and let us craft a dreamy escape for you and your beloved.
+  highlights: 'Fruits Basket
+
+    Minibar
+
+    Wi-Fi
+
+    Air conditioning
+
+    Coffee and tea set'
+  base_price: 300.0
+  currency: USD
+  room_size: 215
+  max_adults: 2
+  max_children: 1
+  bed_type: Twin Bed
+  is_featured: true
+  facilities:
+  - Ultra High-Speed Wifi
+  - Valet Parking
+  - Elite Fitness Gym
+  - Infinity Pool
+  - 24/7 Room Service
+- title: Executive Room
+  slug: executive-room
+  category: executive
+  description: |-
+    Light, bright and with a smart layout that enhances the feeling of spaciousness, our rooms feature all the world class furniture, air conditioning, amenities, toiletries and technology. Super deluxe rooms are ingeniously designed with splendid interiors. The junior suite rooms are spacious rooms with a cozy living room separated by a partial wall. The executive rooms feature a large bedroom and a living room. Elegantly decorated with opulent interiors and varnished in soft tones, all the rooms are spacious with classy comfortable beds.
+  highlights: 'Bathtub
+
+    Fruits Basket
+
+    Minibar
+
+    Wi-Fi
+
+    Air conditioning'
+  base_price: 300.0
+  currency: USD
+  room_size: 215
+  max_adults: 2
+  max_children: 1
+  bed_type: Twin Bed
+  is_featured: true
+  facilities:
+  - Ultra High-Speed Wifi
+  - Valet Parking
+  - Elite Fitness Gym
+  - Infinity Pool
+  - 24/7 Room Service
 dining_venues:
-  - name: "The Royal Orchid Restaurant"
-    slug: "the-royal-orchid-restaurant"
-    category: "restaurant"
-    description: "Our flagship dining space serving international and traditional Asian cuisines. Enjoy dining in a masterfully architected ambient hall overlooking the garden water cascades."
-    timings: "06:00 AM - 11:00 PM"
-    capacity: 120
-    featured_dishes: "Slow-roasted Himalayan Lamb Shanks & local spices"
-    is_featured: true
-    is_published: true
-  - name: "Cinnamon Lounge & Bar"
-    slug: "cinnamon-lounge-bar"
-    category: "bar"
-    description: "Unwind after hours with premium spirits, single malts, and handpicked wines. Features live jazz performances on weekends."
-    timings: "04:00 PM - 12:00 AM"
-    capacity: 60
-    featured_dishes: "Smoked Ginger-infused Whiskey Sour"
-    is_featured: true
-    is_published: true
-
+- name: Fountain Restaurant
+  slug: fountain-restaurant
+  category: restaurant
+  description: "Fountain Restaurant & Bar at Hotel Ichchha in Simara is a 24\u2011hour dining spot offering a vibrant ambience complemented by bar/lounge facilities.\n\n\tIt\u2019s part of a full-service hotel complex that includes amenities like a pool, casino, spa, and fitness center, making it a convenient and upscale choice for both leisure and business travelers ."
+  timings: 06:00 AM - 11:00 PM
+  capacity: 100
+  featured_dishes: Multicuisine
+  is_featured: true
+  is_published: true
+- name: Courtyard Dining
+  slug: courtyard-dining
+  category: restaurant
+  description: "Courtyard Dining at Hotel Ichchha offers an elegant al\u2011fresco dining experience set amidst tranquil garden surroundings, perfect for casual meetups or relaxing meals. It blends a serene ambiance with the hotel\u2019s cosmopolitan spirit, making it an ideal spot for both leisurely lunches and evening gatherings"
+  timings: 06:00 AM - 11:00 PM
+  capacity: 50
+  featured_dishes: Multicuisine
+  is_featured: true
+  is_published: true
+- name: Sports Lounge
+  slug: sports-lounge
+  category: lounge
+  description: "Sports Lounge at Hotel\u202FIchchha provides a relaxed bar/lounge environment with large-screen TVs and live sports broadcasts, ideal for socializing and catching games with friends. It combines casual comfort with the hotel's cosmopolitan flair, offering an engaging setting for informal meetups and sporting entertainment."
+  timings: 06:00 AM - 11:00 PM
+  capacity: 80
+  featured_dishes: Multicuisine
+  is_featured: false
+  is_published: true
+- name: Madhushala Bar
+  slug: madhushala-bar
+  category: bar
+  description: "Madhushala Bar & Lounge offers a stylish, relaxed atmosphere with a curated selection of signature cocktails, fine spirits, and light bar snacks\u2014ideal for unwinding after a day. The elegantly furnished space blends contemporary comfort with the hotel's cosmopolitan style, making it a popular setting for casual meetups or intimate evenings."
+  timings: 04:00 PM - 11:00 PM
+  capacity: 40
+  featured_dishes: Beverages
+  is_featured: false
+  is_published: true
+- name: Pool Bar
+  slug: pool-bar
+  category: bar
+  description: "Pool Bar at Hotel\u202FIchchha offers a relaxed, sun-soaked setting with poolside seating and refreshing drinks\u2014perfect for unwinding between swims.It complements the hotel\u2019s outdoor pool and children\u2019s pool, seamlessly blending leisure, casual refreshment, and the venue\u2019s serene garden ambiance"
+  timings: 04:00 PM - 11:00 PM
+  capacity: 30
+  featured_dishes: Beverages
+  is_featured: false
+  is_published: true
 recreation_activities:
-  - name: "Golden Lotus Spa"
-    slug: "golden-lotus-spa"
-    category: "spa"
-    description: "Experience ancient therapeutic massages, herbal wrap packages, and deep-tissue scrubs administered by certified wellness experts."
-    timings: "08:00 AM - 08:00 PM"
-    price_info: "Packages starting at $45.00"
-    is_active: true
-  - name: "Infinity Oasis Pool"
-    slug: "infinity-oasis-pool"
-    category: "pool"
-    description: "Our solar-heated pool is perfect for a refreshing morning swim. Features comfortable sunbeds and a poolside cocktail service kiosk."
-    timings: "07:00 AM - 09:00 PM"
-    price_info: "Complimentary for guests"
-    is_active: true
-
+- name: Health & Spa
+  slug: health-spa
+  category: spa
+  description: "Indulge in a serene escape at Hotel Ichchha, where wellness meets tradition in a nurturing and revitalizing environment. Our spa offers a unique blend of culturally inspired treatments designed to refresh your body and mind. Experience time-honored massage techniques from ancient traditions, skillfully delivered by our expert therapists.\n\n\tReplenish your body with our signature services that restore trace minerals and promote deep healing. Pamper yourself with a range of beauty services including manicures, pedicures, and professional makeup\u2014perfect for a relaxing getaway or a special occasion."
+  timings: 06:00 AM - 10:00 PM
+  price_info: Paid Services / Entry Rules Apply
+  is_active: true
+- name: Swimming Pool
+  slug: swimming-pool
+  category: pool
+  description: |-
+    Dive into crystal-clear waters and let the refreshing embrace of our outdoor pool wash away the heat of the day. Whether you're swimming laps, splashing around with loved ones, or simply soaking up the sun, it's the perfect place to unwind. Bathed in natural sunlight through a full-length skylight, our pool offers a bright and relaxing atmosphere for guests of all ages. For your convenience, essentials like goggles and swim caps are readily available, ensuring a hassle-free and enjoyable experience.
+  timings: 06:00 AM - 10:00 PM
+  price_info: Complimentary for Guests
+  is_active: true
+- name: Mega Million
+  slug: mega-million
+  category: casino
+  description: "Step into a world of glamour, excitement, and sophistication at our luxurious in-house casino. Whether you're a seasoned player or a curious first-timer, our wide selection of games\u2014from classic roulette and blackjack to modern slot machines\u2014offers something for everyone. Enjoy an evening of entertainment in a refined setting with personalized service, signature cocktails, and a vibrant ambiance. The perfect fusion of leisure and luxury awaits you."
+  timings: 06:00 AM - 10:00 PM
+  price_info: Paid Services / Entry Rules Apply
+  is_active: true
+- name: Adventure Activities
+  slug: adventure-activities
+  category: adventure
+  description: "Embark on an exciting journey deep into the heart of the national park with our exhilarating jeep safari. This unforgettable adventure takes you through lush forests and expansive grasslands, offering the perfect opportunity to spot exotic wildlife in their natural habitat.\n\nKeep your camera ready as you witness breathtaking sights\u2014majestic animals, vibrant birdlife, and the raw beauty of nature. Whether you're a nature lover or a photography enthusiast, the jeep safari promises moments you'll cherish forever."
+  timings: 06:00 AM - 10:00 PM
+  price_info: Complimentary for Guests
+  is_active: true
+- name: Gaming Zone & Kids Club
+  slug: gaming-zone-kids-club
+  category: kids
+  description: "We ensure entertainment for everyone\u2014young and young-at-heart. Our Gaming Zone features a variety of engaging options, from high-end video games and virtual reality experiences to air hockey and arcade classics. Meanwhile, the Kids Club offers a safe, vibrant, and supervised space where little ones can enjoy creative activities, storytelling, games, and fun-filled learning sessions. Whether you're seeking family bonding time or a few peaceful hours to yourself, our dedicated zones keep every guest happy and entertained."
+  timings: 06:00 AM - 10:00 PM
+  price_info: Complimentary for Guests
+  is_active: true
+- name: Steam, Sauna, Jacuzzi
+  slug: steam-sauna-jacuzzi
+  category: spa
+  description: "Unwind in ultimate luxury with our rejuvenating wellness facilities. Step into the soothing warmth of our steam room to detoxify and refresh, or enjoy the deep muscle relaxation offered by our traditional sauna. For a calming hydrotherapy experience, immerse yourself in our Jacuzzi, where bubbling jets melt away tension and fatigue. Perfect after a workout or a long day of travel, these facilities provide the ideal balance of wellness and indulgence\u2014designed to leave you feeling completely renewed."
+  timings: 06:00 AM - 10:00 PM
+  price_info: Paid Services / Entry Rules Apply
+  is_active: true
+- name: Health Club
+  slug: health-club
+  category: gym
+  description: "Stay fit and energized at our state-of-the-art Health Club, designed to meet the wellness needs of today\u2019s travelers. Equipped with modern cardio machines, strength training equipment, and free weights, our facility provides everything you need for a complete workout. Whether you're keeping up with your fitness routine or starting a new one, enjoy a clean, spacious, and motivating environment. Personal trainers and wellness experts are available on request to guide your journey. Open daily for your convenience."
+  timings: 06:00 AM - 10:00 PM
+  price_info: Complimentary for Guests
+  is_active: true
 attractions:
-  - name: "Gadhimai Temple Complex"
-    category: "religious"
-    distance: "12 km"
-    travel_time: "20 mins drive"
-    description: "The historic Gadhimai Temple is a renowned spiritual destination attracting millions of pilgrims globally."
-    order: 1
-    is_active: true
-  - name: "Parsa National Park"
-    category: "park"
-    distance: "24 km"
-    travel_time: "40 mins drive"
-    description: "Explore wild elephant habitats, tigers, and exotic birdwatching safaris in this vast tropical jungle national park."
-    order: 2
-    is_active: true
-
+- name: Airport
+  distance: 2.2 km
+  description: Located close to the hotel (2.2 km distance).
+  is_active: true
+- name: Parsa National Park
+  distance: 62.4 km
+  description: Located close to the hotel (62.4 km distance).
+  is_active: true
+- name: Gadhi Mai
+  distance: 4.9 km
+  description: Located close to the hotel (4.9 km distance).
+  is_active: true
+- name: Raxaul India Border
+  distance: 24.3 km
+  description: Located close to the hotel (24.3 km distance).
+  is_active: true
+- name: Janaki Mandir
+  distance: 141km
+  description: Located close to the hotel (141km distance).
+  is_active: true
+- name: Churiya Mai
+  distance: 33.8km
+  description: Located close to the hotel (33.8km distance).
+  is_active: true
+- name: Bharat Tal
+  distance: 64.5 km
+  description: Located close to the hotel (64.5 km distance).
+  is_active: true
+- name: Shahid Smarak
+  distance: 40.7 km
+  description: Located close to the hotel (40.7 km distance).
+  is_active: true
+- name: Kathmandu
+  distance: 118km
+  description: Located close to the hotel (118km distance).
+  is_active: true
+- name: Birgunj
+  distance: 18.5 km
+  description: Located close to the hotel (18.5 km distance).
+  is_active: true
 testimonials:
-  - guest_name: "Sarah Jenkins"
-    country: "United States"
-    source: "google"
-    rating: 5
-    review_text: "An absolutely stunning property! The rooms are so luxurious, the pool is beautiful, and the staff is extremely helpful."
-    is_featured: true
-    is_published: true
-  - guest_name: "Amit Sharma"
-    country: "India"
-    source: "tripadvisor"
-    rating: 5
-    review_text: "Hotel Ichchha is easily the best hotel in the Bara area. Immaculate food, grand conference halls, and clean suites."
-    is_featured: true
-    is_published: true
-
-# ============================================================
-# SEO Page Data — per-page meta tags AND banner defaults
-# Each entry is keyed by "path" (exact URL match)
-# header_* fields are the hero banner defaults for that page.
-# ============================================================
+- guest_name: Guest
+  source: Tripadvisor / Direct Review
+  rating: 5
+  review_text: Excellent hospitality and grand service at Hotel Ichchha.
+  is_featured: true
+  is_published: true
 seo_data:
-  - path: "/"
-    meta_title: "Hotel Ichchha | 5-Star Luxury Resort in Bara, Nepal"
-    meta_description: "Book rooms at Hotel Ichchha in Simara, Bara, Nepal. Explore our premium chambers, fine dining restaurants, spas, and conference packages."
-    twitter_card: "summary_large_image"
-    structured_data: '{"@context":"https://schema.org","@type":"Hotel","name":"Hotel Ichchha","address":{"@type":"PostalAddress","streetAddress":"Simara","addressLocality":"Bara","addressCountry":"NP"},"starRating":{"@type":"Rating","ratingValue":"5"}}'
-
-  - path: "/rooms/"
-    meta_title: "Rooms & Accommodation | Hotel Ichchha"
-    meta_description: "Browse our premium rooms and suites at Hotel Ichchha. Deluxe, Executive, Honeymoon, and more. Book directly for the best rates."
-    header_subtitle: "Sanctuary Suites"
-    header_title: "Rooms & Accommodation"
-    header_description: "Explore our premium selection of spaces crafted with an eye for elegance and class."
-
-  - path: "/dining/"
-    meta_title: "Gastronomy & Dining | Hotel Ichchha"
-    meta_description: "Discover award-winning dining experiences at Hotel Ichchha — from fine restaurants to rooftop lounges and signature cocktail bars."
-    header_subtitle: "Culinary Experiences"
-    header_title: "Gastronomy & Lounge"
-    header_description: "Discover the finest culinary venues, featuring award-winning chefs and cocktails."
-
-  - path: "/recreation/"
-    meta_title: "Recreation & Wellness | Hotel Ichchha"
-    meta_description: "Recharge at Hotel Ichchha with our elite spa, infinity pool, gym, and adventure activities in the heart of Bara, Nepal."
-    header_subtitle: "Sanctuary Spa & Wellness"
-    header_title: "Recreation & Wellness"
-    header_description: "Recharge, refresh, and indulge with our elite spa, gym, and outdoor adventures."
-
-  - path: "/gallery/"
-    meta_title: "Photo Gallery | Hotel Ichchha"
-    meta_description: "Take a visual tour of Hotel Ichchha — luxury suites, fine dining, the infinity pool, spa, and surrounding landscapes."
-    header_subtitle: "Visual Tour"
-    header_title: "Resort Photo Gallery"
-    header_description: "Take a visual tour through our luxury suites, fine restaurants, and natural landscapes."
-
-  - path: "/conference/"
-    meta_title: "Conferences & Events | Hotel Ichchha"
-    meta_description: "Host prestigious conferences, weddings, and galas at Hotel Ichchha's world-class venue halls in Simara, Bara."
-    header_subtitle: "Opulent Spaces & Venues"
-    header_title: "Conferences & Celebrations"
-    header_description: "Host your prestigious meetings, weddings, and galas in Simara's finest 5-star venue halls."
-
-  - path: "/contact/"
-    meta_title: "Contact & Concierge | Hotel Ichchha"
-    meta_description: "Get in touch with Hotel Ichchha for room bookings, event planning, dining reservations, or any general inquiries."
-    header_subtitle: "Get In Touch"
-    header_title: "Concierge & Contact"
-    header_description: "We are here to assist you with room bookings, event planning, or general questions."
-
-  - path: "/blogs/"
-    meta_title: "News & Luxury Insights | Hotel Ichchha"
-    meta_description: "Read the latest from Hotel Ichchha — festival programs, culinary launches, travel guides, and resort news from Bara, Nepal."
-    header_subtitle: "Resort Journal"
-    header_title: "News & Luxury Insights"
-    header_description: "Stay updated with our latest festival programs, culinary launches, and travel guides."
-
+- path: /
+  meta_title: Hotel Ichchha | 5-Star Luxury Resort in Bara, Nepal
+  meta_description: Book rooms at Hotel Ichchha in Simara, Bara, Nepal. Explore our premium chambers, fine dining restaurants, spas, and conference packages.
+  twitter_card: summary_large_image
+- path: /rooms/
+  meta_title: Rooms & Accommodation | Hotel Ichchha
+  meta_description: Browse our premium rooms and suites at Hotel Ichchha. Deluxe, Executive, Honeymoon, and more. Book directly for the best rates.
+- path: /dining/
+  meta_title: Gastronomy & Dining | Hotel Ichchha
+  meta_description: "Discover award-winning dining experiences at Hotel Ichchha \u2014 from fine restaurants to rooftop lounges and signature cocktail bars."
+- path: /recreation/
+  meta_title: Recreation & Wellness | Hotel Ichchha
+  meta_description: Recharge at Hotel Ichchha with our elite spa, infinity pool, gym, and adventure activities in the heart of Bara, Nepal.
+- path: /gallery/
+  meta_title: Photo Gallery | Hotel Ichchha
+  meta_description: "Take a visual tour of Hotel Ichchha \u2014 luxury suites, fine dining, the infinity pool, spa, and surrounding landscapes."
+- path: /conference/
+  meta_title: Conferences & Events | Hotel Ichchha
+  meta_description: Host prestigious conferences, weddings, and galas at Hotel Ichchha's world-class venue halls in Simara, Bara.
+- path: /contact/
+  meta_title: Contact & Concierge | Hotel Ichchha
+  meta_description: Get in touch with Hotel Ichchha for room bookings, event planning, dining reservations, or any general inquiries.
+- path: /blogs/
+  meta_title: News & Luxury Insights | Hotel Ichchha
+  meta_description: "Read the latest from Hotel Ichchha \u2014 festival programs, culinary launches, travel guides, and resort news from Bara, Nepal."
 coupons:
-  - code: "WELCOME10"
-    discount_type: "percentage"
-    discount_value: 10.00
-    min_spend: 100.00
-    valid_days_from_now: 365
-    is_active: true
-
+- code: WELCOME10
+  discount_type: percentage
+  discount_value: 10.0
+  min_spend: 100.0
+  valid_days_from_now: 365
+  is_active: true
 branches:
-  - name: "Hotel Ichchha"
-    address: "Simara - 03, Bara, Nepal"
-    phone: "+97753520591"
-    email: "info@hotelichchha.com"
-    maps_iframe: '<div style="width: 100%"><iframe width="100%" height="600" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" style="border:0" allowfullscreen="" src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBVizdQeh3udy11xDc5Ao2YStR2gLc-rfc&amp;q=hotel%20ichchha&amp;maptype=roadmap&amp;zoom=14"><a href="https://www.maps.ie/create-google-map/">Embed directions map</a></iframe></div>'
-    is_main: true
-    is_published: true
+- name: Hotel Ichchha
+  address: Simara - 03, Bara, Nepal
+  phone: '+97753520591'
+  email: info@hotelichchha.com
+  maps_iframe: '<div style="width: 100%"><iframe width="100%" height="600" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" style="border:0" allowfullscreen="" src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBVizdQeh3udy11xDc5Ao2YStR2gLc-rfc&amp;q=hotel%20ichchha&amp;maptype=roadmap&amp;zoom=14"><a href="https://www.maps.ie/create-google-map/">Embed directions map</a></iframe></div>'
+  is_main: true
+  is_published: true
