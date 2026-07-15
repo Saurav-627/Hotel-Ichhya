@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand
 from settings_manager.models.hotel_settings import HotelSettings
 from settings_manager.models.currency import Currency
 from settings_manager.models.navigation import NavigationMenu
+from seo.models.seo_data import SEOData
 
 
 class Command(BaseCommand):
@@ -113,5 +114,26 @@ class Command(BaseCommand):
                     is_published=m_data.get("is_published", True),
                 )
                 self.stdout.write(self.style.SUCCESS(f"Created menu item: {name} ({position})"))
+
+        # 4. Import SEO Page Banner Defaults (per-item, keyed by path)
+        seo_banners = data.get("seo_banners", [])
+        for seo in seo_banners:
+            path = seo.get("path")
+            if not path:
+                continue
+            existing = SEOData.objects.filter(path=path).first()
+            if existing and not do_update:
+                self.stdout.write(self.style.WARNING(
+                    f"SEO data for '{path}' already exists. Skipping."
+                ))
+            elif existing and do_update:
+                for field, value in seo.items():
+                    if field != "path":
+                        setattr(existing, field, value)
+                existing.save()
+                self.stdout.write(self.style.SUCCESS(f"Updated SEO data: {path}"))
+            else:
+                SEOData.objects.create(**seo)
+                self.stdout.write(self.style.SUCCESS(f"Created SEO data: {path}"))
 
         self.stdout.write(self.style.SUCCESS("Initial data import completed!"))

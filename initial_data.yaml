@@ -117,3 +117,63 @@ navigation_menus:
     position: "footer_ota"
     order: 3
     is_published: true
+
+# ============================================================
+# SEO Page Data — banner defaults + meta tags per page path
+# Loaded by: python manage.py import_initial_data
+# Keyed by "path" — skips if path already exists in database
+# ============================================================
+seo_banners:
+  - path: "/"
+    meta_title: "Hotel Ichha | 5-Star Luxury Resort in Bara, Nepal"
+    meta_description: "Book rooms at Hotel Ichha in Simara, Bara, Nepal. Explore our premium chambers, fine dining restaurants, spas, and conference packages."
+    twitter_card: "summary_large_image"
+
+  - path: "/rooms/"
+    meta_title: "Rooms & Accommodation | Hotel Ichha"
+    meta_description: "Browse our premium rooms and suites at Hotel Ichha. Deluxe, Executive, Honeymoon, and more."
+    header_subtitle: "Sanctuary Suites"
+    header_title: "Rooms & Accommodation"
+    header_description: "Explore our premium selection of spaces crafted with an eye for elegance and class."
+
+  - path: "/dining/"
+    meta_title: "Gastronomy & Dining | Hotel Ichha"
+    meta_description: "Discover award-winning dining experiences at Hotel Ichha."
+    header_subtitle: "Culinary Experiences"
+    header_title: "Gastronomy & Lounge"
+    header_description: "Discover the finest culinary venues, featuring award-winning chefs and cocktails."
+
+  - path: "/recreation/"
+    meta_title: "Recreation & Wellness | Hotel Ichha"
+    meta_description: "Recharge at Hotel Ichha with our elite spa, infinity pool, gym, and adventure activities."
+    header_subtitle: "Sanctuary Spa & Wellness"
+    header_title: "Recreation & Wellness"
+    header_description: "Recharge, refresh, and indulge with our elite spa, gym, and outdoor adventures."
+
+  - path: "/gallery/"
+    meta_title: "Photo Gallery | Hotel Ichha"
+    meta_description: "Take a visual tour of Hotel Ichha — luxury suites, fine dining, the infinity pool, and spa."
+    header_subtitle: "Visual Tour"
+    header_title: "Resort Photo Gallery"
+    header_description: "Take a visual tour through our luxury suites, fine restaurants, and natural landscapes."
+
+  - path: "/conference/"
+    meta_title: "Conferences & Events | Hotel Ichha"
+    meta_description: "Host prestigious conferences, weddings, and galas at Hotel Ichha's world-class venue halls."
+    header_subtitle: "Opulent Spaces & Venues"
+    header_title: "Conferences & Celebrations"
+    header_description: "Host your prestigious meetings, weddings, and galas in Simara's finest 5-star venue halls."
+
+  - path: "/contact/"
+    meta_title: "Contact & Concierge | Hotel Ichha"
+    meta_description: "Get in touch with Hotel Ichha for room bookings, event planning, or general inquiries."
+    header_subtitle: "Get In Touch"
+    header_title: "Concierge & Contact"
+    header_description: "We are here to assist you with room bookings, event planning, or general questions."
+
+  - path: "/blogs/"
+    meta_title: "News & Luxury Insights | Hotel Ichha"
+    meta_description: "Read the latest from Hotel Ichha — festival programs, culinary launches, and travel guides."
+    header_subtitle: "Resort Journal"
+    header_title: "News & Luxury Insights"
+    header_description: "Stay updated with our latest festival programs, culinary launches, and travel guides."

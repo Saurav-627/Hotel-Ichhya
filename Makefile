@@ -1,4 +1,4 @@
-.PHONY: help install sync migrate makemigrations import-data seed-data superuser run shell backup test clean docker-up docker-down docker-logs docker-clean setup
+.PHONY: help install sync migrate makemigrations import-data seed-data seed-conference seed-all superuser run shell backup test clean docker-up docker-down docker-logs docker-clean setup
 
 # Default shell
 SHELL := /bin/bash
@@ -53,8 +53,14 @@ migrate: ## Apply database migrations
 import-data: ## Load initial currency, global settings, and header menu layout from initial_data.yaml
 	$(PYTHON) manage.py import_initial_data
 
-seed-data: ## Seed the database with premium 5-star hotel sample data (rooms, facilities, attractions)
+seed-data: ## Seed hotel sample data from seed_data.yaml (rooms, dining, activities, SEO etc.)
 	$(PYTHON) manage.py seed_data
+
+seed-conference: ## Seed conference/event venue halls from seed_conference.yaml
+	$(PYTHON) manage.py seed_conference
+
+seed-all: ## Import ALL YAML data in one command (initial_data + seed_data + seed_conference)
+	$(PYTHON) manage.py seed_all
 
 superuser: ## Create an administrative superuser (interactive)
 	$(PYTHON) manage.py createsuperuser
@@ -83,5 +89,5 @@ clean: ## Clean Python cache files (__pycache__, .pyc, .pyo)
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	find . -type f -name "*.py[co]" -delete
 
-setup: install migrate import-data seed-data ## Complete one-step workspace setup (install, migrate, import data, seed sample data)
-	@echo "Setup completed successfully! Run 'make run' to start the development server."
+setup: install migrate seed-all ## Complete one-step workspace setup (install, migrate, import ALL YAML data)
+	@echo "Setup completed! Run 'make run' to start the development server."

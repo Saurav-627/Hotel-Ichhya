@@ -1,0 +1,260 @@
+# ============================================================
+# Hotel Ichha — Main Seed Data
+# Used by: python manage.py seed_data
+# Behaviour: get_or_create — skips existing records, never deletes
+# ============================================================
+
+hotel_settings:
+  site_name: "Hotel Ichha"
+  theme: "luxury"
+  contact_phone: "+977-51-590011"
+  contact_email: "concierge@hotelichha.com"
+  address: "Simara, Bara, Nepal"
+  about_text: "Hotel Ichha is a premier 5-star sanctuary located in the heart of Simara, Bara. Designed to blend modern grandeur with warm Nepalese hospitality, we provide luxury chambers, elite wellness spas, fine dining lounges, and world-class conference facilities."
+  copyright_text: "&copy; 2026 Hotel Ichha Resort. All Rights Reserved."
+  facebook_url: "https://facebook.com"
+  instagram_url: "https://instagram.com"
+  twitter_url: "https://twitter.com"
+
+about_preview:
+  title: "Discover A Sanctuary Of Grandeur"
+  subtitle: "Welcome to Hotel Ichha"
+  content: "Nestled in the lush greenery of Simara, Bara, Hotel Ichha is your gate to exquisite peace and premium relaxation. We boast masterfully curated accommodations, state-of-the-art recreation facilities, and distinct dining venue options that cater to international guests and delegates alike.\n\nFrom our infinity pool deck to the therapeutic Golden Lotus Spa, every corner of our property is designed to inspire comfort and wonder."
+  video_url: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+  stat1_value: "80+"
+  stat1_label: "Luxury Chambers"
+  stat2_value: "4"
+  stat2_label: "Event Venues"
+  stat3_value: "5-Star"
+  stat3_label: "Star Rating"
+  stat4_value: "25k+"
+  stat4_label: "Satisfied Guests"
+
+hero_slides:
+  - title: "A Haven of Elite Luxury & Calm"
+    subtitle: "Hotel Ichha Resort"
+    cta_text: "Book Your Stay"
+    cta_url: "/rooms/"
+    cta2_text: "Explore Dining"
+    cta2_url: "/dining/"
+    order: 1
+    overlay_opacity: 0.60
+    is_active: true
+  - title: "Savor Award-Winning Gastronomy"
+    subtitle: "The Royal Orchid Restaurant"
+    cta_text: "Reserve Table"
+    cta_url: "/dining/"
+    order: 2
+    overlay_opacity: 0.60
+    is_active: true
+
+room_facilities:
+  - name: "Ultra High-Speed Wifi"
+    icon_class: "fa-solid fa-wifi"
+    is_featured: true
+  - name: "Valet Parking"
+    icon_class: "fa-solid fa-square-parking"
+    is_featured: true
+  - name: "Infinity Pool"
+    icon_class: "fa-solid fa-swimming-pool"
+    is_featured: true
+  - name: "Elite Fitness Gym"
+    icon_class: "fa-solid fa-dumbbell"
+    is_featured: true
+  - name: "Golden Lotus Spa"
+    icon_class: "fa-solid fa-spa"
+    is_featured: true
+  - name: "24/7 Room Service"
+    icon_class: "fa-solid fa-bell-concierge"
+    is_featured: true
+
+rooms:
+  - title: "Deluxe Royal Chamber"
+    slug: "deluxe-royal-chamber"
+    category: "deluxe"
+    description: "Our Deluxe Royal Chambers offer absolute serenity and comfort. Adorned with plush kingsize beds, local handcrafted wood furnishings, and panoramic garden views, they are the ideal escape for leisure travelers."
+    highlights: "King Size Pillow-Top Bed\nMini Bar & Espresso Maker\nHigh-definition Smart LED TV\nSpacious work desk"
+    base_price: 120.00
+    currency: "USD"
+    room_size: 420
+    max_adults: 2
+    max_children: 1
+    bed_type: "King Size Bed"
+    is_featured: true
+    facilities:
+      - "Ultra High-Speed Wifi"
+      - "24/7 Room Service"
+      - "Valet Parking"
+  - title: "Executive Diplomatic Suite"
+    slug: "executive-diplomatic-suite"
+    category: "executive"
+    description: "Designed for delegates and corporate high-flyers, our Executive Suites feature a separate grand living lounge, private dining setup, and direct workstation desks. Includes access to our premium lounge club."
+    highlights: "Separate grand lounge section\nPrivate dining room space\nPre-stocked luxury mini bar\nComplementary spa access"
+    base_price: 250.00
+    currency: "EUR"
+    room_size: 680
+    max_adults: 3
+    max_children: 1
+    bed_type: "Grand King Bed"
+    is_featured: true
+    facilities:
+      - "Ultra High-Speed Wifi"
+      - "24/7 Room Service"
+      - "Valet Parking"
+      - "Elite Fitness Gym"
+      - "Golden Lotus Spa"
+  - title: "Honeymoon Sanctuary Suite"
+    slug: "honeymoon-sanctuary-suite"
+    category: "honeymoon_suite"
+    description: "Celebrate love in our exquisite Honeymoon Sanctuary. Featuring candle-lit ambiance accents, an in-room private jacuzzi pool, custom velvet drapery, and complimentary champagne service upon arrival."
+    highlights: "In-suite private jacuzzi bath\nComplimentary champagne on ice\nBreakfast in bed service\nPrivate balcony overlook"
+    base_price: 42000.00
+    currency: "NPR"
+    room_size: 550
+    max_adults: 2
+    max_children: 0
+    bed_type: "King Velvet Bed"
+    is_featured: true
+    facilities:
+      - "Ultra High-Speed Wifi"
+      - "24/7 Room Service"
+      - "Infinity Pool"
+      - "Golden Lotus Spa"
+      - "Valet Parking"
+
+dining_venues:
+  - name: "The Royal Orchid Restaurant"
+    slug: "the-royal-orchid-restaurant"
+    category: "restaurant"
+    description: "Our flagship dining space serving international and traditional Asian cuisines. Enjoy dining in a masterfully architected ambient hall overlooking the garden water cascades."
+    timings: "06:00 AM - 11:00 PM"
+    capacity: 120
+    featured_dishes: "Slow-roasted Himalayan Lamb Shanks & local spices"
+    is_featured: true
+    is_published: true
+  - name: "Cinnamon Lounge & Bar"
+    slug: "cinnamon-lounge-bar"
+    category: "bar"
+    description: "Unwind after hours with premium spirits, single malts, and handpicked wines. Features live jazz performances on weekends."
+    timings: "04:00 PM - 12:00 AM"
+    capacity: 60
+    featured_dishes: "Smoked Ginger-infused Whiskey Sour"
+    is_featured: true
+    is_published: true
+
+recreation_activities:
+  - name: "Golden Lotus Spa"
+    slug: "golden-lotus-spa"
+    category: "spa"
+    description: "Experience ancient therapeutic massages, herbal wrap packages, and deep-tissue scrubs administered by certified wellness experts."
+    timings: "08:00 AM - 08:00 PM"
+    price_info: "Packages starting at $45.00"
+    is_active: true
+  - name: "Infinity Oasis Pool"
+    slug: "infinity-oasis-pool"
+    category: "pool"
+    description: "Our solar-heated pool is perfect for a refreshing morning swim. Features comfortable sunbeds and a poolside cocktail service kiosk."
+    timings: "07:00 AM - 09:00 PM"
+    price_info: "Complimentary for guests"
+    is_active: true
+
+attractions:
+  - name: "Gadhimai Temple Complex"
+    category: "religious"
+    distance: "12 km"
+    travel_time: "20 mins drive"
+    description: "The historic Gadhimai Temple is a renowned spiritual destination attracting millions of pilgrims globally."
+    order: 1
+    is_active: true
+  - name: "Parsa National Park"
+    category: "park"
+    distance: "24 km"
+    travel_time: "40 mins drive"
+    description: "Explore wild elephant habitats, tigers, and exotic birdwatching safaris in this vast tropical jungle national park."
+    order: 2
+    is_active: true
+
+testimonials:
+  - guest_name: "Sarah Jenkins"
+    country: "United States"
+    source: "google"
+    rating: 5
+    review_text: "An absolutely stunning property! The rooms are so luxurious, the pool is beautiful, and the staff is extremely helpful."
+    is_featured: true
+    is_published: true
+  - guest_name: "Amit Sharma"
+    country: "India"
+    source: "tripadvisor"
+    rating: 5
+    review_text: "Hotel Ichha is easily the best hotel in the Bara area. Immaculate food, grand conference halls, and clean suites."
+    is_featured: true
+    is_published: true
+
+# ============================================================
+# SEO Page Data — per-page meta tags AND banner defaults
+# Each entry is keyed by "path" (exact URL match)
+# header_* fields are the hero banner defaults for that page.
+# ============================================================
+seo_data:
+  - path: "/"
+    meta_title: "Hotel Ichha | 5-Star Luxury Resort in Bara, Nepal"
+    meta_description: "Book rooms at Hotel Ichha in Simara, Bara, Nepal. Explore our premium chambers, fine dining restaurants, spas, and conference packages."
+    twitter_card: "summary_large_image"
+    structured_data: '{"@context":"https://schema.org","@type":"Hotel","name":"Hotel Ichha","address":{"@type":"PostalAddress","streetAddress":"Simara","addressLocality":"Bara","addressCountry":"NP"},"starRating":{"@type":"Rating","ratingValue":"5"}}'
+
+  - path: "/rooms/"
+    meta_title: "Rooms & Accommodation | Hotel Ichha"
+    meta_description: "Browse our premium rooms and suites at Hotel Ichha. Deluxe, Executive, Honeymoon, and more. Book directly for the best rates."
+    header_subtitle: "Sanctuary Suites"
+    header_title: "Rooms & Accommodation"
+    header_description: "Explore our premium selection of spaces crafted with an eye for elegance and class."
+
+  - path: "/dining/"
+    meta_title: "Gastronomy & Dining | Hotel Ichha"
+    meta_description: "Discover award-winning dining experiences at Hotel Ichha — from fine restaurants to rooftop lounges and signature cocktail bars."
+    header_subtitle: "Culinary Experiences"
+    header_title: "Gastronomy & Lounge"
+    header_description: "Discover the finest culinary venues, featuring award-winning chefs and cocktails."
+
+  - path: "/recreation/"
+    meta_title: "Recreation & Wellness | Hotel Ichha"
+    meta_description: "Recharge at Hotel Ichha with our elite spa, infinity pool, gym, and adventure activities in the heart of Bara, Nepal."
+    header_subtitle: "Sanctuary Spa & Wellness"
+    header_title: "Recreation & Wellness"
+    header_description: "Recharge, refresh, and indulge with our elite spa, gym, and outdoor adventures."
+
+  - path: "/gallery/"
+    meta_title: "Photo Gallery | Hotel Ichha"
+    meta_description: "Take a visual tour of Hotel Ichha — luxury suites, fine dining, the infinity pool, spa, and surrounding landscapes."
+    header_subtitle: "Visual Tour"
+    header_title: "Resort Photo Gallery"
+    header_description: "Take a visual tour through our luxury suites, fine restaurants, and natural landscapes."
+
+  - path: "/conference/"
+    meta_title: "Conferences & Events | Hotel Ichha"
+    meta_description: "Host prestigious conferences, weddings, and galas at Hotel Ichha's world-class venue halls in Simara, Bara."
+    header_subtitle: "Opulent Spaces & Venues"
+    header_title: "Conferences & Celebrations"
+    header_description: "Host your prestigious meetings, weddings, and galas in Simara's finest 5-star venue halls."
+
+  - path: "/contact/"
+    meta_title: "Contact & Concierge | Hotel Ichha"
+    meta_description: "Get in touch with Hotel Ichha for room bookings, event planning, dining reservations, or any general inquiries."
+    header_subtitle: "Get In Touch"
+    header_title: "Concierge & Contact"
+    header_description: "We are here to assist you with room bookings, event planning, or general questions."
+
+  - path: "/blogs/"
+    meta_title: "News & Luxury Insights | Hotel Ichha"
+    meta_description: "Read the latest from Hotel Ichha — festival programs, culinary launches, travel guides, and resort news from Bara, Nepal."
+    header_subtitle: "Resort Journal"
+    header_title: "News & Luxury Insights"
+    header_description: "Stay updated with our latest festival programs, culinary launches, and travel guides."
+
+coupons:
+  - code: "WELCOME10"
+    discount_type: "percentage"
+    discount_value: 10.00
+    min_spend: 100.00
+    valid_days_from_now: 365
+    is_active: true
