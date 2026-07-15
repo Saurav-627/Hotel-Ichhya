@@ -2,12 +2,12 @@
 
 {% block content %}
 <section class="py-20 border-b border-amber-900/10 text-center relative overflow-hidden bg-cover bg-center"
-         style="background-image: url('https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1200');">
+         style="background-image: url('{% if seo_raw and seo_raw.header_image %}{{ seo_raw.header_image.url }}{% else %}https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1200{% endif %}');">
     <div class="absolute inset-0 bg-black/75"></div>
     <div class="relative z-10 space-y-4">
-        <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-300">Get In Touch</span>
-        <h1 class="font-luxury-title text-4xl sm:text-6xl font-bold text-white leading-tight">Concierge & Contact</h1>
-        <p class="text-sm text-white/80 max-w-xl mx-auto">We are here to assist you with room bookings, event planning, or general questions.</p>
+        <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-300">{{ seo_raw.header_subtitle|default:"Get In Touch" }}</span>
+        <h1 class="font-luxury-title text-4xl sm:text-6xl font-bold text-white leading-tight">{{ seo_raw.header_title|default:"Concierge &amp; Contact" }}</h1>
+        <p class="text-sm text-white/80 max-w-xl mx-auto">{{ seo_raw.header_description|default:"We are here to assist you with room bookings, event planning, or general questions." }}</p>
     </div>
 </section>
 

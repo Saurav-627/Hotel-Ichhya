@@ -89,3 +89,51 @@ A helper shell script `scripts/backup.sh` is provided in the repository root. To
    0 2 * * * /home/user/Workflow/Hotel\ Platform/Hotel-Ichha/scripts/backup.sh
    ```
 
+---
+
+## 🖼️ Dynamic Page Banners (SEO Admin)
+
+Every major listing page has a **fully customizable hero banner** (subtitle, title, description, and background image) that can be managed directly from the Django Admin portal — no code changes required.
+
+### How It Works
+
+Each page banner is driven by the `SEOData` model (`seo` app). A **context processor** runs on every request, looks up the database for a record matching the current URL path, and exposes it as `seo_raw` to all templates.
+
+- If a matching record **exists** → the page renders the admin-configured values.
+- If no record **exists** → the page falls back to built-in default text and a default Unsplash image.
+
+### Pages with Dynamic Banners
+
+| Page | URL Path to configure |
+|---|---|
+| Rooms & Accommodation | `/rooms/` |
+| Gastronomy & Dining | `/dining/` |
+| Recreation & Wellness | `/recreation/` |
+| Resort Photo Gallery | `/gallery/` |
+| Conferences & Venues | `/conference/` |
+| Concierge & Contact | `/contact/` |
+| News & Blog | `/blogs/` |
+
+### Configuring a Banner from Admin
+
+1. Go to **`/admin/`** → **SEO → SEO Page Data** → click **"+ Add SEO Page Data"**
+2. Fill in the **🔗 Page Identity** section:
+   - `Path` — must match exactly, e.g. `/rooms/` (include trailing slash)
+   - `Meta Title` and `Meta Description` — for browser tab and search results
+3. Fill in the **🖼️ Banner Header** section:
+   - `Header Subtitle` — small uppercase label above the title (e.g. *"Sanctuary Suites"*)
+   - `Header Title` — main large heading (e.g. *"Rooms & Accommodation"*)
+   - `Header Description` — short paragraph below the title
+   - `Header Image` — upload a custom background photo (max 2 MB); replaces the default Unsplash image
+4. **Save** — changes appear immediately on the live page.
+
+> **Tip:** Leave any Banner Header field blank to keep the page's built-in default for that field.
+
+### Architecture Reference
+
+| File | Role |
+|---|---|
+| `seo/models/seo_data.py` | `SEOData` model with `header_subtitle`, `header_title`, `header_description`, `header_image` fields |
+| `seo/context_processors.py` | Injects `seo_raw` (the matched `SEOData` instance) into every template context |
+| `seo/admin.py` | Registered admin with labelled fieldsets for easy banner editing |
+| `*/templates/*_list.html` | Each template uses `{{ seo_raw.header_title\|default:"..." }}` with fallbacks |

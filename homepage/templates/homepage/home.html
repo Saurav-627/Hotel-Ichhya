@@ -366,13 +366,12 @@
 </section>
 {% endif %}
 
-<!-- TESTIMONIALS SLIDER SECTION -->
 <section class="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden" x-data="{ 
     activeIndex: 0, 
-    itemsCount: {{ testimonials|length|default:3 }},
+    itemsCount: {{ testimonials|length|default:1 }},
     next() { this.activeIndex = (this.activeIndex + 1) % this.itemsCount },
-    prev() { this.activeIndex = (this.activeIndex - 1 + this.itemsCount) % this.activeIndex }
-}">
+    prev() { this.activeIndex = (this.activeIndex - 1 + this.itemsCount) % this.itemsCount }
+}" x-init="if (itemsCount > 1) setInterval(() => next(), 6000)">
     <div class="text-center max-w-2xl mx-auto space-y-4 mb-16" data-animate="fadeInUp">
         <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">Guest Memoirs</span>
         <h2 class="font-luxury-title text-4xl sm:text-5xl font-bold">What Our Guests Say</h2>

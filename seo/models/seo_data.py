@@ -7,6 +7,18 @@ class SEOData(models.Model):
     meta_description = models.TextField(max_length=160)
     canonical_url = models.URLField(blank=True, null=True, help_text="Leave blank to use current page URL")
 
+    # Header Banner Fields
+    header_subtitle = models.CharField(max_length=150, blank=True, null=True, help_text="Subtitle shown in the page header banner")
+    header_title = models.CharField(max_length=150, blank=True, null=True, help_text="Main title shown in the page header banner")
+    header_description = models.TextField(blank=True, null=True, help_text="Description text shown in the page header banner")
+    header_image = models.ImageField(
+        upload_to=UploadTo('headers'),
+        blank=True,
+        null=True,
+        help_text="Background image for the page banner",
+        validators=[ValidateFileSize(2)]
+    )
+
     # OG Tags
     og_title = models.CharField(max_length=80, blank=True, null=True)
     og_description = models.TextField(max_length=160, blank=True, null=True)

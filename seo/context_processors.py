@@ -12,25 +12,32 @@ def seo_meta(request):
         'twitter_card': 'summary_large_image',
         'structured_data': ''
     }
-    
-    try:
-        # Match current path (e.g. /rooms/ or /contact/)
-        seo_obj = SEOData.objects.filter(path=request.path).first()
-        if not seo_obj and request.path != '/':
-            # Try to match fallback home path '/'
-            seo_obj = SEOData.objects.filter(path='/').first()
 
-        if seo_obj:
-            meta['title'] = seo_obj.meta_title
-            meta['description'] = seo_obj.meta_description
-            meta['canonical'] = seo_obj.canonical_url or request.build_absolute_uri()
-            meta['og_title'] = seo_obj.og_title or seo_obj.meta_title
-            meta['og_description'] = seo_obj.og_description or seo_obj.meta_description
-            if seo_obj.og_image:
-                meta['og_image'] = request.build_absolute_uri(seo_obj.og_image.url)
-            meta['twitter_card'] = seo_obj.twitter_card
-            meta['structured_data'] = seo_obj.structured_data
+    # seo_obj: exact-path match, used for page banner header data (seo_raw)
+    # meta_obj: may fall back to '/' for generic SEO meta tags
+    seo_obj = None
+    meta_obj = None
+
+    try:
+        # Exact match for current path — used for banner header data
+        seo_obj = SEOData.objects.filter(path=request.path).first()
+
+        # For meta tags, fall back to '/' record if no exact match
+        meta_obj = seo_obj
+        if not meta_obj and request.path != '/':
+            meta_obj = SEOData.objects.filter(path='/').first()
+
+        if meta_obj:
+            meta['title'] = meta_obj.meta_title
+            meta['description'] = meta_obj.meta_description
+            meta['canonical'] = meta_obj.canonical_url or request.build_absolute_uri()
+            meta['og_title'] = meta_obj.og_title or meta_obj.meta_title
+            meta['og_description'] = meta_obj.og_description or meta_obj.meta_description
+            if meta_obj.og_image:
+                meta['og_image'] = request.build_absolute_uri(meta_obj.og_image.url)
+            meta['twitter_card'] = meta_obj.twitter_card
+            meta['structured_data'] = meta_obj.structured_data
     except (ProgrammingError, OperationalError):
         pass
 
-    return {'seo': meta}
+    return {'seo': meta, 'seo_raw': seo_obj}

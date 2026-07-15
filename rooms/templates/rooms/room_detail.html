@@ -17,8 +17,11 @@
                     {% empty %}
                         'https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1200',
                     {% endfor %}
-                ]
-            }" class="relative h-[450px] overflow-hidden rounded-2xl border border-amber-900/10">
+                ],
+                next() { this.activeSlide = (this.activeSlide + 1) % this.slides.length }
+            }" 
+            x-init="if (slides.length > 1) setInterval(() => next(), 5000)"
+            class="relative h-[450px] overflow-hidden rounded-2xl border border-amber-900/10">
                 <template x-for="(slide, index) in slides" :key="index">
                     <div x-show="activeSlide === index" 
                          x-transition:enter="transition ease-out duration-500"

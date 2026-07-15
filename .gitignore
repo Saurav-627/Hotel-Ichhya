@@ -14,3 +14,6 @@ wheels/
 
 # Database backups
 backups/
+
+# User-uploaded media files (local development only)
+media/

@@ -2,12 +2,12 @@
 
 {% block content %}
 <section class="py-20 border-b border-amber-900/10 text-center relative overflow-hidden bg-cover bg-center"
-         style="background-image: url('https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=1200');">
+         style="background-image: url('{% if seo_raw and seo_raw.header_image %}{{ seo_raw.header_image.url }}{% else %}https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=1200{% endif %}');">
     <div class="absolute inset-0 bg-black/75"></div>
     <div class="relative z-10 space-y-4">
-        <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-300">Opulent Spaces & Venues</span>
-        <h1 class="font-luxury-title text-4xl sm:text-6xl font-bold text-white leading-tight">Conferences & Celebrations</h1>
-        <p class="text-sm text-white/80 max-w-xl mx-auto">Host your prestigious meetings, weddings, and galas in Simara's finest 5-star venue halls.</p>
+        <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-300">{{ seo_raw.header_subtitle|default:"Opulent Spaces &amp; Venues" }}</span>
+        <h1 class="font-luxury-title text-4xl sm:text-6xl font-bold text-white leading-tight">{{ seo_raw.header_title|default:"Conferences &amp; Celebrations" }}</h1>
+        <p class="text-sm text-white/80 max-w-xl mx-auto">{{ seo_raw.header_description|default:"Host your prestigious meetings, weddings, and galas in Simara's finest 5-star venue halls." }}</p>
     </div>
 </section>
 
