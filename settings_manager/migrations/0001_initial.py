@@ -16,12 +16,12 @@ class Migration(migrations.Migration):
             name='HotelSettings',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('site_name', models.CharField(default='Hotel Ichha', max_length=100)),
+                ('site_name', models.CharField(default='Hotel Ichchha', max_length=100)),
                 ('logo', models.ImageField(blank=True, null=True, upload_to='settings/logos/')),
                 ('logo_dark', models.ImageField(blank=True, help_text='Dark mode logo version', null=True, upload_to='settings/logos/')),
                 ('theme', models.CharField(choices=[('light', 'Light Mode'), ('dark', 'Dark Mode'), ('luxury', 'Luxury Gold Mode'), ('festival', 'Festival Theme')], default='luxury', max_length=20)),
                 ('contact_phone', models.CharField(default='+977-1-4XXXXXX', max_length=20)),
-                ('contact_email', models.EmailField(default='info@hotelichha.com', max_length=254)),
+                ('contact_email', models.EmailField(default='info@hotelichchha.com', max_length=254)),
                 ('address', models.CharField(default='Bara, Nepal', max_length=255)),
                 ('google_maps_iframe', models.TextField(blank=True, help_text='Google Maps HTML embed iframe', null=True)),
                 ('facebook_url', models.URLField(blank=True, null=True)),
@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 ('youtube_url', models.URLField(blank=True, null=True)),
                 ('tripadvisor_url', models.URLField(blank=True, null=True)),
                 ('about_text', models.TextField(default='A premium 5-star experience of hospitality and luxury.')),
-                ('copyright_text', models.CharField(default='&copy; 2026 Hotel Ichha. All Rights Reserved.', max_length=255)),
+                ('copyright_text', models.CharField(default='&copy; 2026 Hotel Ichchha. All Rights Reserved.', max_length=255)),
             ],
             options={
                 'verbose_name': 'Hotel Global Settings',

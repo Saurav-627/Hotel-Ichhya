@@ -9,7 +9,7 @@ class HotelSettings(models.Model):
         ('festival', 'Festival Theme'),
     ]
 
-    site_name = models.CharField(max_length=100, default="Hotel Ichha")
+    site_name = models.CharField(max_length=100, default="Hotel Ichchha")
     logo = models.ImageField(
         upload_to=UploadTo('settings/logos'),
         blank=True,
@@ -27,7 +27,7 @@ class HotelSettings(models.Model):
     
     # Contact Info
     contact_phone = models.CharField(max_length=20, default="+977-1-4XXXXXX")
-    contact_email = models.EmailField(default="info@hotelichha.com")
+    contact_email = models.EmailField(default="info@hotelichchha.com")
     address = models.CharField(max_length=255, default="Bara, Nepal")
     google_maps_iframe = models.TextField(blank=True, null=True, help_text="Google Maps HTML embed iframe")
 
@@ -40,7 +40,7 @@ class HotelSettings(models.Model):
 
     # Footer details
     about_text = models.TextField(default="A premium 5-star experience of hospitality and luxury.")
-    copyright_text = models.CharField(max_length=255, default="&copy; 2026 Hotel Ichha. All Rights Reserved.")
+    copyright_text = models.CharField(max_length=255, default="&copy; 2026 Hotel Ichchha. All Rights Reserved.")
 
     class Meta:
         verbose_name = "Hotel Global Settings"

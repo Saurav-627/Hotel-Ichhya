@@ -54,7 +54,7 @@
             <!-- Core Specs -->
             <div class="space-y-4">
                 <div class="flex items-center gap-3">
-                    <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">{{ room.get_category_display }}</span>
+                    <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">{{ room.category.name|default:"Luxury Suite" }}</span>
                 </div>
                 <h1 class="font-luxury-title text-4xl sm:text-5xl font-bold tracking-wide">{{ room.title }}</h1>
                 <p class="text-sm leading-relaxed opacity-85">{{ room.description }}</p>
@@ -241,19 +241,18 @@
                             <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Adults</label>
                             <select name="adults" x-model="adults" class="w-full px-2 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
                                     :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
-                                <option value="1">1 Adult</option>
-                                <option value="2">2 Adults</option>
-                                <option value="3">3 Adults</option>
-                                <option value="4">4 Adults</option>
+                                {% for i in room.adults_range %}
+                                <option value="{{ i }}">{{ i }} Adult{{ i|pluralize }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                         <div>
                             <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Children</label>
                             <select name="children" x-model="children" class="w-full px-2 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
                                     :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
-                                <option value="0">0 Children</option>
-                                <option value="1">1 Child</option>
-                                <option value="2">2 Children</option>
+                                {% for i in room.children_range %}
+                                <option value="{{ i }}">{{ i }} Child{{ i|pluralize:"ren" }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                     </div>
@@ -353,47 +352,55 @@
                             </div>
                             
                             <!-- Right: Summary (1 Col) -->
-                            <div class="rounded-xl p-5 border space-y-4 text-sm"
+                            <div class="rounded-xl p-4 border space-y-3 text-xs"
                                  :class="{ 'bg-gray-50 border-gray-200': currentTheme === 'light', 'bg-[#1e1a17] border-amber-900/20': currentTheme !== 'light' }">
-                                <h4 class="font-luxury-title text-lg font-semibold border-b pb-3 mb-4">Summary</h4>
-                                
-                                <div class="flex justify-between items-center gap-2">
-                                    <span class="opacity-80">Chamber</span>
-                                    <span class="font-semibold text-right">{{ room.title }}</span>
+                                <h4 class="font-luxury-title text-base font-semibold border-b pb-2 mb-3"
+                                    :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/20': currentTheme !== 'light' }">Booking Summary</h4>
+
+                                <!-- Room name (truncated if long) -->
+                                <div class="flex items-start justify-between gap-2">
+                                    <span class="opacity-70 shrink-0">Room</span>
+                                    <span class="font-semibold text-right truncate max-w-[120px]" title="{{ room.title }}">{{ room.title }}</span>
                                 </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="opacity-80">Arrival</span>
-                                    <span class="font-semibold" x-text="checkIn"></span>
+
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="opacity-70 shrink-0">Arrival</span>
+                                    <span class="font-semibold tabular-nums" x-text="checkIn"></span>
                                 </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="opacity-80">Departure</span>
-                                    <span class="font-semibold" x-text="checkOut"></span>
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="opacity-70 shrink-0">Departure</span>
+                                    <span class="font-semibold tabular-nums" x-text="checkOut"></span>
                                 </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="opacity-80">Duration</span>
-                                    <span class="font-semibold"><span x-text="nights"></span> Night(s)</span>
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="opacity-70 shrink-0">Nights</span>
+                                    <span class="font-semibold tabular-nums"><span x-text="nights"></span> night<span x-show="nights !== 1">s</span></span>
                                 </div>
-                                <div class="flex justify-between items-center border-b pb-3" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
-                                    <span class="opacity-80">Occupancy</span>
-                                    <span class="font-semibold"><span x-text="adults"></span> Adults, <span x-text="children"></span> Children</span>
+                                <div class="flex items-center justify-between gap-2 border-b pb-2"
+                                     :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
+                                    <span class="opacity-70 shrink-0">Guests</span>
+                                    <span class="font-semibold tabular-nums">
+                                        <span x-text="adults"></span>A
+                                        <span x-show="children > 0">, <span x-text="children"></span>C</span>
+                                    </span>
                                 </div>
-                                
-                                <div class="flex justify-between items-center">
-                                    <span class="opacity-80">Base Rate</span>
-                                    <span x-text="roomCurrency + ' ' + basePrice.toFixed(2) + ' / night'"></span>
+
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="opacity-70 shrink-0">Rate/night</span>
+                                    <span class="tabular-nums" x-text="roomCurrency + ' ' + basePrice.toFixed(2)"></span>
                                 </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="opacity-80">Subtotal</span>
-                                    <span x-text="roomCurrency + ' ' + subtotal.toFixed(2)"></span>
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="opacity-70 shrink-0">Subtotal</span>
+                                    <span class="tabular-nums" x-text="roomCurrency + ' ' + subtotal.toFixed(2)"></span>
                                 </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="opacity-80">Taxes (<span x-text="taxPercentage"></span>%)</span>
-                                    <span x-text="roomCurrency + ' ' + tax.toFixed(2)"></span>
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="opacity-70 shrink-0">Tax (<span x-text="taxPercentage"></span>%)</span>
+                                    <span class="tabular-nums" x-text="roomCurrency + ' ' + tax.toFixed(2)"></span>
                                 </div>
-                                
-                                <div class="flex justify-between items-center text-lg font-bold text-luxuryGold-500 border-t pt-3 mt-2" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
+
+                                <div class="flex items-center justify-between gap-2 text-sm font-bold text-luxuryGold-500 border-t pt-2 mt-1"
+                                     :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
                                     <span>Total</span>
-                                    <span class="font-luxury-title" x-text="roomCurrency + ' ' + total.toFixed(2)"></span>
+                                    <span class="font-luxury-title tabular-nums" x-text="roomCurrency + ' ' + total.toFixed(2)"></span>
                                 </div>
                             </div>
                         </div>

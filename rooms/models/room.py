@@ -2,16 +2,6 @@ from django.db import models
 from django.utils.text import slugify
 
 class Room(models.Model):
-    ROOM_CATEGORIES = [
-        ('deluxe', 'Deluxe Room'),
-        ('super_deluxe', 'Super Deluxe Room'),
-        ('premium', 'Premium Room'),
-        ('premium_suite', 'Premium Junior Suite'),
-        ('deluxe_suite', 'Deluxe Suite'),
-        ('honeymoon_suite', 'Honeymoon Suite'),
-        ('executive', 'Executive Room'),
-    ]
-
     CURRENCY_CHOICES = [
         ('USD', 'USD ($)'),
         ('NPR', 'NPR (₨)'),
@@ -21,7 +11,14 @@ class Room(models.Model):
 
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=250, unique=True, blank=True)
-    category = models.CharField(max_length=50, choices=ROOM_CATEGORIES, default='deluxe')
+    category = models.ForeignKey(
+        'RoomCategory',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='rooms',
+        help_text="Room category (managed in admin under Room Categories)"
+    )
     description = models.TextField()
     highlights = models.TextField(help_text="Comma-separated or line-separated list of room highlights")
     base_price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -61,3 +58,12 @@ class Room(models.Model):
     def price_with_tax(self):
         price = self.final_price
         return price + (price * (self.tax_percentage / 100))
+
+    @property
+    def adults_range(self):
+        return range(1, max(1, self.max_adults) + 1)
+
+    @property
+    def children_range(self):
+        return range(0, max(0, self.max_children) + 1)
+

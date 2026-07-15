@@ -2,6 +2,7 @@ from django.views.generic import ListView, DetailView
 from django.db.models import Q
 from ..models.room import Room
 from ..models.room_facility import RoomFacility
+from ..models.room_category import RoomCategory
 
 class RoomListView(ListView):
     model = Room
@@ -33,7 +34,7 @@ class RoomListView(ListView):
         price_max = self.request.GET.get('price_max')
 
         if category:
-            queryset = queryset.filter(category=category)
+            queryset = queryset.filter(category__slug=category)
         if adults:
             try:
                 queryset = queryset.filter(max_adults__gte=int(adults))
@@ -54,7 +55,7 @@ class RoomListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['categories'] = Room.ROOM_CATEGORIES
+        context['categories'] = RoomCategory.objects.filter(is_published=True)
         context['facilities'] = RoomFacility.objects.all()
         
         # Resolve active currency symbol

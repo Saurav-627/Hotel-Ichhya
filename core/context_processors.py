@@ -5,13 +5,13 @@ from settings_manager.models.navigation import NavigationMenu
 def global_settings(request):
     # Safe defaults to prevent migration crashes
     settings_data = {
-        'site_name': 'Hotel Ichha',
+        'site_name': 'Hotel Ichchha',
         'theme': 'luxury',
         'contact_phone': '+977-1-4XXXXXX',
-        'contact_email': 'info@hotelichha.com',
+        'contact_email': 'info@hotelichchha.com',
         'address': 'Bara, Nepal',
         'about_text': 'A premium 5-star experience of hospitality and luxury.',
-        'copyright_text': '&copy; 2026 Hotel Ichha. All Rights Reserved.',
+        'copyright_text': '&copy; 2026 Hotel Ichchha. All Rights Reserved.',
     }
     
     header_menu = []
@@ -26,10 +26,10 @@ def global_settings(request):
         else:
             # Create a default settings object if database is ready but empty
             settings_data = HotelSettings(
-                site_name='Hotel Ichha',
+                site_name='Hotel Ichchha',
                 theme='luxury',
                 contact_phone='+977-1-4XXXXXX',
-                contact_email='info@hotelichha.com',
+                contact_email='info@hotelichchha.com',
                 address='Bara, Nepal',
                 about_text='A premium 5-star experience of hospitality and luxury.'
             )

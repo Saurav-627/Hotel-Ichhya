@@ -1,6 +1,6 @@
-# Hotel Ichha — CMS & Admin Control Report
+# Hotel Ichchha — CMS & Admin Control Report
 
-> **Purpose:** This document maps out every part of the Hotel Ichha platform — what the admin can control through the Django Admin CMS, what is submitted by guests/users, and what is hardcoded/static in the codebase. Intended for developers, hotel managers, and content editors.
+> **Purpose:** This document maps out every part of the Hotel Ichchha platform — what the admin can control through the Django Admin CMS, what is submitted by guests/users, and what is hardcoded/static in the codebase. Intended for developers, hotel managers, and content editors.
 
 ---
 
@@ -33,7 +33,7 @@
 
 ## Platform Overview
 
-Hotel Ichha is a full-stack Django CMS platform for a luxury 5-star hotel. It is split into **16 Django apps**, each managing a separate domain of hotel operations. The admin panel is powered by **Django Unfold** for a modern UI. The frontend uses **TailwindCSS** and **Alpine.js**.
+Hotel Ichchha is a full-stack Django CMS platform for a luxury 5-star hotel. It is split into **16 Django apps**, each managing a separate domain of hotel operations. The admin panel is powered by **Django Unfold** for a modern UI. The frontend uses **TailwindCSS** and **Alpine.js**.
 
 ---
 
@@ -134,7 +134,7 @@ The "About the Hotel" section below the hero slider:
 
 | Field | Description |
 |---|---|
-| `title` | Section heading (e.g. "About Hotel Ichha") |
+| `title` | Section heading (e.g. "About Hotel Ichchha") |
 | `subtitle` | Supporting tagline |
 | `content` | Main descriptive paragraph |
 | `image` | Featured photo shown in the about section |
@@ -148,7 +148,7 @@ The "About the Hotel" section below the hero slider:
 
 ### 6. Rooms & Accommodation
 **Admin path:** `Rooms -> Rooms`
-**Models:** `rooms/models/room.py`, `room_image.py`, `room_facility.py`, `room_price.py`, `room_policy.py`, `room_availability.py`
+**Models:** `rooms/models/room.py`, `room_category.py`, `room_image.py`, `room_facility.py`, `room_price.py`, `room_policy.py`, `room_availability.py`
 
 This is the core of the platform. Admin has full control over:
 
@@ -156,7 +156,7 @@ This is the core of the platform. Admin has full control over:
 | Field | Description |
 |---|---|
 | `title` | Room name (e.g. "Deluxe King Suite") |
-| `category` | Room type: Deluxe / Super Deluxe / Premium / Suite / Honeymoon / Executive |
+| `category` | ForeignKey to Room Category (managed dynamically in admin) |
 | `description` | Full room description |
 | `highlights` | Comma-separated or line-separated bullet highlights |
 | `base_price` | Price per night |
@@ -447,7 +447,6 @@ These items are **built into the code or templates** and cannot be changed from 
 | Item | Location | Notes |
 |---|---|---|
 | Payment gateways | `payments/models/payment.py` | Stripe, eSewa, Khalti — hardcoded as model choices |
-| Room category types | `rooms/models/room.py` | Deluxe / Super Deluxe / Premium / Suite / Honeymoon / Executive |
 | Recreation category types | `recreation/models/activity.py` | Spa / Pool / Gym / Kids / Casino / Adventure / Safari / Games |
 | Dining venue categories | `dining/models/venue.py` | Restaurant / Bar / Cafe / Rooftop / Pool Bar / Fine Dining |
 | Booking status flow | `booking/models/booking.py` | Pending / Confirmed / Checked In / Checked Out / Cancelled |
@@ -495,7 +494,7 @@ These items are **built into the code or templates** and cannot be changed from 
 | Dining reservations | | YES (admin manages status) | |
 | Conference inquiries | | YES (admin manages status) | |
 | Contact form messages | | YES (read-only in admin) | |
-| Room category types | | | YES |
+| Room category types | YES | | |
 | Payment gateway options | | | YES |
 | Booking status states | | | YES |
 | Hero banner fallback defaults | | | YES |
@@ -505,4 +504,4 @@ These items are **built into the code or templates** and cannot be changed from 
 
 ---
 
-*Generated: July 2026 | Hotel Ichha Platform v1.0*
+*Generated: July 2026 | Hotel Ichchha Platform v1.0*

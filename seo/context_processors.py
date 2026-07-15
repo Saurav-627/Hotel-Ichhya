@@ -3,10 +3,10 @@ from .models.seo_data import SEOData
 
 def seo_meta(request):
     meta = {
-        'title': 'Hotel Ichha | Premium Five-Star Luxury Hotel & CMS',
-        'description': 'Experience ultimate luxury, fine dining, and elite wellness spas at Hotel Ichha, a five-star international standard resort.',
+        'title': 'Hotel Ichchha | Premium Five-Star Luxury Hotel & CMS',
+        'description': 'Experience ultimate luxury, fine dining, and elite wellness spas at Hotel Ichchha, a five-star international standard resort.',
         'canonical': request.build_absolute_uri(),
-        'og_title': 'Hotel Ichha | Five-Star Luxury Hotel',
+        'og_title': 'Hotel Ichchha | Five-Star Luxury Hotel',
         'og_description': 'Experience ultimate luxury, fine dining, and elite wellness spas.',
         'og_image': '',
         'twitter_card': 'summary_large_image',

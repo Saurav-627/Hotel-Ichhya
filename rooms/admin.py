@@ -1,5 +1,6 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin, TabularInline
+from .models.room_category import RoomCategory
 from .models.room import Room
 from .models.room_image import RoomImage
 from .models.room_facility import RoomFacility
@@ -10,6 +11,12 @@ from .models.room_availability import RoomAvailability
 class RoomImageInline(TabularInline):
     model = RoomImage
     extra = 1
+
+@admin.register(RoomCategory)
+class RoomCategoryAdmin(ModelAdmin):
+    list_display = ('name', 'slug', 'order', 'is_published')
+    list_editable = ('order', 'is_published')
+    prepopulated_fields = {'slug': ('name',)}
 
 class RoomPolicyInline(TabularInline):
     model = RoomPolicy

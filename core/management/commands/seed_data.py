@@ -45,7 +45,7 @@ class Command(BaseCommand):
         # -- 1. Superuser
         if not User.objects.filter(username="admin").exists():
             User.objects.create_superuser(
-                "admin", "admin@hotelichha.com", "admin123",
+                "admin", "admin@hotelichchha.com", "admin123",
                 phone="+977-9855012345", is_hotel_admin=True, is_guest=False
             )
             self.stdout.write(self.style.SUCCESS("Created superuser 'admin' (password: admin123)."))
@@ -142,13 +142,39 @@ class Command(BaseCommand):
             else:
                 self.stdout.write(self.style.WARNING(f"Facility '{name}' already exists. Skipping."))
 
+        # -- 7.5. Room Categories
+        from rooms.models.room_category import RoomCategory
+        for cat in data.get("room_categories", []):
+            slug = cat.get("slug")
+            if not slug:
+                continue
+            _, created = RoomCategory.objects.get_or_create(
+                slug=slug,
+                defaults={
+                    "name": cat.get("name"),
+                    "order": cat.get("order", 0),
+                    "is_published": cat.get("is_published", True),
+                }
+            )
+            if created:
+                self.stdout.write(self.style.SUCCESS(f"Created Room Category: {cat.get('name')}"))
+            else:
+                self.stdout.write(self.style.WARNING(f"Room Category '{slug}' already exists. Skipping."))
+
         # -- 8. Rooms
         from rooms.models.room import Room
+        from rooms.models.room_category import RoomCategory
         for room_data in data.get("rooms", []):
             slug = room_data.get("slug")
             if not slug:
                 continue
             facility_names = room_data.pop("facilities", [])
+            
+            category_slug = room_data.get("category")
+            if category_slug:
+                cat_obj = RoomCategory.objects.filter(slug=category_slug).first()
+                room_data["category"] = cat_obj
+
             room_obj, created = Room.objects.get_or_create(
                 slug=slug,
                 defaults={k: v for k, v in room_data.items()}

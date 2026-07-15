@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name='AboutPreview',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(default='About Hotel Ichha', max_length=150)),
+                ('title', models.CharField(default='About Hotel Ichchha', max_length=150)),
                 ('subtitle', models.CharField(default='A Haven of Luxury & Hospitality', max_length=250)),
                 ('content', models.TextField(help_text='Introductory text about the hotel')),
                 ('image', models.ImageField(blank=True, null=True, upload_to='homepage/about/')),

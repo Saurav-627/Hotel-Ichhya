@@ -169,7 +169,7 @@ else:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'hotel-ichha-locmem',
+            'LOCATION': 'hotel-ichchha-locmem',
         }
     }
 
@@ -188,8 +188,8 @@ AUTH_USER_MODEL = 'accounts.User'
 
 # Django Unfold Configuration (Premium Dark/Gold Theme)
 UNFOLD = {
-    "SITE_TITLE": "Hotel Ichha Admin Portal",
-    "SITE_HEADER": "Hotel Ichha",
+    "SITE_TITLE": "Hotel Ichchha Admin Portal",
+    "SITE_HEADER": "Hotel Ichchha",
     "SITE_SYMBOL": "hotel",
     "SITE_LOGO": "/static/images/hotel-ichchha-logo.png",
     "SITE_ICON": {

@@ -21,7 +21,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write(self.style.NOTICE("=" * 55))
-        self.stdout.write(self.style.NOTICE(" Hotel Ichha — Full Data Import"))
+        self.stdout.write(self.style.NOTICE(" Hotel Ichchha — Full Data Import"))
         self.stdout.write(self.style.NOTICE("=" * 55))
 
         # Step 1: initial_data.yaml (settings, currencies, nav menus, SEO banners)

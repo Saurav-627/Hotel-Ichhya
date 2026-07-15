@@ -1,4 +1,4 @@
-# Hotel Ichha Platform
+# Hotel Ichchha Platform
 
 A premium, high-performance Django-based hospitality and booking management platform designed for luxury hotels and resorts.
 
@@ -86,7 +86,7 @@ A helper shell script `scripts/backup.sh` is provided in the repository root. To
    ```
 2. Add the following entry (updating the directory path to your project's absolute path):
    ```text
-   0 2 * * * /home/user/Workflow/Hotel\ Platform/Hotel-Ichha/scripts/backup.sh
+   0 2 * * * /home/user/Workflow/Hotel\ Platform/Hotel-Ichchha/scripts/backup.sh
    ```
 
 ---

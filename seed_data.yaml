@@ -1,25 +1,25 @@
 # ============================================================
-# Hotel Ichha — Main Seed Data
+# Hotel Ichchha — Main Seed Data
 # Used by: python manage.py seed_data
 # Behaviour: get_or_create — skips existing records, never deletes
 # ============================================================
 
 hotel_settings:
-  site_name: "Hotel Ichha"
+  site_name: "Hotel Ichchha"
   theme: "luxury"
   contact_phone: "+977-51-590011"
-  contact_email: "concierge@hotelichha.com"
+  contact_email: "concierge@hotelichchha.com"
   address: "Simara, Bara, Nepal"
-  about_text: "Hotel Ichha is a premier 5-star sanctuary located in the heart of Simara, Bara. Designed to blend modern grandeur with warm Nepalese hospitality, we provide luxury chambers, elite wellness spas, fine dining lounges, and world-class conference facilities."
-  copyright_text: "&copy; 2026 Hotel Ichha Resort. All Rights Reserved."
+  about_text: "Hotel Ichchha is a premier 5-star sanctuary located in the heart of Simara, Bara. Designed to blend modern grandeur with warm Nepalese hospitality, we provide luxury chambers, elite wellness spas, fine dining lounges, and world-class conference facilities."
+  copyright_text: "&copy; 2026 Hotel Ichchha Resort. All Rights Reserved."
   facebook_url: "https://facebook.com"
   instagram_url: "https://instagram.com"
   twitter_url: "https://twitter.com"
 
 about_preview:
   title: "Discover A Sanctuary Of Grandeur"
-  subtitle: "Welcome to Hotel Ichha"
-  content: "Nestled in the lush greenery of Simara, Bara, Hotel Ichha is your gate to exquisite peace and premium relaxation. We boast masterfully curated accommodations, state-of-the-art recreation facilities, and distinct dining venue options that cater to international guests and delegates alike.\n\nFrom our infinity pool deck to the therapeutic Golden Lotus Spa, every corner of our property is designed to inspire comfort and wonder."
+  subtitle: "Welcome to Hotel Ichchha"
+  content: "Nestled in the lush greenery of Simara, Bara, Hotel Ichchha is your gate to exquisite peace and premium relaxation. We boast masterfully curated accommodations, state-of-the-art recreation facilities, and distinct dining venue options that cater to international guests and delegates alike.\n\nFrom our infinity pool deck to the therapeutic Golden Lotus Spa, every corner of our property is designed to inspire comfort and wonder."
   video_url: "https://www.youtube.com/embed/dQw4w9WgXcQ"
   stat1_value: "80+"
   stat1_label: "Luxury Chambers"
@@ -30,9 +30,39 @@ about_preview:
   stat4_value: "25k+"
   stat4_label: "Satisfied Guests"
 
+room_categories:
+  - name: "Deluxe Room"
+    slug: "deluxe"
+    order: 1
+    is_published: true
+  - name: "Super Deluxe Room"
+    slug: "super_deluxe"
+    order: 2
+    is_published: true
+  - name: "Premium Room"
+    slug: "premium"
+    order: 3
+    is_published: true
+  - name: "Premium Junior Suite"
+    slug: "premium_suite"
+    order: 4
+    is_published: true
+  - name: "Deluxe Suite"
+    slug: "deluxe_suite"
+    order: 5
+    is_published: true
+  - name: "Honeymoon Suite"
+    slug: "honeymoon_suite"
+    order: 6
+    is_published: true
+  - name: "Executive Room"
+    slug: "executive"
+    order: 7
+    is_published: true
+
 hero_slides:
   - title: "A Haven of Elite Luxury & Calm"
-    subtitle: "Hotel Ichha Resort"
+    subtitle: "Hotel Ichchha Resort"
     cta_text: "Book Your Stay"
     cta_url: "/rooms/"
     cta2_text: "Explore Dining"
@@ -186,7 +216,7 @@ testimonials:
     country: "India"
     source: "tripadvisor"
     rating: 5
-    review_text: "Hotel Ichha is easily the best hotel in the Bara area. Immaculate food, grand conference halls, and clean suites."
+    review_text: "Hotel Ichchha is easily the best hotel in the Bara area. Immaculate food, grand conference halls, and clean suites."
     is_featured: true
     is_published: true
 
@@ -197,56 +227,56 @@ testimonials:
 # ============================================================
 seo_data:
   - path: "/"
-    meta_title: "Hotel Ichha | 5-Star Luxury Resort in Bara, Nepal"
-    meta_description: "Book rooms at Hotel Ichha in Simara, Bara, Nepal. Explore our premium chambers, fine dining restaurants, spas, and conference packages."
+    meta_title: "Hotel Ichchha | 5-Star Luxury Resort in Bara, Nepal"
+    meta_description: "Book rooms at Hotel Ichchha in Simara, Bara, Nepal. Explore our premium chambers, fine dining restaurants, spas, and conference packages."
     twitter_card: "summary_large_image"
-    structured_data: '{"@context":"https://schema.org","@type":"Hotel","name":"Hotel Ichha","address":{"@type":"PostalAddress","streetAddress":"Simara","addressLocality":"Bara","addressCountry":"NP"},"starRating":{"@type":"Rating","ratingValue":"5"}}'
+    structured_data: '{"@context":"https://schema.org","@type":"Hotel","name":"Hotel Ichchha","address":{"@type":"PostalAddress","streetAddress":"Simara","addressLocality":"Bara","addressCountry":"NP"},"starRating":{"@type":"Rating","ratingValue":"5"}}'
 
   - path: "/rooms/"
-    meta_title: "Rooms & Accommodation | Hotel Ichha"
-    meta_description: "Browse our premium rooms and suites at Hotel Ichha. Deluxe, Executive, Honeymoon, and more. Book directly for the best rates."
+    meta_title: "Rooms & Accommodation | Hotel Ichchha"
+    meta_description: "Browse our premium rooms and suites at Hotel Ichchha. Deluxe, Executive, Honeymoon, and more. Book directly for the best rates."
     header_subtitle: "Sanctuary Suites"
     header_title: "Rooms & Accommodation"
     header_description: "Explore our premium selection of spaces crafted with an eye for elegance and class."
 
   - path: "/dining/"
-    meta_title: "Gastronomy & Dining | Hotel Ichha"
-    meta_description: "Discover award-winning dining experiences at Hotel Ichha — from fine restaurants to rooftop lounges and signature cocktail bars."
+    meta_title: "Gastronomy & Dining | Hotel Ichchha"
+    meta_description: "Discover award-winning dining experiences at Hotel Ichchha — from fine restaurants to rooftop lounges and signature cocktail bars."
     header_subtitle: "Culinary Experiences"
     header_title: "Gastronomy & Lounge"
     header_description: "Discover the finest culinary venues, featuring award-winning chefs and cocktails."
 
   - path: "/recreation/"
-    meta_title: "Recreation & Wellness | Hotel Ichha"
-    meta_description: "Recharge at Hotel Ichha with our elite spa, infinity pool, gym, and adventure activities in the heart of Bara, Nepal."
+    meta_title: "Recreation & Wellness | Hotel Ichchha"
+    meta_description: "Recharge at Hotel Ichchha with our elite spa, infinity pool, gym, and adventure activities in the heart of Bara, Nepal."
     header_subtitle: "Sanctuary Spa & Wellness"
     header_title: "Recreation & Wellness"
     header_description: "Recharge, refresh, and indulge with our elite spa, gym, and outdoor adventures."
 
   - path: "/gallery/"
-    meta_title: "Photo Gallery | Hotel Ichha"
-    meta_description: "Take a visual tour of Hotel Ichha — luxury suites, fine dining, the infinity pool, spa, and surrounding landscapes."
+    meta_title: "Photo Gallery | Hotel Ichchha"
+    meta_description: "Take a visual tour of Hotel Ichchha — luxury suites, fine dining, the infinity pool, spa, and surrounding landscapes."
     header_subtitle: "Visual Tour"
     header_title: "Resort Photo Gallery"
     header_description: "Take a visual tour through our luxury suites, fine restaurants, and natural landscapes."
 
   - path: "/conference/"
-    meta_title: "Conferences & Events | Hotel Ichha"
-    meta_description: "Host prestigious conferences, weddings, and galas at Hotel Ichha's world-class venue halls in Simara, Bara."
+    meta_title: "Conferences & Events | Hotel Ichchha"
+    meta_description: "Host prestigious conferences, weddings, and galas at Hotel Ichchha's world-class venue halls in Simara, Bara."
     header_subtitle: "Opulent Spaces & Venues"
     header_title: "Conferences & Celebrations"
     header_description: "Host your prestigious meetings, weddings, and galas in Simara's finest 5-star venue halls."
 
   - path: "/contact/"
-    meta_title: "Contact & Concierge | Hotel Ichha"
-    meta_description: "Get in touch with Hotel Ichha for room bookings, event planning, dining reservations, or any general inquiries."
+    meta_title: "Contact & Concierge | Hotel Ichchha"
+    meta_description: "Get in touch with Hotel Ichchha for room bookings, event planning, dining reservations, or any general inquiries."
     header_subtitle: "Get In Touch"
     header_title: "Concierge & Contact"
     header_description: "We are here to assist you with room bookings, event planning, or general questions."
 
   - path: "/blogs/"
-    meta_title: "News & Luxury Insights | Hotel Ichha"
-    meta_description: "Read the latest from Hotel Ichha — festival programs, culinary launches, travel guides, and resort news from Bara, Nepal."
+    meta_title: "News & Luxury Insights | Hotel Ichchha"
+    meta_description: "Read the latest from Hotel Ichchha — festival programs, culinary launches, travel guides, and resort news from Bara, Nepal."
     header_subtitle: "Resort Journal"
     header_title: "News & Luxury Insights"
     header_description: "Stay updated with our latest festival programs, culinary launches, and travel guides."
