@@ -151,6 +151,7 @@ rooms:
       - "Infinity Pool"
       - "Golden Lotus Spa"
       - "Valet Parking"
+      - "Elite Fitness Gym"
 
 dining_venues:
   - name: "The Royal Orchid Restaurant"
@@ -288,3 +289,12 @@ coupons:
     min_spend: 100.00
     valid_days_from_now: 365
     is_active: true
+
+branches:
+  - name: "Hotel Ichchha"
+    address: "Simara - 03, Bara, Nepal"
+    phone: "+97753520591"
+    email: "info@hotelichchha.com"
+    maps_iframe: '<div style="width: 100%"><iframe width="100%" height="600" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" style="border:0" allowfullscreen="" src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBVizdQeh3udy11xDc5Ao2YStR2gLc-rfc&amp;q=hotel%20ichchha&amp;maptype=roadmap&amp;zoom=14"><a href="https://www.maps.ie/create-google-map/">Embed directions map</a></iframe></div>'
+    is_main: true
+    is_published: true

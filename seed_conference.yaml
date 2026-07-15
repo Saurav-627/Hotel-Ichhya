@@ -32,3 +32,4 @@ event_venues:
     layout_options: "U Shape: 25 pax\nClassroom: 30 pax\nBoard Room: 20 pax"
     base_price: 20000.00
     is_active: true
+

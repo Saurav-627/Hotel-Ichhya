@@ -169,6 +169,9 @@ class Command(BaseCommand):
             if not slug:
                 continue
             facility_names = room_data.pop("facilities", [])
+            images = room_data.pop("images", [])
+            policies = room_data.pop("policies", [])
+            seasonal_prices = room_data.pop("seasonal_prices", [])
             
             category_slug = room_data.get("category")
             if category_slug:
@@ -184,7 +187,39 @@ class Command(BaseCommand):
                     fac = RoomFacility.objects.filter(name=fname).first()
                     if fac:
                         room_obj.facilities.add(fac)
-                self.stdout.write(self.style.SUCCESS(f"Created room: {room_obj.title}"))
+                
+                # Seed Room Images
+                from rooms.models.room_image import RoomImage
+                for img in images:
+                    RoomImage.objects.create(
+                        room=room_obj,
+                        image=img.get("image"),
+                        is_primary=img.get("is_primary", False),
+                        alt_text=img.get("alt_text", "")
+                    )
+                
+                # Seed Room Policies
+                from rooms.models.room_policy import RoomPolicy
+                for pol in policies:
+                    RoomPolicy.objects.create(
+                        room=room_obj,
+                        title=pol.get("title"),
+                        description=pol.get("description")
+                    )
+                
+                # Seed Room Seasonal Prices
+                from rooms.models.room_price import RoomPrice
+                for prc in seasonal_prices:
+                    RoomPrice.objects.create(
+                        room=room_obj,
+                        name=prc.get("name"),
+                        start_date=prc.get("start_date"),
+                        end_date=prc.get("end_date"),
+                        price_override=prc.get("price_override"),
+                        is_active=prc.get("is_active", True)
+                    )
+
+                self.stdout.write(self.style.SUCCESS(f"Created room: {room_obj.title} (with images, policies, and seasonal prices)"))
             else:
                 self.stdout.write(self.style.WARNING(f"Room '{slug}' already exists. Skipping."))
 
@@ -284,5 +319,20 @@ class Command(BaseCommand):
                 is_active=coupon.get("is_active", True),
             )
             self.stdout.write(self.style.SUCCESS(f"Created coupon: {code}"))
+
+        # -- 15. Branches
+        from contact.models.branch import Branch
+        for b in data.get("branches", []):
+            name = b.get("name")
+            if not name:
+                continue
+            _, created = Branch.objects.get_or_create(
+                name=name,
+                defaults={k: v for k, v in b.items() if k != "name"}
+            )
+            if created:
+                self.stdout.write(self.style.SUCCESS(f"Created branch: {name}"))
+            else:
+                self.stdout.write(self.style.WARNING(f"Branch '{name}' already exists. Skipping."))
 
         self.stdout.write(self.style.SUCCESS("\nDatabase seeding completed successfully!"))
