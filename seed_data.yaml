@@ -496,3 +496,24 @@ branches:
   maps_iframe: '<div style="width: 100%"><iframe width="100%" height="600" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" style="border:0" allowfullscreen="" src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBVizdQeh3udy11xDc5Ao2YStR2gLc-rfc&amp;q=hotel%20ichchha&amp;maptype=roadmap&amp;zoom=14"><a href="https://www.maps.ie/create-google-map/">Embed directions map</a></iframe></div>'
   is_main: true
   is_published: true
+
+payment_processors:
+- name: eSewa
+  code: esewa
+  apply_tax: true
+  is_published: true
+  currencies:
+  - NPR
+- name: Khalti
+  code: khalti
+  apply_tax: true
+  is_published: true
+  currencies:
+  - NPR
+- name: Stripe
+  code: stripe
+  apply_tax: false
+  is_published: true
+  currencies:
+  - USD
+

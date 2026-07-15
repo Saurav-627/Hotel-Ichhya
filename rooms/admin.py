@@ -33,6 +33,45 @@ class RoomAdmin(ModelAdmin):
     search_fields = ('title', 'description', 'highlights')
     prepopulated_fields = {'slug': ('title',)}
     inlines = [RoomImageInline, RoomPolicyInline, RoomPriceInline]
+    actions = ['duplicate_room']
+
+    @admin.action(description="Duplicate selected rooms (Deep Copy)")
+    def duplicate_room(self, request, queryset):
+        import uuid
+        count = 0
+        for room in queryset:
+            original_pk = room.pk
+            original_room = Room.objects.get(pk=original_pk)
+
+            # Clone Room fields
+            room.pk = None
+            room.title = f"{room.title} (Copy)"
+            room.slug = f"{room.slug}-copy-{str(uuid.uuid4())[:8]}"
+            room.save()
+
+            # Copy Many-to-Many facilities
+            room.facilities.set(original_room.facilities.all())
+
+            # Copy related inlines
+            for img in original_room.images.all():
+                img.pk = None
+                img.room = room
+                img.save()
+
+            for policy in original_room.policies.all():
+                policy.pk = None
+                policy.room = room
+                policy.save()
+
+            for price in original_room.seasonal_prices.all():
+                price.pk = None
+                price.room = room
+                price.save()
+
+            count += 1
+
+        self.message_user(request, f"Successfully duplicated {count} room(s).")
+
 
 @admin.register(RoomFacility)
 class RoomFacilityAdmin(ModelAdmin):

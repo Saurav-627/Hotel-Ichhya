@@ -335,4 +335,36 @@ class Command(BaseCommand):
             else:
                 self.stdout.write(self.style.WARNING(f"Branch '{name}' already exists. Skipping."))
 
+        # -- 16. Payment Processors
+        from payments.models.payment_processor import PaymentProcessor, PaymentProcessorCurrency
+        from settings_manager.models.currency import Currency
+        
+        processors_to_seed = data.get("payment_processors", [])
+
+        
+        for p_data in processors_to_seed:
+            code = p_data['code']
+            processor, created = PaymentProcessor.objects.get_or_create(
+                code=code,
+                defaults={
+                    'name': p_data['name'],
+                    'apply_tax': p_data['apply_tax'],
+                    'is_published': p_data['is_published']
+                }
+            )
+            if created:
+                self.stdout.write(self.style.SUCCESS(f"Created payment processor: {p_data['name']}"))
+            else:
+                self.stdout.write(self.style.WARNING(f"Payment processor '{p_data['name']}' already exists. Skipping."))
+                
+            # Associate currencies
+            for cur_code in p_data['currencies']:
+                currency_obj = Currency.objects.filter(iso_code=cur_code).first()
+                if currency_obj:
+                    PaymentProcessorCurrency.objects.get_or_create(
+                        payment_processor=processor,
+                        currency=currency_obj
+                    )
+
         self.stdout.write(self.style.SUCCESS("\nDatabase seeding completed successfully!"))
+

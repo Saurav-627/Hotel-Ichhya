@@ -1,9 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, Http404
-from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
 from booking.models.booking import Booking
 from ..models.payment import Payment
+from ..services import get_processor_by_gateway_name
+from ..services.base_payment import PaymentValidationResult
 import uuid
+import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 def process_payment(request, booking_uid, gateway):
     booking = get_object_or_404(Booking, booking_uid=booking_uid)
@@ -14,39 +20,203 @@ def process_payment(request, booking_uid, gateway):
     if gateway not in ['stripe', 'esewa', 'khalti']:
         raise Http404("Invalid payment gateway.")
 
-    # Create a pending Payment record
+    from ..models.payment_processor import PaymentProcessor
+    from settings_manager.models.currency import Currency
+    from decimal import Decimal
+
+    # Fetch payment processor metadata
+    processor_meta = PaymentProcessor.objects.filter(code=gateway, is_published=True).first()
+
+    # Update booking tax and total based on apply_tax setting
+    if processor_meta and not processor_meta.apply_tax:
+        # No tax applies for this processor!
+        booking.tax = Decimal("0.00")
+        booking.total = booking.subtotal - booking.discount
+        booking.save(update_fields=['tax', 'total'])
+    else:
+        # Recalculate standard tax based on the room's tax percentage
+        tax_pct = Decimal(str(booking.room.tax_percentage))
+        booking.tax = (booking.subtotal - booking.discount) * (tax_pct / Decimal("100.00"))
+        booking.total = (booking.subtotal - booking.discount) + booking.tax
+        booking.save(update_fields=['tax', 'total'])
+
+    # Determine currency
+    currency_obj = None
+    if processor_meta:
+        currency_obj = processor_meta.payment_currencies.first()
+    if not currency_obj:
+        currency_obj = Currency.objects.filter(iso_code=booking.room.currency).first()
+
+    # Create a pending Payment record with the correct amount and currency
+    transaction_id = str(uuid.uuid4())
     payment = Payment.objects.create(
         booking=booking,
         gateway=gateway,
-        transaction_id=str(uuid.uuid4())[:18].upper(),
+        currency=currency_obj,
+        transaction_id=transaction_id,
         amount=booking.total,
         status='pending'
     )
 
-    # In a live app, you would redirect to Stripe/eSewa/Khalti SDKs/APIs.
-    # We will simulate a successful payment gateway callback for demo purposes.
-    context = {
-        'booking': booking,
-        'gateway': gateway,
-        'payment': payment,
-    }
-    return render(request, 'payments/process.html', context)
+
+    if gateway == 'stripe':
+        # Keep simulated fallback for stripe
+        context = {
+            'booking': booking,
+            'gateway': gateway,
+            'payment': payment,
+            'api_url': reverse('payments:payment_callback', args=[payment.id]),
+            'form_method': 'GET',
+            'form_data': {}
+        }
+        return render(request, 'payments/process.html', context)
+
+    try:
+        processor = get_processor_by_gateway_name(gateway)
+        return_url = request.build_absolute_uri(reverse('payments:payment_callback', args=[payment.id]))
+
+        kwargs = {
+            'tax_amount': float(booking.tax)
+        }
+
+        if gateway == 'khalti':
+            kwargs['display_name'] = f"Booking for {booking.room.title}"
+            kwargs['customer_info'] = {
+                'name': booking.guest_name,
+                'email': booking.guest_email,
+                'phone': booking.guest_phone,
+            }
+            from ..services.utils import to_minor_units
+            kwargs['product_items'] = [{
+                'identity': str(booking.room.id),
+                'name': booking.room.title,
+                'total_price': to_minor_units(booking.total),
+                'quantity': 1,
+                'unit_price': to_minor_units(booking.total)
+            }]
+
+        result = processor.initiate_payment(
+            total_amount=float(booking.total),
+            transaction_id=transaction_id,
+            return_url=return_url,
+            **kwargs
+        )
+
+        # Store initiation response or reference
+        if gateway == 'khalti':
+            payment.gateway_response = result.get('provider_reference')
+            payment.save(update_fields=['gateway_response'])
+        else:
+            payment.gateway_response = json.dumps(result)
+            payment.save(update_fields=['gateway_response'])
+
+        context = {
+            'booking': booking,
+            'gateway': gateway,
+            'payment': payment,
+            'api_url': result['api_url'],
+            'form_method': result['form_method'],
+            'form_data': result['form_data']
+        }
+        return render(request, 'payments/process.html', context)
+
+    except Exception as e:
+        payment.status = 'failed'
+        payment.gateway_response = str(e)
+        payment.save()
+        logger.error(f"Payment initiation failed for booking {booking_uid} via {gateway}: {e}")
+        return HttpResponse(f"Payment initiation failed: {e}")
 
 def payment_callback(request, payment_id):
     payment = get_object_or_404(Payment, id=payment_id)
     booking = payment.booking
 
-    # Mock gateway validation success
-    payment.status = 'success'
-    payment.save()
+    if payment.status == 'success':
+        return render(request, 'payments/success.html', {'booking': booking, 'payment': payment, 'message': "Payment already confirmed!"})
 
-    booking.status = 'confirmed'
-    booking.save()
+    gateway = payment.gateway
 
-    # Trigger background tasks (send email confirmation/SMS notification via Celery) here if desired!
-    messages_success_html = f"Payment of {booking.room.currency} {payment.amount} successful via {payment.gateway.upper()}!"
-    
-    return render(request, 'payments/success.html', {'booking': booking, 'payment': payment, 'message': messages_success_html})
+    if gateway == 'stripe':
+        # Keep simulated success for stripe
+        payment.status = 'success'
+        payment.save()
+        booking.status = 'confirmed'
+        booking.save()
+        message = f"Payment of {booking.room.currency} {payment.amount} successful via Stripe!"
+        return render(request, 'payments/success.html', {'booking': booking, 'payment': payment, 'message': message})
+
+    try:
+        processor = get_processor_by_gateway_name(gateway)
+
+        if gateway == 'khalti':
+            pidx = request.GET.get('pidx') or payment.gateway_response
+            if not pidx:
+                raise ValueError("Khalti pidx transaction reference not found.")
+            transaction_id = pidx
+        elif gateway == 'esewa':
+            transaction_id = payment.transaction_id
+        else:
+            raise ValueError(f"Unsupported callback gateway: {gateway}")
+
+        validation_result = processor.validate_payment(
+            total_amount=float(payment.amount),
+            transaction_id=transaction_id
+        )
+
+        if validation_result.status == PaymentValidationResult.Status.SUCCESS:
+            payment.status = 'success'
+            payment.save()
+            booking.status = 'confirmed'
+            booking.save()
+
+            # Log callback parameters
+            payment.gateway_response = json.dumps(dict(request.GET))
+            payment.save(update_fields=['gateway_response'])
+
+            message = f"Payment of {booking.room.currency} {payment.amount} successful via {gateway.upper()}!"
+            return render(request, 'payments/success.html', {'booking': booking, 'payment': payment, 'message': message})
+
+        elif validation_result.status == PaymentValidationResult.Status.PENDING:
+            payment.status = 'pending'
+            payment.save()
+            return render(request, 'payments/success.html', {
+                'booking': booking,
+                'payment': payment,
+                'message': f"Payment is pending. Please verify with {gateway.upper()}."
+            })
+        else:
+            payment.status = 'failed'
+            payment.save()
+
+            # Release blocked dates and mark booking as cancelled
+            booking.status = 'cancelled'
+            booking.save()
+            from rooms.models.room_availability import RoomAvailability
+            RoomAvailability.objects.filter(booking=booking).delete()
+
+            return render(request, 'payments/success.html', {
+                'booking': booking,
+                'payment': payment,
+                'message': f"Payment validation failed for {gateway.upper()}."
+            })
+
+    except Exception as e:
+        payment.status = 'failed'
+        payment.save()
+
+        # Release blocked dates and mark booking as cancelled
+        booking.status = 'cancelled'
+        booking.save()
+        from rooms.models.room_availability import RoomAvailability
+        RoomAvailability.objects.filter(booking=booking).delete()
+
+        logger.error(f"Callback error for payment {payment_id}: {e}")
+        return render(request, 'payments/success.html', {
+            'booking': booking,
+            'payment': payment,
+            'message': f"Payment callback error: {e}"
+        })
+
 
 def view_invoice(request, booking_uid):
     booking = get_object_or_404(Booking, booking_uid=booking_uid)
@@ -57,3 +227,4 @@ def view_invoice(request, booking_uid):
         'payment': payment,
     }
     return render(request, 'payments/invoice.html', context)
+

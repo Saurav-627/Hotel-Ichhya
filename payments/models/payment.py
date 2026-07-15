@@ -16,9 +16,11 @@ class Payment(models.Model):
 
     booking = models.ForeignKey('booking.Booking', on_delete=models.CASCADE, related_name='payments')
     gateway = models.CharField(max_length=20, choices=GATEWAY_CHOICES)
+    currency = models.ForeignKey('settings_manager.Currency', on_delete=models.PROTECT, related_name='payments', null=True, blank=True)
     transaction_id = models.CharField(max_length=150, unique=True, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+
     
     # Logs and details
     gateway_response = models.TextField(blank=True, null=True, help_text="Raw JSON response from payment gateway")

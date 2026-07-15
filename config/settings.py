@@ -225,3 +225,13 @@ UNFOLD = {
         },
     },
 }
+
+# Payment Gateways Config
+ESEWA_CLIENT_ID = env('ESEWA_CLIENT_ID', default='EPAYTEST')
+ESEWA_CLIENT_SECRET = env('ESEWA_CLIENT_SECRET', default='8g7h3o986fsa2at4mqawat219nch2y3w')
+ESEWA_DEMO = env.bool('ESEWA_DEMO', default=True)
+
+KHALTI_CLIENT_ID = env('KHALTI_CLIENT_ID', default='')
+KHALTI_CLIENT_SECRET = env('KHALTI_CLIENT_SECRET', default='test_secret_key_5c8e3381e3cb41ee84e03d36b42b9e67')
+KHALTI_DEMO = env.bool('KHALTI_DEMO', default=True)
+

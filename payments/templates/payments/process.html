@@ -2,13 +2,8 @@
 
 {% block content %}
 <section class="py-24 max-w-xl mx-auto px-4 text-center space-y-8" 
-         x-data="{ count: 3 }" 
-         x-init="setInterval(() => { 
-             count--; 
-             if (count === 0) { 
-                 window.location.href = '{% url 'payments:payment_callback' payment.id %}'; 
-             } 
-         }, 1000)">
+         x-data="{ submitting: false }" 
+         x-init="submitting = true; $nextTick(() => { $refs.paymentForm.submit(); })">
     
     <div class="relative w-24 h-24 mx-auto">
         <!-- Spinner animation -->
@@ -25,8 +20,16 @@
     </div>
 
     <div class="text-xs opacity-75 pt-6 border-t border-amber-900/10">
-        Redirecting to payment gateway in <span class="font-bold text-luxuryGold-500" x-text="count"></span> second(s)...
+        Redirecting to {{ gateway|upper }} secure checkout portal...
     </div>
+
+    <!-- Secure Redirection Form -->
+    <form x-ref="paymentForm" action="{{ api_url }}" method="{{ form_method }}" class="hidden">
+        {% for key, val in form_data.items %}
+            <input type="hidden" name="{{ key }}" value="{{ val }}">
+        {% endfor %}
+    </form>
 
 </section>
 {% endblock %}
+
