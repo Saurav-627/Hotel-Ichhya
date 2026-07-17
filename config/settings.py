@@ -29,11 +29,8 @@ AUTH_USER_MODEL = 'accounts.User'
 
 # Application definition
 INSTALLED_APPS = [
-    # Admin Interface Theme
-    'unfold',
-    'unfold.contrib.filters',
-    'unfold.contrib.forms',
-    'unfold.contrib.import_export',
+    # Custom Dashboard App
+    'dashboard.apps.DashboardConfig',
     
     # Django Default Apps
     'django.contrib.admin',
@@ -186,45 +183,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.User'
 
-# Django Unfold Configuration (Premium Dark/Gold Theme)
-UNFOLD = {
-    "SITE_TITLE": "Hotel Ichchha Admin Portal",
-    "SITE_HEADER": "Hotel Ichchha",
-    "SITE_SYMBOL": "hotel",
-    "SITE_LOGO": "/static/images/hotel-ichchha-logo.png",
-    "SITE_ICON": {
-        "light": lambda request: static("images/hotel-ichchha-logo.png"),
-        "dark": lambda request: static("images/hotel-ichchha-logo.png"),
-    },
-    "SITE_FAVICONS": [
-        {
-            "rel": "icon",
-            "type": "image/png",
-            "href": lambda request: static("images/hotel-ichchha-logo.png"),
-        }
-    ],
-    "SHOW_HISTORY": True,
-    "SHOW_SIDEBAR_FILTER": True,
-    "THEME": "light",
-    "STYLES": [
-        lambda request: static("css/admin_custom.css"),
-    ],
-    "COLORS": {
-        "primary": {
-            "50": "250 245 233",
-            "100": "243 231 202",
-            "200": "229 204 148",
-            "300": "211 170 94",
-            "400": "196 142 55",
-            "500": "180 120 37",  # Premium Gold Primary
-            "600": "153 96 29",
-            "700": "120 72 23",
-            "800": "93 55 19",
-            "900": "77 46 17",
-            "950": "43 23 7",
-        },
-    },
-}
+
 
 # Payment Gateways Config
 ESEWA_CLIENT_ID = env('ESEWA_CLIENT_ID', default='EPAYTEST')

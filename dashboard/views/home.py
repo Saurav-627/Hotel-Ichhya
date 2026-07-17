@@ -1,0 +1,178 @@
+import datetime
+from django.views.generic import TemplateView
+from django.db.models import Sum, Q, Count
+from django.utils import timezone
+from django.contrib.auth import get_user_model
+from django.urls import reverse
+
+from dashboard.mixins import StaffRequiredMixin
+from booking.models.booking import Booking
+from rooms.models.room import Room
+from rooms.models.room_category import RoomCategory
+from payments.models.payment import Payment
+from dining.models.reservation import DiningReservation
+from conference.models.inquiry import EventInquiry
+from contact.models.inquiry import ContactInquiry
+from blogs.models.post import BlogPost
+
+User = get_user_model()
+
+class DashboardHomeView(StaffRequiredMixin, TemplateView):
+    template_name = 'dashboard/home.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        today = timezone.localdate()
+        start_of_month = today.replace(day=1)
+        
+        # 1. Today's Check-ins / Check-outs
+        today_checkins = Booking.objects.filter(check_in=today)
+        today_checkouts = Booking.objects.filter(check_out=today)
+        
+        # 2. Room Occupancy
+        total_rooms_capacity = RoomCategory.objects.aggregate(total=Sum('total_rooms'))['total'] or 0
+        
+        # Rooms occupied today: checkings status is checked_in or confirmed (if they check in today)
+        occupied_bookings = Booking.objects.filter(
+            status__in=['checked_in', 'confirmed'],
+            check_in__lte=today,
+            check_out__gt=today
+        )
+        occupied_rooms_count = occupied_bookings.aggregate(total=Sum('num_rooms'))['total'] or 0
+        available_rooms_count = max(0, total_rooms_capacity - occupied_rooms_count)
+        
+        # 3. Booking Stats
+        pending_bookings_count = Booking.objects.filter(status__in=['draft', 'pending']).count()
+        confirmed_bookings_count = Booking.objects.filter(status='confirmed').count()
+        
+        # 4. Revenue Today & Month
+        # Sum payments that succeeded
+        revenue_today = Payment.objects.filter(
+            status='success', 
+            created_at__date=today
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        revenue_month = Payment.objects.filter(
+            status='success',
+            created_at__date__gte=start_of_month,
+            created_at__date__lte=today
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        # 5. Pending Payments (bookings pending/confirmed but payment not successful)
+        pending_payments_count = Booking.objects.filter(status='pending').count()
+        
+        # 6. Service / Dining Reservations
+        dining_reservations_today = DiningReservation.objects.filter(date=today)
+        
+        # 7. Conference Event Inquiries
+        pending_event_inquiries = EventInquiry.objects.filter(status='pending')
+        
+        # 8. Contact inquiries
+        contact_messages_today = ContactInquiry.objects.filter(created_at__date=today)
+        
+        # 9. Coupon Usage
+        coupon_usage_count = Booking.objects.filter(coupon__isnull=False).count()
+        
+        # 10. Dynamic Chart Data
+        # We fetch the actual daily bookings and successful payments count for the last 7 days
+        # and pre-calculate display heights to scale beautifully on screen.
+        chart_data = []
+        raw_revs = []
+        raw_books = []
+        for i in range(6, -1, -1):
+            date_point = today - datetime.timedelta(days=i)
+            b_cnt = Booking.objects.filter(created_at__date=date_point).count()
+            p_sum = Payment.objects.filter(status='success', created_at__date=date_point).aggregate(total=Sum('amount'))['total'] or 0
+            raw_books.append(b_cnt)
+            raw_revs.append(float(p_sum))
+            
+        max_rev = max(raw_revs) if raw_revs and max(raw_revs) > 0 else 1000.0
+        max_book = max(raw_books) if raw_books and max(raw_books) > 0 else 5.0
+        
+        for i in range(6, -1, -1):
+            date_point = today - datetime.timedelta(days=i)
+            b_cnt = Booking.objects.filter(created_at__date=date_point).count()
+            p_sum = Payment.objects.filter(status='success', created_at__date=date_point).aggregate(total=Sum('amount'))['total'] or 0
+            
+            rev_height = int((float(p_sum) / float(max_rev)) * 80)
+            book_height = int((float(b_cnt) / float(max_book)) * 80)
+            
+            if p_sum > 0 and rev_height < 10:
+                rev_height = 10
+            if b_cnt > 0 and book_height < 10:
+                book_height = 10
+                
+            chart_data.append({
+                'label': date_point.strftime('%b %d'),
+                'revenue': p_sum,
+                'bookings': b_cnt,
+                'rev_height': rev_height,
+                'book_height': book_height,
+            })
+            
+        # 11. Recent Activities List
+        recent_bookings = Booking.objects.all()[:5]
+        recent_payments = Payment.objects.all().select_related('booking')[:5]
+        recent_contacts = ContactInquiry.objects.all()[:5]
+        
+        activities = []
+        for b in recent_bookings:
+            activities.append({
+                'type': 'booking',
+                'title': f"New booking by {b.guest_name}",
+                'desc': f"{b.room.title} · {b.num_rooms} room(s)",
+                'time': b.created_at,
+                'url': reverse('dashboard:booking_detail', args=[b.id])
+            })
+        for p in recent_payments:
+            activities.append({
+                'type': 'payment',
+                'title': f"Payment of {p.currency.symbol if p.currency else '$'}{p.amount} received",
+                'desc': f"Txn: {p.transaction_id} · Gateway: {p.gateway}",
+                'time': p.created_at,
+                'url': reverse('dashboard:payment_detail', args=[p.id])
+            })
+        for c in recent_contacts:
+            activities.append({
+                'type': 'inquiry',
+                'title': f"Message from {c.name}",
+                'desc': f"Subj: {c.subject}",
+                'time': c.created_at,
+                'url': reverse('dashboard:contact_dashboard') + "?tab=inquiries"
+            })
+            
+        # Sort activities by time desc
+        activities = sorted(activities, key=lambda x: x['time'], reverse=True)[:8]
+
+        # Put everything into context
+        context.update({
+            'today_checkins_count': today_checkins.count(),
+            'today_checkouts_count': today_checkouts.count(),
+            'today_checkins': today_checkins[:5],
+            'today_checkouts': today_checkouts[:5],
+            
+            'occupied_rooms_count': occupied_rooms_count,
+            'available_rooms_count': available_rooms_count,
+            'occupancy_rate': int((occupied_rooms_count / total_rooms_capacity * 100)) if total_rooms_capacity > 0 else 0,
+            
+            'pending_bookings_count': pending_bookings_count,
+            'confirmed_bookings_count': confirmed_bookings_count,
+            
+            'revenue_today': revenue_today,
+            'revenue_month': revenue_month,
+            'pending_payments_count': pending_payments_count,
+            
+            'dining_reservations_today_count': dining_reservations_today.count(),
+            'dining_reservations_today': dining_reservations_today[:5],
+            
+            'pending_event_inquiries_count': pending_event_inquiries.count(),
+            'contact_messages_today_count': contact_messages_today.count(),
+            'coupon_usage_count': coupon_usage_count,
+            
+            # Chart Data
+            'chart_data': chart_data,
+            
+            # Activities
+            'activities': activities,
+        })
+        return context

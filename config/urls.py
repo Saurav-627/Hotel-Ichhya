@@ -4,8 +4,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    # Admin Interface
-    path('admin/', admin.site.urls),
+    # Custom Admin Dashboard
+    path('admin/', include('dashboard.urls', namespace='dashboard')),
+    
+    # Native Django Admin (Developer fallback)
+    path('django-admin/', admin.site.urls),
     
     # Modular Apps
     path('', include('homepage.urls', namespace='homepage')),

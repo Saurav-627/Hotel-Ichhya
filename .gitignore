@@ -17,3 +17,6 @@ backups/
 
 # User-uploaded media files (local development only)
 media/
+
+# Generated staticfiles (collected static assets)
+staticfiles/

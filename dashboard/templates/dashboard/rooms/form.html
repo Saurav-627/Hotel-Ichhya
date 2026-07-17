@@ -1,0 +1,247 @@
+{% extends 'dashboard/base.html' %}
+
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Manage room characteristics, pricing, capacities, and inline details.{% endblock %}
+
+{% block breadcrumbs %}
+<i class="fa-solid fa-chevron-right text-xs"></i>
+<a href="{% url 'dashboard:room_dashboard' %}" class="hover:text-luxuryGold-400">Rooms</a>
+<i class="fa-solid fa-chevron-right text-xs"></i>
+<span class="text-neutral-500">Edit / Add</span>
+{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" class="space-y-8 max-w-[90%] mx-auto">
+    {% csrf_token %}
+    
+    <!-- Core fields card -->
+    <div class="custom-card rounded-2xl p-6 bg-white/50 dark:bg-neutral-900/50">
+        <h3 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100 font-serif mb-6 pb-2 border-b border-neutral-200 dark:border-neutral-800">
+            Core Specifications
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Title -->
+            <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Room Title / Name</label>
+                {{ form.title }}
+                {{ form.title.errors }}
+            </div>
+            
+            <!-- Slug -->
+            <div>
+                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Slug URL Path (Leave empty to auto-generate)</label>
+                {{ form.slug }}
+                {{ form.slug.errors }}
+            </div>
+
+            <!-- Category -->
+            <div>
+                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Category</label>
+                {{ form.category }}
+                {{ form.category.errors }}
+            </div>
+
+            <!-- Base Price -->
+            <div>
+                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Base Price (Per Night)</label>
+                {{ form.base_price }}
+                {{ form.base_price.errors }}
+            </div>
+
+            <!-- Discount Price -->
+            <div>
+                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Discount Rate (Optional)</label>
+                {{ form.discount_price }}
+                {{ form.discount_price.errors }}
+            </div>
+
+            <!-- Tax Percentage -->
+            <div>
+                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Tax Percentage (%)</label>
+                {{ form.tax_percentage }}
+                {{ form.tax_percentage.errors }}
+            </div>
+
+            <!-- Currency -->
+            <div>
+                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Currency Type</label>
+                {{ form.currency }}
+                {{ form.currency.errors }}
+            </div>
+
+            <!-- Inventory Rooms -->
+            <div>
+                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Total Room Units Inventory</label>
+                {{ form.total_rooms }}
+                {{ form.total_rooms.errors }}
+            </div>
+
+            <!-- Amenities/Highlights -->
+            <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Highlights (Highlights text)</label>
+                {{ form.highlights }}
+                {{ form.highlights.errors }}
+            </div>
+
+            <!-- Description -->
+            <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Description Detail</label>
+                {{ form.description }}
+                {{ form.description.errors }}
+            </div>
+
+            <!-- Toggles -->
+            <div class="md:col-span-2 flex flex-wrap gap-8 items-center pt-2">
+                <div class="flex items-center gap-3">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        {{ form.is_published }}
+                        <div class="w-11 h-6 bg-neutral-200 rounded-full peer peer-focus:outline-none peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-luxuryGold-500"></div>
+                    </label>
+                    <span class="text-sm font-semibold text-neutral-700">Publish Visibility (Live on website)</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        {{ form.is_featured }}
+                        <div class="w-11 h-6 bg-neutral-200 rounded-full peer peer-focus:outline-none peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-luxuryGold-500"></div>
+                    </label>
+                    <span class="text-sm font-semibold text-neutral-700">Mark as Featured Type</span>
+                </div>
+            </div>
+
+            <!-- Facilities -->
+            <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Select Amenities / Facilities</label>
+                {{ form.facilities }}
+                {{ form.facilities.errors }}
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Images Inline Formset -->
+    <div class="custom-card rounded-2xl p-6 bg-white/50 dark:bg-neutral-900/50">
+        <h3 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100 font-serif mb-6 pb-2 border-b border-neutral-200 dark:border-neutral-800">
+            Image Gallery (Drag/Drop or Select Images)
+        </h3>
+        {{ image_formset.management_form }}
+        <div class="space-y-4">
+            {% for image_form in image_formset %}
+            <div class="flex items-center justify-between gap-4 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-950/20">
+                {{ image_form.id }}
+                
+                <div class="flex-1">
+                    {{ image_form.image }}
+                    {{ image_form.image.errors }}
+                </div>
+                
+                {% if image_form.instance.pk %}
+                <div class="h-16 w-16 shrink-0 rounded overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-neutral-100">
+                    <img src="{{ image_form.instance.image.url }}" alt="Room Image" class="h-full w-full object-cover">
+                </div>
+                {% endif %}
+                
+                {% if image_formset.can_delete %}
+                <div class="flex items-center gap-2 text-xs font-semibold text-rose-500">
+                    {{ image_form.DELETE }}
+                    <span>Delete Image</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Policies Inline Formset -->
+    <div class="custom-card rounded-2xl p-6 bg-white/50 dark:bg-neutral-900/50">
+        <h3 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100 font-serif mb-6 pb-2 border-b border-neutral-200 dark:border-neutral-800">
+            Room Policies rules
+        </h3>
+        {{ policy_formset.management_form }}
+        <div class="space-y-4">
+            {% for policy_form in policy_formset %}
+            <div class="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-950/20 space-y-3">
+                {{ policy_form.id }}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-neutral-700 mb-1">Policy Title</label>
+                        {{ policy_form.title }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-neutral-700 mb-1">Policy Description</label>
+                        {{ policy_form.description }}
+                    </div>
+                </div>
+                {% if policy_formset.can_delete %}
+                <div class="flex items-center gap-2 text-xs font-semibold text-rose-500 pt-1">
+                    {{ policy_form.DELETE }}
+                    <span>Delete Policy Rule</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Seasonal Price override Formset -->
+    <div class="custom-card rounded-2xl p-6 bg-white/50 dark:bg-neutral-900/50">
+        <h3 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100 font-serif mb-6 pb-2 border-b border-neutral-200 dark:border-neutral-800">
+            Seasonal Pricing Overrides
+        </h3>
+        {{ price_formset.management_form }}
+        <div class="space-y-4">
+            {% for price_form in price_formset %}
+            <div class="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-950/20 space-y-3">
+                {{ price_form.id }}
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-neutral-700 mb-1">Season Name</label>
+                        {{ price_form.name }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-neutral-700 mb-1">Override Price Rate</label>
+                        {{ price_form.price_override }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-neutral-700 mb-1">Start Date</label>
+                        {{ price_form.start_date }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-neutral-700 mb-1">End Date</label>
+                        {{ price_form.end_date }}
+                    </div>
+                </div>
+                <div class="flex items-center justify-between gap-4 pt-2">
+                    <div class="flex items-center gap-3">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            {{ price_form.is_active }}
+                            <div class="w-11 h-6 bg-neutral-200 rounded-full peer peer-focus:outline-none peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-luxuryGold-500"></div>
+                        </label>
+                        <span class="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Rule Is Active</span>
+                    </div>
+                    {% if price_formset.can_delete %}
+                    <div class="flex items-center gap-2 text-xs font-semibold text-rose-500">
+                        {{ price_form.DELETE }}
+                        <span>Delete Price Override</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Action footer bar -->
+    <div class="mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-end gap-4">
+        <button type="submit" 
+                class="px-6 py-3 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-xl shadow-lg shadow-luxuryGold-500/10 transition">
+            Save Specifications
+        </button>
+        <a href="{% url 'dashboard:room_dashboard' %}" 
+           class="px-6 py-3 border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-semibold rounded-xl transition">
+            Cancel
+        </a>
+    </div>
+
+</form>
+{% endblock %}
