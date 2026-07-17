@@ -13,9 +13,7 @@ class Room(models.Model):
     slug = models.SlugField(max_length=250, unique=True, blank=True)
     category = models.ForeignKey(
         'RoomCategory',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.PROTECT,
         related_name='rooms',
         help_text="Room category (managed in admin under Room Categories)"
     )
@@ -24,7 +22,7 @@ class Room(models.Model):
     base_price = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default='USD', help_text="Currency of the base and discount price")
     discount_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=13.00) # e.g. 13% VAT
+    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, default=None, help_text="Optional tax percentage for this room listing")
     room_size = models.IntegerField(help_text="Size in sq. ft. or sq. meters")
     max_adults = models.IntegerField(default=2)
     max_children = models.IntegerField(default=0)
@@ -57,7 +55,12 @@ class Room(models.Model):
     @property
     def price_with_tax(self):
         price = self.final_price
-        return price + (price * (self.tax_percentage / 100))
+        tax_pct = self.tax_percentage or 0
+        return price + (price * (tax_pct / 100))
+
+    @property
+    def total_rooms(self):
+        return self.category.total_rooms if self.category else 0
 
     @property
     def adults_range(self):

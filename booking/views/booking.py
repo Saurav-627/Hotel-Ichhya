@@ -3,73 +3,11 @@ from django.views.decorators.http import require_POST
 from django.contrib import messages
 from rooms.models.room import Room
 from rooms.models.room_availability import RoomAvailability
+from django.db.models import Sum
 from ..models.booking import Booking
 from ..models.coupon import Coupon
 import datetime
 
-def initiate_booking(request, room_id):
-    room = get_object_or_404(Room, id=room_id, is_published=True)
-    
-    # Retrieve query params or set defaults
-    check_in_str = request.GET.get('check_in', '')
-    check_out_str = request.GET.get('check_out', '')
-    adults = request.GET.get('adults', '2')
-    children = request.GET.get('children', '0')
-
-    # Convert to date objects
-    today = datetime.date.today()
-    tomorrow = today + datetime.timedelta(days=1)
-    
-    try:
-        check_in = datetime.datetime.strptime(check_in_str, "%Y-%m-%d").date() if check_in_str else today
-        check_out = datetime.datetime.strptime(check_out_str, "%Y-%m-%d").date() if check_out_str else tomorrow
-        if check_in < today:
-            check_in = today
-            check_out = today + datetime.timedelta(days=1)
-        if check_out <= check_in:
-            check_out = check_in + datetime.timedelta(days=1)
-    except ValueError:
-        check_in = today
-        check_out = tomorrow
-
-    nights = (check_out - check_in).days
-    
-    # Calculate price
-    # Check if we have seasonal prices during this range
-    base_price = room.base_price
-    # Simple seasonal average check or fallback to base price
-    # (In production, you would check seasonal prices for each day of the stay)
-    daily_price = base_price
-    seasonal = room.seasonal_prices.filter(start_date__lte=check_in, end_date__gte=check_out, is_active=True).first()
-    if seasonal:
-        daily_price = seasonal.price_override
-
-    # Check availability for the dates
-    is_available = not RoomAvailability.objects.filter(
-        room=room,
-        date__gte=check_in,
-        date__lt=check_out,
-        is_available=False
-    ).exists()
-
-    subtotal = daily_price * nights
-    tax = subtotal * (room.tax_percentage / 100)
-    total = subtotal + tax
-
-    context = {
-        'room': room,
-        'check_in': check_in,
-        'check_out': check_out,
-        'adults': adults,
-        'children': children,
-        'nights': nights,
-        'subtotal': subtotal,
-        'tax': tax,
-        'total': total,
-        'daily_price': daily_price,
-        'is_available': is_available,
-    }
-    return render(request, 'booking/booking_initiate.html', context)
 
 @require_POST
 def create_booking(request, room_id):
@@ -90,20 +28,31 @@ def create_booking(request, room_id):
         check_out = datetime.datetime.strptime(check_out_str, "%Y-%m-%d").date()
         adults = int(adults_str)
         children = int(children_str)
+        num_rooms = max(1, int(request.POST.get('num_rooms', '1')))
     except (ValueError, TypeError):
         messages.error(request, "Invalid input formats.")
         return redirect('rooms:room_detail', slug=room.slug)
 
-    # Double check availability
-    blocked = RoomAvailability.objects.filter(
-        room=room,
-        date__gte=check_in,
-        date__lt=check_out,
-        is_available=False
-    ).exists()
+    # Double check availability: blocked if any date can't accommodate num_rooms
+    blocked = False
+    available_rooms = room.total_rooms
+    check_date = check_in
+    while check_date < check_out:
+        booked_count = RoomAvailability.objects.filter(room__category=room.category, date=check_date).aggregate(
+            total=Sum('rooms_booked')
+        )['total'] or 0
+        remaining = room.total_rooms - booked_count
+        if remaining < available_rooms:
+            available_rooms = remaining
+        if booked_count + num_rooms > room.total_rooms:
+            blocked = True
+        check_date += datetime.timedelta(days=1)
 
     if blocked:
-        messages.error(request, "Sorry, this room is not available for the selected dates.")
+        if available_rooms > 0:
+            messages.error(request, f"Only {available_rooms} room{'s' if available_rooms != 1 else ''} available for the selected dates.")
+        else:
+            messages.error(request, "This room is not available for the selected dates. Please adjust your dates.")
         return redirect('rooms:room_detail', slug=room.slug)
 
     nights = (check_out - check_in).days
@@ -112,7 +61,7 @@ def create_booking(request, room_id):
     if seasonal:
         daily_price = seasonal.price_override
 
-    subtotal = daily_price * nights
+    subtotal = daily_price * nights * num_rooms
     
     # Process promo code
     from decimal import Decimal
@@ -128,8 +77,8 @@ def create_booking(request, room_id):
             messages.warning(request, "Invalid or expired promo code.")
 
     taxable_amount = subtotal - discount
-    tax = taxable_amount * (room.tax_percentage / 100)
-    total = taxable_amount + tax
+    tax = 0
+    total = taxable_amount
 
     # Create Booking
     booking = Booking.objects.create(
@@ -142,24 +91,15 @@ def create_booking(request, room_id):
         check_out=check_out,
         adults=adults,
         children=children,
+        num_rooms=num_rooms,
         subtotal=subtotal,
         coupon=coupon,
         discount=discount,
         tax=tax,
         total=total,
         special_requests=special_requests,
-        status='pending'
+        status='draft'
     )
-
-    # Block dates in availability
-    current_date = check_in
-    while current_date < check_out:
-        RoomAvailability.objects.get_or_create(
-            room=room,
-            date=current_date,
-            defaults={'is_available': False, 'booking': booking}
-        )
-        current_date += datetime.timedelta(days=1)
 
     return redirect('booking:checkout_page', booking_uid=booking.booking_uid)
 
@@ -213,8 +153,8 @@ def channel_manager_sync(request):
     # Calculate price
     nights = (check_out - check_in).days
     subtotal = room.base_price * nights
-    tax = subtotal * (room.tax_percentage / 100)
-    total = subtotal + tax
+    tax = 0
+    total = subtotal
     
     if not booking:
         # Create new OTA Booking
@@ -226,7 +166,7 @@ def channel_manager_sync(request):
             check_in=check_in,
             check_out=check_out,
             subtotal=subtotal,
-            tax=tax,
+            tax=0,
             total=total,
             status='confirmed',  # OTA bookings are usually confirmed
             channel_name=channel,
@@ -234,16 +174,6 @@ def channel_manager_sync(request):
             channel_raw_payload=data
         )
         
-        # Block dates
-        current_date = check_in
-        while current_date < check_out:
-            RoomAvailability.objects.get_or_create(
-                room=room,
-                date=current_date,
-                defaults={'is_available': False, 'booking': booking}
-            )
-            current_date += datetime.timedelta(days=1)
-            
         return JsonResponse({'status': 'success', 'message': 'Booking created successfully', 'booking_id': booking.id})
     else:
         # Update existing booking details/dates
@@ -253,21 +183,11 @@ def channel_manager_sync(request):
         booking.check_in = check_in
         booking.check_out = check_out
         booking.subtotal = subtotal
-        booking.tax = tax
+        booking.tax = 0
         booking.total = total
         booking.channel_raw_payload = data
         booking.save()
         
-        # Reset and block dates
-        RoomAvailability.objects.filter(booking=booking).delete()
-        current_date = check_in
-        while current_date < check_out:
-            RoomAvailability.objects.get_or_create(
-                room=room,
-                date=current_date,
-                defaults={'is_available': False, 'booking': booking}
-            )
-            current_date += datetime.timedelta(days=1)
-            
         return JsonResponse({'status': 'success', 'message': 'Booking updated successfully', 'booking_id': booking.id})
+
 

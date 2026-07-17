@@ -22,7 +22,7 @@
                 <i class="fa-solid fa-circle-exclamation animate-pulse"></i>
             </div>
             <h1 class="font-luxury-title text-3xl font-bold tracking-wide text-luxuryGold-500">Payment Pending</h1>
-            <p class="text-xs opacity-75">Your transaction is currently pending verification. The room will be confirmed once payment is complete.</p>
+            <p class="text-xs opacity-75">Your transaction is currently pending verification. The booking remains a draft until payment is complete.</p>
         </div>
         {% else %}
         <div class="space-y-3">
@@ -30,7 +30,7 @@
                 <i class="fa-solid fa-circle-xmark"></i>
             </div>
             <h1 class="font-luxury-title text-3xl font-bold tracking-wide text-red-500">Payment Failed</h1>
-            <p class="text-xs opacity-75">We were unable to verify your payment. The room has not been reserved.</p>
+            <p class="text-xs opacity-75">We were unable to verify your payment. The booking remains a draft and the room has not been reserved.</p>
         </div>
         {% endif %}
 
@@ -67,9 +67,21 @@
                 <span class="text-right font-mono">{{ booking.booking_uid }}</span>
             </div>
             <div class="grid grid-cols-2 p-4 border-b" :class="{ 'border-gray-100': currentTheme === 'light', 'border-amber-900/5': currentTheme !== 'light' }">
-                <span class="text-left opacity-75">Room Booked</span>
+                <span class="text-left opacity-75">{% if payment.status == 'success' %}Room Booked{% else %}Room Selected{% endif %}</span>
                 <span class="text-right font-semibold">{{ booking.room.title }}</span>
             </div>
+            {% if payment.tax_amount > 0 %}
+            <div class="grid grid-cols-2 p-4 border-b" :class="{ 'border-gray-100': currentTheme === 'light', 'border-amber-900/5': currentTheme !== 'light' }">
+                <span class="text-left opacity-75">Tax</span>
+                <span class="text-right font-semibold">{% if payment.currency %}{{ payment.currency.symbol }}{% else %}{{ payment.booking.room.currency }}{% endif %} {{ payment.tax_amount|floatformat:2 }}</span>
+            </div>
+            {% if booking.num_rooms > 1 %}
+            <div class="grid grid-cols-2 p-4 border-b" :class="{ 'border-gray-100': currentTheme === 'light', 'border-amber-900/5': currentTheme !== 'light' }">
+                <span class="text-left opacity-75">Tax per room</span>
+                <span class="text-right font-semibold">{% if payment.currency %}{{ payment.currency.symbol }}{% else %}{{ payment.booking.room.currency }}{% endif %} {{ payment.tax_per_room|floatformat:2 }}</span>
+            </div>
+            {% endif %}
+            {% endif %}
             <div class="grid grid-cols-2 p-4 border-b transition-all" 
                  :class="{ 
                      'border-gray-200 bg-amber-500/5': currentTheme === 'light', 

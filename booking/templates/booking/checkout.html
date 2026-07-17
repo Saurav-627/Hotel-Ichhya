@@ -14,6 +14,12 @@
             </div>
             <h1 class="font-luxury-title text-3xl font-bold tracking-wide animate__animated animate__fadeInDown">Secure Check-out</h1>
             <p class="text-xs opacity-75">Booking Reference: <span class="font-mono font-semibold">{{ booking.booking_uid }}</span></p>
+            {% if booking.status == 'draft' %}
+            <div class="mt-4 max-w-md mx-auto rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-left text-xs" :class="{ 'border-amber-200 bg-amber-50 text-amber-900': currentTheme === 'light', 'border-amber-900/20 bg-amber-900/10 text-amber-100': currentTheme !== 'light' }">
+                <p class="font-semibold mb-1">Draft booking</p>
+                <p>This stay is not reserved yet. It becomes confirmed only after payment succeeds.</p>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Price block -->

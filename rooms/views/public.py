@@ -1,5 +1,5 @@
 from django.views.generic import ListView, DetailView
-from django.db.models import Q
+from django.db.models import Q, Sum
 from ..models.room import Room
 from ..models.room_facility import RoomFacility
 from ..models.room_category import RoomCategory
@@ -89,6 +89,7 @@ from ..models.room_availability import RoomAvailability
 def check_room_availability(request, room_id):
     check_in_str = request.GET.get('check_in')
     check_out_str = request.GET.get('check_out')
+    num_rooms_str = request.GET.get('num_rooms', '1')
     
     if not check_in_str or not check_out_str:
         return JsonResponse({'available': False, 'message': 'Missing date parameters.'}, status=400)
@@ -96,17 +97,35 @@ def check_room_availability(request, room_id):
     try:
         check_in = datetime.datetime.strptime(check_in_str, "%Y-%m-%d").date()
         check_out = datetime.datetime.strptime(check_out_str, "%Y-%m-%d").date()
+        num_rooms = int(num_rooms_str)
     except ValueError:
-        return JsonResponse({'available': False, 'message': 'Invalid date format.'}, status=400)
+        return JsonResponse({'available': False, 'message': 'Invalid parameter format.'}, status=400)
         
     if check_out <= check_in:
         return JsonResponse({'available': False, 'message': 'Departure must be after arrival.'}, status=400)
         
-    blocked = RoomAvailability.objects.filter(
-        room_id=room_id,
-        date__gte=check_in,
-        date__lt=check_out,
-        is_available=False
-    ).exists()
+    from ..models.room import Room
+    try:
+        room = Room.objects.get(id=room_id)
+    except Room.DoesNotExist:
+        return JsonResponse({'available': False, 'message': 'Room not found.'}, status=404)
+
+    is_available = True
+    available_rooms = room.total_rooms
+    check_date = check_in
+    while check_date < check_out:
+        booked_count = RoomAvailability.objects.filter(room__category=room.category, date=check_date).aggregate(
+            total=Sum('rooms_booked')
+        )['total'] or 0
+        remaining = room.total_rooms - booked_count
+        if remaining < available_rooms:
+            available_rooms = remaining
+        if booked_count + num_rooms > room.total_rooms:
+            is_available = False
+        check_date += datetime.timedelta(days=1)
     
-    return JsonResponse({'available': not blocked})
+    return JsonResponse({
+        'available': is_available,
+        'available_rooms': max(0, available_rooms),
+    })
+

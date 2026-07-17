@@ -38,7 +38,7 @@ sync: install ## Alias for install
 
 ##@ Development & Run
 run: ## Start the local development server (accessible from other devices)
-	$(PYTHON) manage.py runserver 0.0.0.0:8000
+	$(PYTHON) manage.py runserver
 
 shell: ## Open a Django shell with models and database access
 	$(PYTHON) manage.py shell

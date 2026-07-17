@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from unfold.admin import ModelAdmin, TabularInline
 from .models.room_category import RoomCategory
 from .models.room import Room
@@ -14,8 +15,8 @@ class RoomImageInline(TabularInline):
 
 @admin.register(RoomCategory)
 class RoomCategoryAdmin(ModelAdmin):
-    list_display = ('name', 'slug', 'order', 'is_published')
-    list_editable = ('order', 'is_published')
+    list_display = ('name', 'total_rooms', 'slug', 'order', 'is_published')
+    list_editable = ('total_rooms', 'order', 'is_published')
     prepopulated_fields = {'slug': ('name',)}
 
 class RoomPolicyInline(TabularInline):
@@ -28,14 +29,28 @@ class RoomPriceInline(TabularInline):
 
 @admin.register(Room)
 class RoomAdmin(ModelAdmin):
-    list_display = ('title', 'category', 'base_price', 'currency', 'is_published', 'is_featured')
+    list_display = ('title', 'category', 'base_price', 'discount_price', 'tax_amount', 'price_with_tax_display', 'currency', 'inventory_rooms', 'is_published', 'is_featured')
     list_filter = ('category', 'currency', 'is_published', 'is_featured', 'facilities')
     search_fields = ('title', 'description', 'highlights')
     prepopulated_fields = {'slug': ('title',)}
     inlines = [RoomImageInline, RoomPolicyInline, RoomPriceInline]
     actions = ['duplicate_room']
 
-    @admin.action(description="Duplicate selected rooms (Deep Copy)")
+    @admin.display(description='Tax')
+    def tax_amount(self, obj):
+        tax_pct = obj.tax_percentage or 0
+        amount = obj.final_price * (tax_pct / 100)
+        return f'{obj.currency} {amount:.2f}'
+
+    @admin.display(description='Total Amount')
+    def price_with_tax_display(self, obj):
+        return f'{obj.currency} {obj.price_with_tax:.2f}'
+
+    @admin.display(description='Rooms')
+    def inventory_rooms(self, obj):
+        return obj.total_rooms
+
+    @admin.action(description='Duplicate selected rooms (Deep Copy)')
     def duplicate_room(self, request, queryset):
         import uuid
         count = 0
@@ -43,16 +58,13 @@ class RoomAdmin(ModelAdmin):
             original_pk = room.pk
             original_room = Room.objects.get(pk=original_pk)
 
-            # Clone Room fields
             room.pk = None
-            room.title = f"{room.title} (Copy)"
-            room.slug = f"{room.slug}-copy-{str(uuid.uuid4())[:8]}"
+            room.title = f'{room.title} (Copy)'
+            room.slug = f'{room.slug}-copy-{str(uuid.uuid4())[:8]}'
             room.save()
 
-            # Copy Many-to-Many facilities
             room.facilities.set(original_room.facilities.all())
 
-            # Copy related inlines
             for img in original_room.images.all():
                 img.pk = None
                 img.room = room
@@ -70,8 +82,7 @@ class RoomAdmin(ModelAdmin):
 
             count += 1
 
-        self.message_user(request, f"Successfully duplicated {count} room(s).")
-
+        self.message_user(request, f'Successfully duplicated {count} room(s).')
 
 @admin.register(RoomFacility)
 class RoomFacilityAdmin(ModelAdmin):
@@ -90,5 +101,40 @@ class RoomPolicyAdmin(ModelAdmin):
 
 @admin.register(RoomAvailability)
 class RoomAvailabilityAdmin(ModelAdmin):
-    list_display = ('room', 'date', 'is_available', 'booking')
-    list_filter = ('is_available', 'date', 'room')
+    list_display = ('room', 'room_category', 'date', 'rooms_booked', 'is_available', 'booking_summary', 'booking_status')
+    list_filter = ('is_available', 'date', 'room__category', 'room', 'booking__status')
+    search_fields = ('room__title', 'room__category__name', 'booking__booking_uid', 'booking__guest_name', 'booking__guest_email')
+    list_select_related = ('room', 'booking', 'room__category')
+
+    @admin.display(description='Category', ordering='room__category__name')
+    def room_category(self, obj):
+        return obj.room.category.name if obj.room and obj.room.category else '-'
+
+    @admin.display(description='Booking')
+    def booking_summary(self, obj):
+        if not obj.booking:
+            return '-'
+        return format_html(
+            '<strong>{}</strong><br><span style="opacity:.75">{} · {}</span>',
+            obj.booking.guest_name,
+            obj.booking.booking_uid,
+            obj.booking.payment_method,
+        )
+
+    @admin.display(description='Rooms Booked', ordering='rooms_booked')
+    def rooms_booked(self, obj):
+        return obj.rooms_booked if obj.booking else '-'
+
+    @admin.display(description='Booking Status', ordering='booking__status')
+    def booking_status(self, obj):
+        if not obj.booking:
+            return '-'
+        icon = {
+            'draft': '⚪',
+            'pending': '🟡',
+            'confirmed': '🟢',
+            'checked_in': '🔵',
+            'checked_out': '✅',
+            'cancelled': '🔴',
+        }.get(obj.booking.status, '⚪')
+        return f'{icon} {obj.booking.get_status_display()}'

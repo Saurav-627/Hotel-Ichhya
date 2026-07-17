@@ -1,4 +1,5 @@
 from django.db import models
+from decimal import Decimal
 
 class Payment(models.Model):
     GATEWAY_CHOICES = [
@@ -8,6 +9,7 @@ class Payment(models.Model):
     ]
 
     STATUS_CHOICES = [
+        ('draft', 'Draft'),
         ('pending', 'Pending'),
         ('success', 'Success'),
         ('failed', 'Failed'),
@@ -19,6 +21,7 @@ class Payment(models.Model):
     currency = models.ForeignKey('settings_manager.Currency', on_delete=models.PROTECT, related_name='payments', null=True, blank=True)
     transaction_id = models.CharField(max_length=150, unique=True, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    tax_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
     
@@ -32,3 +35,14 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment {self.id} for Booking {self.booking.id} (${self.amount})"
+
+    @property
+    def tax_per_room(self):
+        rooms = getattr(self.booking, 'num_rooms', 1) or 1
+        if rooms <= 1:
+            return self.tax_amount
+        return Decimal(self.tax_amount) / Decimal(rooms)
+
+    @property
+    def amount_ex_tax(self):
+        return Decimal(self.amount) - Decimal(self.tax_amount)

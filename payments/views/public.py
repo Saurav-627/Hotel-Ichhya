@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db import transaction
 from django.http import HttpResponse, Http404
 from django.urls import reverse
 from booking.models.booking import Booking
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 def process_payment(request, booking_uid, gateway):
     booking = get_object_or_404(Booking, booking_uid=booking_uid)
     
-    if booking.status != 'pending':
+    if booking.status not in {'draft', 'pending'}:
         return HttpResponse("This booking has already been processed.")
 
     if gateway not in ['stripe', 'esewa', 'khalti']:
@@ -27,18 +28,17 @@ def process_payment(request, booking_uid, gateway):
     # Fetch payment processor metadata
     processor_meta = PaymentProcessor.objects.filter(code=gateway, is_published=True).first()
 
-    # Update booking tax and total based on apply_tax setting
-    if processor_meta and not processor_meta.apply_tax:
-        # No tax applies for this processor!
-        booking.tax = Decimal("0.00")
-        booking.total = booking.subtotal - booking.discount
-        booking.save(update_fields=['tax', 'total'])
+    taxable_amount = booking.subtotal - booking.discount
+    tax_amount = Decimal('0.00')
+    if processor_meta and processor_meta.apply_tax:
+        tax_pct = Decimal(str(booking.room.tax_percentage or 0))
+        tax_amount = taxable_amount * (tax_pct / Decimal('100.00'))
+        booking.tax = tax_amount
+        booking.total = taxable_amount + tax_amount
     else:
-        # Recalculate standard tax based on the room's tax percentage
-        tax_pct = Decimal(str(booking.room.tax_percentage))
-        booking.tax = (booking.subtotal - booking.discount) * (tax_pct / Decimal("100.00"))
-        booking.total = (booking.subtotal - booking.discount) + booking.tax
-        booking.save(update_fields=['tax', 'total'])
+        booking.tax = Decimal('0.00')
+        booking.total = taxable_amount
+    booking.save(update_fields=['tax', 'total'])
 
     # Determine currency
     currency_obj = None
@@ -55,6 +55,7 @@ def process_payment(request, booking_uid, gateway):
         currency=currency_obj,
         transaction_id=transaction_id,
         amount=booking.total,
+        tax_amount=tax_amount,
         status='pending'
     )
 
@@ -76,7 +77,7 @@ def process_payment(request, booking_uid, gateway):
         return_url = request.build_absolute_uri(reverse('payments:payment_callback', args=[payment.id]))
 
         kwargs = {
-            'tax_amount': float(booking.tax)
+            'tax_amount': float(tax_amount)
         }
 
         if gateway == 'khalti':
@@ -138,10 +139,25 @@ def payment_callback(request, payment_id):
 
     if gateway == 'stripe':
         # Keep simulated success for stripe
-        payment.status = 'success'
-        payment.save()
-        booking.status = 'confirmed'
-        booking.save()
+        with transaction.atomic():
+            from rooms.models.room import Room
+
+            Room.objects.select_for_update().get(pk=booking.room_id)
+            if not booking.has_room_availability():
+                payment.status = 'failed'
+                payment.gateway_response = 'Room inventory changed before confirmation.'
+                payment.save(update_fields=['status', 'gateway_response'])
+                booking.status = 'draft'
+                booking.save(update_fields=['status'])
+
+                message = 'Payment could not be confirmed because the room is no longer available. The booking remains a draft.'
+                return render(request, 'payments/success.html', {'booking': booking, 'payment': payment, 'message': message})
+
+            payment.status = 'success'
+            payment.save(update_fields=['status'])
+            booking.status = 'confirmed'
+            booking.save(update_fields=['status'])
+
         message = f"Payment of {booking.room.currency} {payment.amount} successful via Stripe!"
         return render(request, 'payments/success.html', {'booking': booking, 'payment': payment, 'message': message})
 
@@ -164,51 +180,59 @@ def payment_callback(request, payment_id):
         )
 
         if validation_result.status == PaymentValidationResult.Status.SUCCESS:
-            payment.status = 'success'
-            payment.save()
-            booking.status = 'confirmed'
-            booking.save()
+            with transaction.atomic():
+                from rooms.models.room import Room
 
-            # Log callback parameters
-            payment.gateway_response = json.dumps(dict(request.GET))
-            payment.save(update_fields=['gateway_response'])
+                Room.objects.select_for_update().get(pk=booking.room_id)
+                if not booking.has_room_availability():
+                    payment.status = 'failed'
+                    payment.gateway_response = 'Room inventory changed before confirmation.'
+                    payment.save(update_fields=['status', 'gateway_response'])
+                    booking.status = 'draft'
+                    booking.save(update_fields=['status'])
+
+                    return render(request, 'payments/success.html', {
+                        'booking': booking,
+                        'payment': payment,
+                        'message': f"Payment succeeded, but the room is no longer available. The booking remains a draft."
+                    })
+
+                payment.status = 'success'
+                payment.gateway_response = json.dumps(dict(request.GET))
+                payment.save(update_fields=['status', 'gateway_response'])
+                booking.status = 'confirmed'
+                booking.save(update_fields=['status'])
 
             message = f"Payment of {booking.room.currency} {payment.amount} successful via {gateway.upper()}!"
             return render(request, 'payments/success.html', {'booking': booking, 'payment': payment, 'message': message})
 
         elif validation_result.status == PaymentValidationResult.Status.PENDING:
             payment.status = 'pending'
-            payment.save()
+            payment.save(update_fields=['status'])
+            booking.status = 'draft'
+            booking.save(update_fields=['status'])
             return render(request, 'payments/success.html', {
                 'booking': booking,
                 'payment': payment,
-                'message': f"Payment is pending. Please verify with {gateway.upper()}."
+                'message': f"Payment is pending. Please verify with {gateway.upper()}. The booking is still a draft until payment completes."
             })
         else:
             payment.status = 'failed'
-            payment.save()
-
-            # Release blocked dates and mark booking as cancelled
-            booking.status = 'cancelled'
-            booking.save()
-            from rooms.models.room_availability import RoomAvailability
-            RoomAvailability.objects.filter(booking=booking).delete()
+            payment.save(update_fields=['status'])
+            booking.status = 'draft'
+            booking.save(update_fields=['status'])
 
             return render(request, 'payments/success.html', {
                 'booking': booking,
                 'payment': payment,
-                'message': f"Payment validation failed for {gateway.upper()}."
+                'message': f"Payment validation failed for {gateway.upper()}. The booking remains a draft."
             })
 
     except Exception as e:
         payment.status = 'failed'
-        payment.save()
-
-        # Release blocked dates and mark booking as cancelled
-        booking.status = 'cancelled'
-        booking.save()
-        from rooms.models.room_availability import RoomAvailability
-        RoomAvailability.objects.filter(booking=booking).delete()
+        payment.save(update_fields=['status'])
+        booking.status = 'draft'
+        booking.save(update_fields=['status'])
 
         logger.error(f"Callback error for payment {payment_id}: {e}")
         return render(request, 'payments/success.html', {
@@ -216,7 +240,6 @@ def payment_callback(request, payment_id):
             'payment': payment,
             'message': f"Payment callback error: {e}"
         })
-
 
 def view_invoice(request, booking_uid):
     booking = get_object_or_404(Booking, booking_uid=booking_uid)

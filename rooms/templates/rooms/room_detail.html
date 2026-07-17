@@ -140,10 +140,12 @@
             checkOut: new URLSearchParams(window.location.search).get('check_out') || new Date(new Date().getTime() + 2*24*60*60*1000).toISOString().split('T')[0],
             adults: parseInt(new URLSearchParams(window.location.search).get('adults')) || 2,
             children: parseInt(new URLSearchParams(window.location.search).get('children')) || 0,
+            numRooms: 1,
+            maxRooms: {{ room.total_rooms }},
             showModal: false,
             basePrice: {{ room.base_price }},
             roomCurrency: '{{ room.currency }}',
-            taxPercentage: {{ room.tax_percentage|default:13 }},
+            taxPercentage: {{ room.tax_percentage|default:0 }},
             checkingAvailability: false,
             isAvailable: true,
             errorMessage: '',
@@ -157,10 +159,10 @@
                 return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             },
             get subtotal() {
-                return this.basePrice * this.nights;
+                return this.basePrice * this.nights * this.numRooms;
             },
             get tax() {
-                return this.subtotal * (this.taxPercentage / 100);
+                return this.taxPercentage > 0 ? this.subtotal * (this.taxPercentage / 100) : 0;
             },
             get total() {
                 return this.subtotal + this.tax;
@@ -186,7 +188,7 @@
                 this.checkingAvailability = true;
                 this.errorMessage = '';
                 try {
-                    const res = await fetch(`/rooms/api/{{ room.id }}/check-availability/?check_in=${this.checkIn}&check_out=${this.checkOut}`);
+                    const res = await fetch(`/rooms/api/{{ room.id }}/check-availability/?check_in=${this.checkIn}&check_out=${this.checkOut}&num_rooms=${this.numRooms}`);
                     if (!res.ok) {
                         throw new Error('Error checking availability');
                     }
@@ -194,6 +196,8 @@
                     this.isAvailable = data.available;
                     if (data.available) {
                         this.showModal = true;
+                    } else if (data.available_rooms > 0) {
+                        this.errorMessage = `Only ${data.available_rooms} room${data.available_rooms === 1 ? '' : 's'} available for the selected dates.`;
                     } else {
                         this.errorMessage = 'This room is not available for the selected dates. Please adjust your dates.';
                     }
@@ -211,16 +215,44 @@
                      'bg-white border-gray-200': currentTheme === 'light',
                      'bg-[#161412] border-amber-900/20': currentTheme !== 'light'
                  }">
-                <div class="border-b pb-4 mb-6 border-gray-200">
+                <div class="border-b pb-4 mb-6 border-gray-200" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
                     <span class="text-xs uppercase opacity-75 font-semibold text-gray-500">Starting from</span>
-                    <h3 class="font-luxury-title text-4xl font-extrabold text-luxuryGold-800 mt-1">
+                    <h3 class="font-luxury-title text-4xl font-extrabold mt-1" :class="{ 'text-luxuryGold-800': currentTheme === 'light', 'text-amber-250': currentTheme !== 'light' }">
                         <span>{{ room.currency }} {{ room.base_price }}</span>
                         <span class="text-sm font-normal opacity-75">/night</span>
                     </h3>
                     {% if room.discount_price %}
                     <p class="text-xs line-through opacity-50 mt-1">Was <span>{{ room.currency }} {{ room.discount_price }}</span></p>
                     {% endif %}
-                    <p class="text-[10px] opacity-75 mt-2">Prices exclude {{ room.tax_percentage }}% Local Taxes & VAT</p>
+                    {% if room.tax_percentage %}
+                    <p class="text-[10px] opacity-75 mt-2">Prices include {{ room.tax_percentage }}% Local Taxes & VAT</p>
+                    {% endif %}
+
+                    <!-- Live Price Summary Widget in Sidebar -->
+                    <div class="mt-4 pt-4 border-t border-gray-200/50" :style="{ borderColor: currentTheme !== 'light' ? '#92400e22' : '#e5e7eb' }" x-show="nights > 0">
+                        <div class="flex justify-between text-xs opacity-75">
+                            <span>Stay Duration:</span>
+                            <span class="font-semibold" x-text="nights + (nights === 1 ? ' night' : ' nights')"></span>
+                        </div>
+                        <div class="flex justify-between text-xs opacity-75 mt-1.5">
+                             <span>Rooms:</span>
+                             <span class="font-semibold" x-text="numRooms + (numRooms === 1 ? ' room' : ' rooms')"></span>
+                        </div>
+                        <div class="flex justify-between text-xs opacity-75 mt-1.5">
+                             <span>Subtotal:</span>
+                             <span class="font-semibold tabular-nums" x-text="roomCurrency + ' ' + subtotal.toFixed(2)"></span>
+                        </div>
+                        <template x-if="taxPercentage > 0">
+                            <div class="flex justify-between text-xs opacity-75 mt-1.5">
+                                 <span>Tax (<span x-text="taxPercentage"></span>%)</span>
+                                 <span class="font-semibold tabular-nums" x-text="roomCurrency + ' ' + tax.toFixed(2)"></span>
+                            </div>
+                        </template>
+                        <div class="flex justify-between text-sm font-bold text-luxuryGold-500 mt-3 pt-2.5 border-t border-dashed" :style="{ borderColor: currentTheme !== 'light' ? '#92400e22' : '#e5e7eb' }">
+                             <span>Est. Total{% if room.tax_percentage %} (incl. tax){% endif %}:</span>
+                             <span class="tabular-nums" x-text="roomCurrency + ' ' + total.toFixed(2)"></span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Initiate Booking Form -->
@@ -257,6 +289,27 @@
                         </div>
                     </div>
 
+                    <!-- Number of Rooms counter -->
+                    <div>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">No. of Rooms</label>
+                        <div class="flex items-center gap-3">
+                            <button type="button"
+                                    @click="if(numRooms > 1) numRooms--"
+                                    :disabled="numRooms <= 1"
+                                    :class="numRooms <= 1 ? 'opacity-30 cursor-not-allowed' : 'hover:opacity-70 cursor-pointer'"
+                                    class="w-9 h-9 rounded-lg border flex items-center justify-center text-base font-bold flex-shrink-0 transition"
+                                    :style="{ borderColor: currentTheme !== 'light' ? '#92400e66' : '#d1d5db' }">−</button>
+                            <span class="text-sm font-bold w-5 text-center" x-text="numRooms"></span>
+                            <button type="button"
+                                    @click="if(numRooms < maxRooms) numRooms++"
+                                    :disabled="numRooms >= maxRooms"
+                                    :class="numRooms >= maxRooms ? 'opacity-30 cursor-not-allowed' : 'hover:opacity-70 cursor-pointer'"
+                                    class="w-9 h-9 rounded-lg border flex items-center justify-center text-base font-bold flex-shrink-0 transition"
+                                    :style="{ borderColor: currentTheme !== 'light' ? '#92400e66' : '#d1d5db' }">+</button>
+                            <span class="text-[10px] opacity-50">max <span x-text="maxRooms"></span></span>
+                        </div>
+                    </div>
+
                     <div x-show="errorMessage" class="p-3 rounded-lg border border-red-500/20 bg-red-500/10 text-red-500 text-xs mt-2" style="display: none;">
                         <p x-text="errorMessage"></p>
                     </div>
@@ -268,7 +321,7 @@
                                 'opacity-50 cursor-wait': checkingAvailability,
                                 'cursor-pointer': !checkingAvailability
                             }">
-                        <span x-show="!checkingAvailability">Confirm & Reserve</span>
+                        <span x-show="!checkingAvailability">Continue to Guest Details</span>
                         <span x-show="checkingAvailability" style="display: none;">Checking Availability...</span>
                     </button>
                 </form>
@@ -282,7 +335,7 @@
                          }">
                         
                         <div class="flex items-center justify-between pb-4 border-b border-amber-900/10 mb-6">
-                            <h3 class="font-luxury-title text-2xl font-bold tracking-wide">Complete Your Reservation</h3>
+                            <h3 class="font-luxury-title text-2xl font-bold tracking-wide">Complete Your Draft Booking</h3>
                             <button @click="showModal = false" type="button" class="p-2 rounded-lg hover:bg-luxuryGold-900/10 transition-colors">
                                 <i class="fa-solid fa-xmark text-lg"></i>
                             </button>
@@ -291,6 +344,10 @@
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             <!-- Left: Guest Details Form (2 Cols) -->
                             <div class="lg:col-span-2 space-y-6">
+                                <div class="rounded-xl border px-4 py-3 text-xs" :class="{ 'bg-amber-500/10 border-amber-500/20 text-amber-900': currentTheme === 'light', 'bg-amber-900/10 border-amber-900/20 text-amber-100': currentTheme !== 'light' }">
+                                    <p class="font-semibold">Draft booking only</p>
+                                    <p>Your room is not reserved yet. It becomes confirmed only after payment succeeds.</p>
+                                </div>
                                 <form method="POST" action="{% url 'booking:create_booking' room.id %}" class="space-y-6">
                                     {% csrf_token %}
                                     <!-- Hidden stay inputs -->
@@ -298,6 +355,7 @@
                                     <input type="hidden" name="check_out" :value="checkOut">
                                     <input type="hidden" name="adults" :value="adults">
                                     <input type="hidden" name="children" :value="children">
+                                    <input type="hidden" name="num_rooms" :value="numRooms">
                                     
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                         <div>
@@ -345,7 +403,7 @@
                                                     'bg-amber-800 text-white': currentTheme === 'light',
                                                     'bg-luxuryGold-500 text-black gold-glow': currentTheme !== 'light'
                                                 }">
-                                            Confirm Booking
+                                            Save Draft & Continue
                                         </button>
                                     </div>
                                 </form>
@@ -383,19 +441,25 @@
                                         <span x-show="children > 0">, <span x-text="children"></span>C</span>
                                     </span>
                                 </div>
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="opacity-70 shrink-0">Rooms</span>
+                                    <span class="font-semibold tabular-nums" x-text="numRooms + (numRooms === 1 ? ' Room' : ' Rooms')"></span>
+                                </div>
 
                                 <div class="flex items-center justify-between gap-2">
                                     <span class="opacity-70 shrink-0">Rate/night</span>
-                                    <span class="tabular-nums" x-text="roomCurrency + ' ' + basePrice.toFixed(2)"></span>
+                                    <span class="tabular-nums" x-text="roomCurrency + ' ' + basePrice.toFixed(2) + ' / room'"></span>
                                 </div>
                                 <div class="flex items-center justify-between gap-2">
                                     <span class="opacity-70 shrink-0">Subtotal</span>
                                     <span class="tabular-nums" x-text="roomCurrency + ' ' + subtotal.toFixed(2)"></span>
                                 </div>
-                                <div class="flex items-center justify-between gap-2">
-                                    <span class="opacity-70 shrink-0">Tax (<span x-text="taxPercentage"></span>%)</span>
-                                    <span class="tabular-nums" x-text="roomCurrency + ' ' + tax.toFixed(2)"></span>
-                                </div>
+                                <template x-if="taxPercentage > 0">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="opacity-70 shrink-0">Tax (<span x-text="taxPercentage"></span>%)</span>
+                                        <span class="tabular-nums" x-text="roomCurrency + ' ' + tax.toFixed(2)"></span>
+                                    </div>
+                                </template>
 
                                 <div class="flex items-center justify-between gap-2 text-sm font-bold text-luxuryGold-500 border-t pt-2 mt-1"
                                      :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
