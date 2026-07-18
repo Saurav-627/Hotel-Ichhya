@@ -1,5 +1,5 @@
 from django.contrib import admin
-from unfold.admin import ModelAdmin
+from django.contrib.admin import ModelAdmin
 from .models.hotel_settings import HotelSettings
 from .models.navigation import NavigationMenu
 from .models.currency import Currency

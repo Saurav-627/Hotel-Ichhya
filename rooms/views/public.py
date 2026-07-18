@@ -1,8 +1,12 @@
 from django.views.generic import ListView, DetailView
-from django.db.models import Q, Sum
+from django.db.models import Sum
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+import datetime
 from ..models.room import Room
 from ..models.room_facility import RoomFacility
 from ..models.room_category import RoomCategory
+from ..models.room_availability import RoomAvailability
 
 class RoomListView(ListView):
     model = Room
@@ -79,11 +83,6 @@ class RoomDetailView(DetailView):
 
     def get_queryset(self):
         return super().get_queryset().filter(is_published=True).prefetch_related('images', 'facilities', 'policies', 'seasonal_prices')
-
-from django.http import JsonResponse
-from django.views.decorators.http import require_GET
-import datetime
-from ..models.room_availability import RoomAvailability
 
 @require_GET
 def check_room_availability(request, room_id):

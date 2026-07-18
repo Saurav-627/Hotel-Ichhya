@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from unfold.admin import ModelAdmin, TabularInline
+from django.contrib.admin import ModelAdmin, TabularInline
 from .models.room_category import RoomCategory
 from .models.room import Room
 from .models.room_image import RoomImage

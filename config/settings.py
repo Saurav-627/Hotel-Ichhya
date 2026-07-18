@@ -1,7 +1,5 @@
-import os
 from pathlib import Path
 import environ
-from django.templatetags.static import static
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,7 +28,7 @@ AUTH_USER_MODEL = 'accounts.User'
 # Application definition
 INSTALLED_APPS = [
     # Custom Dashboard App
-    'dashboard.apps.DashboardConfig',
+    'admin_dashboard.apps.AdminDashboardConfig',
     
     # Django Default Apps
     'django.contrib.admin',

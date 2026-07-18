@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     # Custom Admin Dashboard
-    path('admin/', include('dashboard.urls', namespace='dashboard')),
+    path('admin/', include('admin_dashboard.urls', namespace='admin_dashboard')),
     
     # Native Django Admin (Developer fallback)
     path('django-admin/', admin.site.urls),

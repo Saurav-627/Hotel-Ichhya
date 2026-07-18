@@ -11,7 +11,6 @@ dependencies = [
     "django-environ>=0.14.0",
     "django-imagekit>=6.1.0",
     "django-import-export>=4.4.1",
-    "django-unfold>=0.100.0",
     "gunicorn>=26.0.0",
     "pillow>=12.3.0",
     "psycopg2-binary>=2.9.12",
@@ -19,5 +18,13 @@ dependencies = [
     "redis>=8.0.1",
     "requests>=2.32.3",
     "whitenoise>=6.12.0",
+]
+
+[tool.pyrefly]
+search_path = ["."]
+
+[dependency-groups]
+dev = [
+    "django-stubs>=6.0.7",
 ]
 

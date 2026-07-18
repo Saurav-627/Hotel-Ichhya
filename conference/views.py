@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView
 from django.contrib import messages
 from django import forms

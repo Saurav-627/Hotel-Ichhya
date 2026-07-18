@@ -1,12 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from rooms.models.room import Room
 from rooms.models.room_availability import RoomAvailability
 from django.db.models import Sum
 from ..models.booking import Booking
 from ..models.coupon import Coupon
 import datetime
+import json
 
 
 @require_POST
@@ -107,10 +110,6 @@ def checkout_page(request, booking_uid):
     booking = get_object_or_404(Booking, booking_uid=booking_uid)
     return render(request, 'booking/checkout.html', {'booking': booking})
 
-import json
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-
 @csrf_exempt
 @require_POST
 def channel_manager_sync(request):
@@ -153,7 +152,6 @@ def channel_manager_sync(request):
     # Calculate price
     nights = (check_out - check_in).days
     subtotal = room.base_price * nights
-    tax = 0
     total = subtotal
     
     if not booking:

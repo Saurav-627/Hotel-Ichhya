@@ -1,22 +1,21 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from unfold.admin import ModelAdmin, TabularInline
 from .models.payment import Payment
 from .models.payment_processor import PaymentProcessor, PaymentProcessorCurrency
 
-class PaymentProcessorCurrencyInline(TabularInline):
+class PaymentProcessorCurrencyInline(admin.TabularInline):
     model = PaymentProcessorCurrency
     extra = 1
 
 @admin.register(PaymentProcessor)
-class PaymentProcessorAdmin(ModelAdmin):
+class PaymentProcessorAdmin(admin.ModelAdmin):
     list_display = ('name', 'code', 'apply_tax', 'is_published')
     list_filter = ('apply_tax', 'is_published')
     search_fields = ('name', 'code')
     inlines = [PaymentProcessorCurrencyInline]
 
 @admin.register(Payment)
-class PaymentAdmin(ModelAdmin):
+class PaymentAdmin(admin.ModelAdmin):
     list_display = ('id', 'get_booking', 'transaction_id', 'gateway', 'get_currency_iso', 'amount_ex_tax', 'tax_amount', 'status_badge', 'created_at')
     list_filter = ('gateway', 'status', 'created_at', 'currency')
     search_fields = ('transaction_id', 'booking__booking_uid', 'booking__guest_name')
