@@ -103,8 +103,8 @@
                                     {{ booking.check_out|timeuntil:booking.check_in }}
                                 {% endwith %}
                             </td>
-                            <td class="py-4 px-4 text-right">{{ booking.room.currency }} {{ booking.room.base_price }}</td>
-                            <td class="py-4 px-4 text-right">{{ booking.room.currency }} {{ booking.subtotal }}</td>
+                            <td class="py-4 px-4 text-right">{{ booking.currency_code }} {{ booking.room.base_price }}</td>
+                            <td class="py-4 px-4 text-right">{{ booking.currency_code }} {{ booking.subtotal }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -116,29 +116,29 @@
             <div class="w-full max-w-xs space-y-3 text-sm text-gray-600">
                 <div class="flex justify-between">
                     <span>Subtotal</span>
-                    <span>{{ booking.room.currency }} {{ booking.subtotal|floatformat:2 }}</span>
+                    <span>{{ booking.currency_code }} {{ booking.subtotal|floatformat:2 }}</span>
                 </div>
                 {% if booking.discount > 0 %}
                 <div class="flex justify-between text-green-600">
                     <span>Coupon Discount</span>
-                    <span>-{{ booking.room.currency }} {{ booking.discount|floatformat:2 }}</span>
+                    <span>-{{ booking.currency_code }} {{ booking.discount|floatformat:2 }}</span>
                 </div>
                 {% endif %}
                 {% if payment.tax_amount > 0 %}
                 <div class="flex justify-between">
                     <span>Tax</span>
-                    <span>{{ payment.currency.iso_code|default:booking.room.currency }} {{ payment.tax_amount|floatformat:2 }}</span>
+                    <span>{{ payment.currency.iso_code|default:booking.currency_code }} {{ payment.tax_amount|floatformat:2 }}</span>
                 </div>
                 {% if booking.num_rooms > 1 %}
                 <div class="flex justify-between text-xs text-gray-500">
                     <span>Tax per room</span>
-                    <span>{{ payment.currency.iso_code|default:booking.room.currency }} {{ payment.tax_per_room|floatformat:2 }}</span>
+                    <span>{{ payment.currency.iso_code|default:booking.currency_code }} {{ payment.tax_per_room|floatformat:2 }}</span>
                 </div>
                 {% endif %}
                 {% endif %}
                 <div class="flex justify-between text-lg font-bold text-gray-900 border-t pt-3">
                     <span>Grand Total</span>
-                    <span>{{ payment.currency.iso_code|default:booking.room.currency }} {{ payment.amount|floatformat:2 }}</span>
+                    <span>{{ payment.currency.iso_code|default:booking.currency_code }} {{ payment.amount|floatformat:2 }}</span>
                 </div>
             </div>
         </div>

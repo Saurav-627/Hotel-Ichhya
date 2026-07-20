@@ -15,8 +15,7 @@ class BookingListView(StaffRequiredMixin, ListView):
     paginate_by = 15
 
     def get_queryset(self):
-        # pyrefly: ignore [missing-attribute]
-        queryset = Booking.objects.all().select_related('room', 'room__category')
+        queryset = Booking.objects.all().select_related('room', 'room__category').prefetch_related('room__currency_prices__currency')
         
         # Search query
         q = self.request.GET.get('search', '').strip()
@@ -56,6 +55,16 @@ class BookingDetailView(StaffRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # Prefetch currency prices for the booking room
+        from django.db.models import Prefetch
+        from rooms.models.room_currency_price import RoomCurrencyPrice
+        # Resolve the booking's currency by looking at the subtotal-stored currency (fallback: first available price)
+        booking = self.object
+        if booking and booking.room:
+            # Use the first available price as the display currency for the invoice (price was copied at booking time)
+            first_cp = booking.room.currency_prices.first()
+            if first_cp:
+                booking.room.set_active_currency(first_cp.currency.iso_code)
         # Fetch payments associated with this booking
         # pyrefly: ignore [missing-attribute]
         context['payments'] = Payment.objects.filter(booking=self.object).order_by('-created_at')

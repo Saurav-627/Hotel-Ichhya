@@ -143,8 +143,8 @@
             numRooms: 1,
             maxRooms: {{ room.total_rooms }},
             showModal: false,
-            basePrice: {{ room.base_price }},
-            roomCurrency: '{{ room.currency }}',
+            basePrice: {{ room.base_price|default:0 }},
+            roomCurrency: '{{ room.currency.iso_code|default:"USD" }}',
             taxPercentage: {{ room.tax_percentage|default:0 }},
             checkingAvailability: false,
             isAvailable: true,
@@ -218,11 +218,11 @@
                 <div class="border-b pb-4 mb-6 border-gray-200" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
                     <span class="text-xs uppercase opacity-75 font-semibold text-gray-500">Starting from</span>
                     <h3 class="font-luxury-title text-4xl font-extrabold mt-1" :class="{ 'text-luxuryGold-800': currentTheme === 'light', 'text-amber-250': currentTheme !== 'light' }">
-                        <span>{{ room.currency }} {{ room.base_price }}</span>
+                        <span>{{ room.currency.iso_code }} {{ room.base_price }}</span>
                         <span class="text-sm font-normal opacity-75">/night</span>
                     </h3>
                     {% if room.discount_price %}
-                    <p class="text-xs line-through opacity-50 mt-1">Was <span>{{ room.currency }} {{ room.discount_price }}</span></p>
+                    <p class="text-xs line-through opacity-50 mt-1">Was <span>{{ room.currency.iso_code }} {{ room.discount_price }}</span></p>
                     {% endif %}
                     {% if room.tax_percentage %}
                     <p class="text-[10px] opacity-75 mt-2">Prices include {{ room.tax_percentage }}% Local Taxes & VAT</p>

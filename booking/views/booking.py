@@ -14,7 +14,19 @@ import json
 
 @require_POST
 def create_booking(request, room_id):
-    room = get_object_or_404(Room, id=room_id, is_published=True)
+    from django.db.models import Prefetch
+    from rooms.models.room_currency_price import RoomCurrencyPrice
+    
+    selected_currency = request.COOKIES.get('currency', 'USD')
+    room_qs = Room.objects.prefetch_related(
+        Prefetch(
+            'currency_prices',
+            queryset=RoomCurrencyPrice.objects.filter(currency__iso_code=selected_currency),
+            to_attr='active_currency_price'
+        )
+    )
+    room = get_object_or_404(room_qs, id=room_id, is_published=True)
+    room.set_active_currency(selected_currency)
     
     name = request.POST.get('name')
     email = request.POST.get('email')
@@ -96,6 +108,7 @@ def create_booking(request, room_id):
         children=children,
         num_rooms=num_rooms,
         subtotal=subtotal,
+        currency_code=selected_currency,
         coupon=coupon,
         discount=discount,
         tax=tax,
@@ -107,7 +120,21 @@ def create_booking(request, room_id):
     return redirect('booking:checkout_page', booking_uid=booking.booking_uid)
 
 def checkout_page(request, booking_uid):
-    booking = get_object_or_404(Booking, booking_uid=booking_uid)
+    from django.db.models import Prefetch
+    from rooms.models.room_currency_price import RoomCurrencyPrice
+    
+    selected_currency = request.COOKIES.get('currency', 'USD')
+    
+    booking_qs = Booking.objects.prefetch_related(
+        Prefetch(
+            'room__currency_prices',
+            queryset=RoomCurrencyPrice.objects.filter(currency__iso_code=selected_currency),
+            to_attr='active_currency_price'
+        )
+    )
+    booking = get_object_or_404(booking_qs, booking_uid=booking_uid)
+    booking.room.set_active_currency(selected_currency)
+    
     return render(request, 'booking/checkout.html', {'booking': booking})
 
 @csrf_exempt
@@ -136,7 +163,7 @@ def channel_manager_sync(request):
         return JsonResponse({'status': 'error', 'message': 'Missing required fields'}, status=400)
         
     try:
-        room = Room.objects.get(id=room_id)
+        room = Room.objects.prefetch_related('currency_prices').get(id=room_id)
     except Room.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Room not found'}, status=404)
         

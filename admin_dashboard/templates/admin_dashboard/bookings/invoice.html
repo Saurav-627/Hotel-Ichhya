@@ -144,8 +144,8 @@
                     <small style="color: #666;">Room Category: {{ booking.room.category.name }}</small>
                 </td>
                 <td>{{ booking.num_rooms }} room(s)</td>
-                <td>{{ booking.room.currency }} {{ booking.room.base_price }}</td>
-                <td style="text-align: right;">{{ booking.room.currency }} {{ booking.subtotal }}</td>
+                <td>{{ booking.room.currency_prices.first.currency.iso_code|default:booking.currency_code }} {{ booking.room.base_price }}</td>
+                <td style="text-align: right;">{{ booking.currency_code }} {{ booking.subtotal }}</td>
             </tr>
         </tbody>
     </table>
@@ -154,21 +154,21 @@
         <table class="total-table">
             <tr>
                 <td>Subtotal</td>
-                <td style="text-align: right;">{{ booking.room.currency }} {{ booking.subtotal }}</td>
+                <td style="text-align: right;">{{ booking.currency_code }} {{ booking.subtotal }}</td>
             </tr>
             {% if booking.coupon %}
             <tr style="color: green;">
                 <td>Discount ({{ booking.coupon.code }})</td>
-                <td style="text-align: right;">-{{ booking.room.currency }} {{ booking.discount }}</td>
+                <td style="text-align: right;">-{{ booking.currency_code }} {{ booking.discount }}</td>
             </tr>
             {% endif %}
             <tr>
                 <td>Tax (Standard VAT)</td>
-                <td style="text-align: right;">{{ booking.room.currency }} {{ booking.tax }}</td>
+                <td style="text-align: right;">{{ booking.currency_code }} {{ booking.tax }}</td>
             </tr>
             <tr class="total-row">
                 <td>Total Charged</td>
-                <td style="text-align: right;">{{ booking.room.currency }} {{ booking.total }}</td>
+                <td style="text-align: right;">{{ booking.currency_code }} {{ booking.total }}</td>
             </tr>
         </table>
         <div class="clear"></div>
@@ -193,7 +193,7 @@
                     <td>{{ p.transaction_id }}</td>
                     <td style="text-transform: uppercase;">{{ p.gateway }}</td>
                     <td style="color: green; font-weight: bold;">{{ p.get_status_display }}</td>
-                    <td style="text-align: right; font-weight: bold;">{{ p.currency.iso_code|default:booking.room.currency }} {{ p.amount }}</td>
+                    <td style="text-align: right; font-weight: bold;">{{ p.currency.iso_code|default:booking.currency_code }} {{ p.amount }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

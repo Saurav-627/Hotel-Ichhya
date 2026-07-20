@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.db import transaction
 from django.http import HttpResponse, Http404
 from django.urls import reverse
@@ -22,7 +22,6 @@ def process_payment(request, booking_uid, gateway):
         raise Http404("Invalid payment gateway.")
 
     from ..models.payment_processor import PaymentProcessor
-    from settings_manager.models.currency import Currency
     from decimal import Decimal
 
     # Fetch payment processor metadata
@@ -45,7 +44,10 @@ def process_payment(request, booking_uid, gateway):
     if processor_meta:
         currency_obj = processor_meta.payment_currencies.first()
     if not currency_obj:
-        currency_obj = Currency.objects.filter(iso_code=booking.room.currency).first()
+        # Fall back to the first currency price defined for the room
+        first_cp = booking.room.currency_prices.first()
+        if first_cp:
+            currency_obj = first_cp.currency
 
     # Create a pending Payment record with the correct amount and currency
     transaction_id = str(uuid.uuid4())
@@ -158,7 +160,7 @@ def payment_callback(request, payment_id):
             booking.status = 'confirmed'
             booking.save(update_fields=['status'])
 
-        message = f"Payment of {booking.room.currency} {payment.amount} successful via Stripe!"
+        message = f"Payment of {booking.currency_code} {payment.amount} successful via Stripe!"
         return render(request, 'payments/success.html', {'booking': booking, 'payment': payment, 'message': message})
 
     try:
@@ -194,7 +196,7 @@ def payment_callback(request, payment_id):
                     return render(request, 'payments/success.html', {
                         'booking': booking,
                         'payment': payment,
-                        'message': f"Payment succeeded, but the room is no longer available. The booking remains a draft."
+                        'message': "Payment succeeded, but the room is no longer available. The booking remains a draft."
                     })
 
                 payment.status = 'success'
@@ -203,7 +205,7 @@ def payment_callback(request, payment_id):
                 booking.status = 'confirmed'
                 booking.save(update_fields=['status'])
 
-            message = f"Payment of {booking.room.currency} {payment.amount} successful via {gateway.upper()}!"
+            message = f"Payment of {booking.currency_code} {payment.amount} successful via {gateway.upper()}!"
             return render(request, 'payments/success.html', {'booking': booking, 'payment': payment, 'message': message})
 
         elif validation_result.status == PaymentValidationResult.Status.PENDING:

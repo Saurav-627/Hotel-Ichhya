@@ -27,7 +27,28 @@ class HomeView(TemplateView):
 
         context['hero_slides'] = HeroSlide.objects.filter(is_active=True).order_by('order')
         context['about_preview'] = AboutPreview.objects.first()
-        context['featured_rooms'] = Room.objects.filter(is_featured=True, is_published=True, currency=selected_currency)[:3]
+        
+        from django.db.models import Prefetch
+        from rooms.models.room_currency_price import RoomCurrencyPrice
+        
+        rooms = list(Room.objects.filter(
+            is_featured=True,
+            is_published=True,
+            currency_prices__currency__iso_code=selected_currency
+        ).prefetch_related(
+            Prefetch(
+                'currency_prices',
+                queryset=RoomCurrencyPrice.objects.filter(currency__iso_code=selected_currency),
+                to_attr='active_currency_price'
+            ),
+            'images',
+            'facilities'
+        )[:3])
+        
+        for room in rooms:
+            room.set_active_currency(selected_currency)
+            
+        context['featured_rooms'] = rooms
         context['featured_dining'] = DiningVenue.objects.filter(is_featured=True, is_published=True)[:3]
         context['facilities'] = RoomFacility.objects.filter(is_featured=True)
         context['testimonials'] = Testimonial.objects.filter(is_featured=True, is_published=True)[:5]

@@ -2,13 +2,6 @@ from django.db import models
 from django.utils.text import slugify
 
 class Room(models.Model):
-    CURRENCY_CHOICES = [
-        ('USD', 'USD ($)'),
-        ('NPR', 'NPR (₨)'),
-        ('EUR', 'EUR (€)'),
-        ('GBP', 'GBP (£)'),
-    ]
-
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=250, unique=True, blank=True)
     category = models.ForeignKey(
@@ -19,9 +12,6 @@ class Room(models.Model):
     )
     description = models.TextField()
     highlights = models.TextField(help_text="Comma-separated or line-separated list of room highlights")
-    base_price = models.DecimalField(max_digits=10, decimal_places=2)
-    currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default='USD', help_text="Currency of the base and discount price")
-    discount_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, default=None, help_text="Optional tax percentage for this room listing")
     room_size = models.IntegerField(help_text="Size in sq. ft. or sq. meters")
     max_adults = models.IntegerField(default=2)
@@ -36,10 +26,45 @@ class Room(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['base_price']
+        ordering = ['id']
+
+    def set_active_currency(self, currency_code):
+        self._active_currency_code = currency_code
+        if hasattr(self, 'active_currency_price') and self.active_currency_price:
+            # Check if active_currency_price prefetch matches the active currency code
+            matches = [p for p in self.active_currency_price if p.currency.iso_code == currency_code]
+            self._active_price = matches[0] if matches else None
+        else:
+            self._active_price = self.currency_prices.filter(currency__iso_code=currency_code).first()
+
+    @property
+    def base_price(self):
+        active_price = getattr(self, '_active_price', None)
+        if active_price:
+            return active_price.base_price
+        first_price = self.currency_prices.first()
+        return first_price.base_price if first_price else None
+
+    @property
+    def discount_price(self):
+        active_price = getattr(self, '_active_price', None)
+        if active_price:
+            return active_price.discount_price
+        first_price = self.currency_prices.first()
+        return first_price.discount_price if first_price else None
+
+    @property
+    def currency(self):
+        active_price = getattr(self, '_active_price', None)
+        if active_price:
+            return active_price.currency
+        first_price = self.currency_prices.first()
+        return first_price.currency if first_price else None
 
     def __str__(self):
-        return f"{self.title} ({self.currency} {self.base_price}/night)"
+        base_price_val = self.base_price
+        curr_code = self.currency.iso_code if self.currency else 'N/A'
+        return f"{self.title} ({curr_code} {base_price_val}/night)"
 
     def save(self, *args, **kwargs):
         if not self.slug:

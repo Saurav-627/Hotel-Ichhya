@@ -172,6 +172,7 @@ class Command(BaseCommand):
             images = room_data.pop("images", [])
             policies = room_data.pop("policies", [])
             seasonal_prices = room_data.pop("seasonal_prices", [])
+            prices_data = room_data.pop("prices", [])
             
             category_slug = room_data.get("category")
             if category_slug:
@@ -182,6 +183,21 @@ class Command(BaseCommand):
                 slug=slug,
                 defaults={k: v for k, v in room_data.items()}
             )
+            
+            from rooms.models.room_currency_price import RoomCurrencyPrice
+            from settings_manager.models.currency import Currency
+            for p_data in prices_data:
+                ccode = p_data.get("currency")
+                c_obj = Currency.objects.filter(iso_code=ccode).first()
+                if c_obj:
+                    RoomCurrencyPrice.objects.update_or_create(
+                        room=room_obj,
+                        currency=c_obj,
+                        defaults={
+                            'base_price': p_data.get("base_price"),
+                            'discount_price': p_data.get("discount_price")
+                        }
+                    )
             if created:
                 for fname in facility_names:
                     fac = RoomFacility.objects.filter(name=fname).first()

@@ -79,7 +79,7 @@ class Command(BaseCommand):
             ]
             
             try:
-                result = subprocess.run(cmd, env=env, check=True, capture_output=True, text=True)
+                subprocess.run(cmd, env=env, check=True, capture_output=True, text=True)
                 self.stdout.write(self.style.SUCCESS(f"Successfully backed up PostgreSQL database to: {backup_path}"))
             except subprocess.CalledProcessError as e:
                 self.stderr.write(self.style.ERROR(f"pg_dump failed: {e.stderr}"))

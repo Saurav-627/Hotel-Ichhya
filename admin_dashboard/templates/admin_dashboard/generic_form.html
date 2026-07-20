@@ -67,4 +67,28 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const titleInput = document.getElementById('id_title') || document.getElementById('id_name');
+    const slugInput = document.getElementById('id_slug');
+    if (titleInput && slugInput) {
+        let userEditedSlug = slugInput.value.length > 0;
+        function toSlug(str) {
+            return str.toLowerCase().trim()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-');
+        }
+        titleInput.addEventListener('input', function () {
+            if (!userEditedSlug) {
+                slugInput.value = toSlug(this.value);
+            }
+        });
+        slugInput.addEventListener('input', function () {
+            userEditedSlug = this.value.length > 0;
+        });
+    }
+});
+</script>
 {% endblock %}

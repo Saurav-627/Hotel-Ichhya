@@ -18,7 +18,7 @@ def submit_inquiry_ajax(request):
         )
 
     # Save inquiry to database
-    inquiry = ContactInquiry.objects.create(
+    ContactInquiry.objects.create(
         name=name,
         email=email,
         phone=phone,

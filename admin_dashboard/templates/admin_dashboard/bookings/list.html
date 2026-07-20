@@ -92,7 +92,7 @@
                         {{ b.check_out|date:"M d, Y" }}
                     </td>
                     <td class="px-6 py-4 text-neutral-600 dark:text-neutral-400 font-medium">{{ b.num_rooms }}</td>
-                    <td class="px-6 py-4 text-neutral-900 dark:text-neutral-100 font-semibold">{{ b.room.currency }} {{ b.total }}</td>
+                    <td class="px-6 py-4 text-neutral-900 dark:text-neutral-100 font-semibold">{{ b.room.currency.iso_code }} {{ b.total }}</td>
                     <td class="px-6 py-4">
                         <span class="px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase
                                      {% if b.status == 'confirmed' %}bg-emerald-500/10 text-emerald-500

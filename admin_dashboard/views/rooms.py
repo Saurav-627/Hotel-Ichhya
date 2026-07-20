@@ -15,7 +15,8 @@ from rooms.models.room_image import RoomImage
 from rooms.models.room_policy import RoomPolicy
 from rooms.models.room_price import RoomPrice
 from rooms.models.room_availability import RoomAvailability
-from admin_dashboard.forms import RoomForm, RoomCategoryForm, RoomFacilityForm, RoomPriceForm, RoomImageForm, RoomPolicyForm
+from rooms.models.room_currency_price import RoomCurrencyPrice
+from admin_dashboard.forms import RoomForm, RoomCategoryForm, RoomFacilityForm, RoomPriceForm, RoomImageForm, RoomPolicyForm, RoomCurrencyPriceForm
 
 # Formsets for inline editing on Room
 RoomImageFormSet = inlineformset_factory(
@@ -33,11 +34,16 @@ RoomPriceFormSet = inlineformset_factory(
     fields=('name', 'start_date', 'end_date', 'price_override', 'is_active'), 
     extra=2, can_delete=True
 )
+RoomCurrencyPriceFormSet = inlineformset_factory(
+    Room, RoomCurrencyPrice, form=RoomCurrencyPriceForm,
+    fields=('currency', 'base_price', 'discount_price'),
+    extra=2, can_delete=True
+)
 
 class RoomDashboardView(StaffRequiredMixin, View):
     def get(self, request):
         # pyrefly: ignore [missing-attribute]
-        rooms = Room.objects.all().select_related('category')
+        rooms = Room.objects.all().select_related('category').prefetch_related('currency_prices__currency')
         # pyrefly: ignore [missing-attribute]
         categories = RoomCategory.objects.all()
         # pyrefly: ignore [missing-attribute]
@@ -51,17 +57,25 @@ class RoomDashboardView(StaffRequiredMixin, View):
             'active_tab': active_tab,
         })
 
+def get_category_inventory_map():
+    import json
+    from rooms.models.room_category import RoomCategory
+    return json.dumps({str(c.id): c.total_rooms for c in RoomCategory.objects.all()})
+
 class RoomCreateView(StaffRequiredMixin, View):
     def get(self, request):
         form = RoomForm()
         image_formset = RoomImageFormSet()
         policy_formset = RoomPolicyFormSet()
         price_formset = RoomPriceFormSet()
+        currency_price_formset = RoomCurrencyPriceFormSet()
         return render(request, 'admin_dashboard/rooms/form.html', {
             'form': form,
             'image_formset': image_formset,
             'policy_formset': policy_formset,
             'price_formset': price_formset,
+            'currency_price_formset': currency_price_formset,
+            'category_inventory_map': get_category_inventory_map(),
             'title': 'Add New Room'
         })
         
@@ -72,11 +86,13 @@ class RoomCreateView(StaffRequiredMixin, View):
             image_formset = RoomImageFormSet(request.POST, request.FILES, instance=room)
             policy_formset = RoomPolicyFormSet(request.POST, instance=room)
             price_formset = RoomPriceFormSet(request.POST, instance=room)
+            currency_price_formset = RoomCurrencyPriceFormSet(request.POST, instance=room)
             
-            if image_formset.is_valid() and policy_formset.is_valid() and price_formset.is_valid():
+            if image_formset.is_valid() and policy_formset.is_valid() and price_formset.is_valid() and currency_price_formset.is_valid():
                 image_formset.save()
                 policy_formset.save()
                 price_formset.save()
+                currency_price_formset.save()
                 messages.success(request, "Room created successfully.")
                 return redirect('admin_dashboard:room_dashboard')
             else:
@@ -86,12 +102,15 @@ class RoomCreateView(StaffRequiredMixin, View):
             image_formset = RoomImageFormSet(request.POST, request.FILES)
             policy_formset = RoomPolicyFormSet(request.POST)
             price_formset = RoomPriceFormSet(request.POST)
+            currency_price_formset = RoomCurrencyPriceFormSet(request.POST)
             
         return render(request, 'admin_dashboard/rooms/form.html', {
             'form': form,
             'image_formset': image_formset,
             'policy_formset': policy_formset,
             'price_formset': price_formset,
+            'currency_price_formset': currency_price_formset,
+            'category_inventory_map': get_category_inventory_map(),
             'title': 'Add New Room'
         })
 
@@ -102,11 +121,14 @@ class RoomUpdateView(StaffRequiredMixin, View):
         image_formset = RoomImageFormSet(instance=room)
         policy_formset = RoomPolicyFormSet(instance=room)
         price_formset = RoomPriceFormSet(instance=room)
+        currency_price_formset = RoomCurrencyPriceFormSet(instance=room)
         return render(request, 'admin_dashboard/rooms/form.html', {
             'form': form,
             'image_formset': image_formset,
             'policy_formset': policy_formset,
             'price_formset': price_formset,
+            'currency_price_formset': currency_price_formset,
+            'category_inventory_map': get_category_inventory_map(),
             'room': room,
             'title': f'Edit Room: {room.title}'
         })
@@ -117,12 +139,14 @@ class RoomUpdateView(StaffRequiredMixin, View):
         image_formset = RoomImageFormSet(request.POST, request.FILES, instance=room)
         policy_formset = RoomPolicyFormSet(request.POST, instance=room)
         price_formset = RoomPriceFormSet(request.POST, instance=room)
+        currency_price_formset = RoomCurrencyPriceFormSet(request.POST, instance=room)
         
-        if form.is_valid() and image_formset.is_valid() and policy_formset.is_valid() and price_formset.is_valid():
+        if form.is_valid() and image_formset.is_valid() and policy_formset.is_valid() and price_formset.is_valid() and currency_price_formset.is_valid():
             form.save()
             image_formset.save()
             policy_formset.save()
             price_formset.save()
+            currency_price_formset.save()
             messages.success(request, "Room updated successfully.")
             return redirect('admin_dashboard:room_dashboard')
             
@@ -131,6 +155,8 @@ class RoomUpdateView(StaffRequiredMixin, View):
             'image_formset': image_formset,
             'policy_formset': policy_formset,
             'price_formset': price_formset,
+            'currency_price_formset': currency_price_formset,
+            'category_inventory_map': get_category_inventory_map(),
             'room': room,
             'title': f'Edit Room: {room.title}'
         })
@@ -301,17 +327,16 @@ class RoomBulkPriceUpdateView(StaffRequiredMixin, View):
             messages.warning(request, "No rooms selected for bulk pricing update.")
             return redirect('admin_dashboard:room_dashboard')
             
-        # pyrefly: ignore [missing-attribute]
-        rooms = Room.objects.filter(id__in=room_ids)
-        for room in rooms:
+        from rooms.models.room_currency_price import RoomCurrencyPrice
+        currency_prices = RoomCurrencyPrice.objects.filter(room_id__in=room_ids)
+        for cp in currency_prices:
             if adjustment_type == 'percentage':
-                # e.g. 10 means +10%, -5 means -5%
-                room.base_price = room.base_price * (Decimal('1') + adjustment_value / Decimal('100'))
+                cp.base_price = cp.base_price * (Decimal('1') + adjustment_value / Decimal('100'))
             else:
-                room.base_price = room.base_price + adjustment_value
-            room.save()
+                cp.base_price = cp.base_price + adjustment_value
+            cp.save()
             
-        messages.success(request, f"Bulk updated base price for {rooms.count()} room(s).")
+        messages.success(request, f"Bulk updated base price for {len(room_ids)} room(s).")
         return redirect('admin_dashboard:room_dashboard')
 
 class RoomBulkPublishView(StaffRequiredMixin, View):

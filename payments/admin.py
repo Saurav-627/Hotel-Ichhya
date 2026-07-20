@@ -61,12 +61,12 @@ class PaymentAdmin(admin.ModelAdmin):
 
     @admin.display(description='Tax')
     def tax_amount(self, obj):
-        currency = obj.currency.iso_code if obj.currency else (obj.booking.room.currency if obj.booking and obj.booking.room else '-')
+        currency = obj.currency.iso_code if obj.currency else (obj.booking.currency_code if obj.booking else '-')
         return f'{currency} {obj.tax_amount:.2f}'
 
     @admin.display(description='Amount', ordering='amount')
     def amount_ex_tax(self, obj):
-        currency = obj.currency.iso_code if obj.currency else (obj.booking.room.currency if obj.booking and obj.booking.room else '-')
+        currency = obj.currency.iso_code if obj.currency else (obj.booking.currency_code if obj.booking else '-')
         amount = obj.amount_ex_tax if hasattr(obj, 'amount_ex_tax') else (obj.amount - obj.tax_amount)
         return f'{currency} {amount:.2f}'
 

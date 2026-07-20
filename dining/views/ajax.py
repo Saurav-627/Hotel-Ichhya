@@ -35,7 +35,7 @@ def book_table_ajax(request, venue_id):
         )
 
     # Save reservation
-    reservation = DiningReservation.objects.create(
+    DiningReservation.objects.create(
         venue=venue,
         name=name,
         email=email,

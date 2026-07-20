@@ -26,9 +26,9 @@
         <div class="p-6 rounded-xl border max-w-md mx-auto animate__animated animate__zoomIn" 
              :class="{ 'bg-gray-50 border-gray-200': currentTheme === 'light', 'bg-[#0A0908] border-amber-900/10': currentTheme !== 'light' }">
             <span class="text-xs uppercase opacity-75">Payable Amount</span>
-            <h2 class="font-luxury-title text-4xl font-bold text-luxuryGold-500 mt-1">{{ booking.room.currency }} {{ booking.total|floatformat:2 }}</h2>
+            <h2 class="font-luxury-title text-4xl font-bold text-luxuryGold-500 mt-1">{{ booking.room.currency.iso_code }} {{ booking.total|floatformat:2 }}</h2>
             {% if booking.discount > 0 %}
-                <p class="text-xs text-green-400 mt-2"><i class="fa-solid fa-tags mr-1"></i>Saved <span>{{ booking.room.currency }} {{ booking.discount|floatformat:2 }}</span> via Promo Code!</p>
+                <p class="text-xs text-green-400 mt-2"><i class="fa-solid fa-tags mr-1"></i>Saved <span>{{ booking.room.currency.iso_code }} {{ booking.discount|floatformat:2 }}</span> via Promo Code!</p>
             {% endif %}
         </div>
 
@@ -37,7 +37,7 @@
             <h3 class="text-xs font-semibold tracking-widest uppercase opacity-75">Choose Payment Gateway</h3>
             
             <!-- Stripe -->
-            {% if booking.room.currency|upper != 'NPR' %}
+            {% if booking.room.currency.iso_code|upper != 'NPR' %}
             <a href="{% url 'payments:process_payment' booking.booking_uid 'stripe' %}" 
                @click.prevent="gatewayName = 'Stripe'; redirectUrl = $el.getAttribute('href'); showModal = true; statusText = 'Initializing secure handshake...'; setTimeout(() => { statusText = 'Establishing PCI-DSS secure connection...'; }, 1000); setTimeout(() => { window.location.href = redirectUrl; }, 2500)"
                class="flex items-center justify-between p-4 rounded-xl border hover:scale-[1.03] hover:shadow-lg duration-300 transition-all cursor-pointer bg-blue-900/10 border-blue-900/30 group animate__animated animate__fadeInUp"
@@ -75,7 +75,7 @@
             {% endif %}
 
             <!-- eSewa -->
-            {% if booking.room.currency|upper == 'NPR' %}
+            {% if booking.room.currency.iso_code|upper == 'NPR' %}
             <a href="{% url 'payments:process_payment' booking.booking_uid 'esewa' %}" 
                @click.prevent="gatewayName = 'eSewa Wallet'; redirectUrl = $el.getAttribute('href'); showModal = true; statusText = 'Connecting to eSewa API...'; setTimeout(() => { statusText = 'Verifying merchant wallet handshake...'; }, 1000); setTimeout(() => { window.location.href = redirectUrl; }, 2500)"
                class="flex items-center justify-between p-4 rounded-xl border hover:scale-[1.03] hover:shadow-lg duration-300 transition-all cursor-pointer bg-green-900/10 border-green-900/30 group animate__animated animate__fadeInUp"
@@ -197,7 +197,7 @@
             {% endif %}
 
             <!-- Khalti -->
-            {% if booking.room.currency|upper == 'NPR' %}
+            {% if booking.room.currency.iso_code|upper == 'NPR' %}
             <a href="{% url 'payments:process_payment' booking.booking_uid 'khalti' %}" 
                @click.prevent="gatewayName = 'Khalti SDK'; redirectUrl = $el.getAttribute('href'); showModal = true; statusText = 'Initializing Khalti payment session...'; setTimeout(() => { statusText = 'Authorizing secure transaction portal...'; }, 1000); setTimeout(() => { window.location.href = redirectUrl; }, 2500)"
                class="flex items-center justify-between p-4 rounded-xl border hover:scale-[1.03] hover:shadow-lg duration-300 transition-all cursor-pointer bg-purple-900/10 border-purple-900/30 group animate__animated animate__fadeInUp"

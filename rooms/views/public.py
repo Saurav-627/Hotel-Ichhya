@@ -29,7 +29,18 @@ class RoomListView(ListView):
         except Exception:
             selected_currency = 'USD'
 
-        queryset = queryset.filter(currency=selected_currency)
+        queryset = queryset.filter(currency_prices__currency__iso_code=selected_currency)
+        
+        # Prefetch the active currency price
+        from django.db.models import Prefetch
+        from rooms.models.room_currency_price import RoomCurrencyPrice
+        queryset = queryset.prefetch_related(
+            Prefetch(
+                'currency_prices',
+                queryset=RoomCurrencyPrice.objects.filter(currency__iso_code=selected_currency),
+                to_attr='active_currency_price'
+            )
+        )
         
         # Filtering parameters
         category = self.request.GET.get('category')
@@ -46,16 +57,16 @@ class RoomListView(ListView):
                 pass
         if price_min:
             try:
-                queryset = queryset.filter(base_price__gte=float(price_min))
+                queryset = queryset.filter(currency_prices__currency__iso_code=selected_currency, currency_prices__base_price__gte=float(price_min))
             except ValueError:
                 pass
         if price_max:
             try:
-                queryset = queryset.filter(base_price__lte=float(price_max))
+                queryset = queryset.filter(currency_prices__currency__iso_code=selected_currency, currency_prices__base_price__lte=float(price_max))
             except ValueError:
                 pass
                 
-        return queryset.prefetch_related('images', 'facilities')
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -65,13 +76,18 @@ class RoomListView(ListView):
         # Resolve active currency symbol
         from settings_manager.models.currency import Currency
         try:
-            published_currencies = list(Currency.objects.filter(is_published=True))
             default_currency = 'USD'
             selected_currency = self.request.COOKIES.get('currency', default_currency)
             currency_obj = Currency.objects.filter(iso_code=selected_currency, is_published=True).first()
             context['selected_currency_symbol'] = currency_obj.symbol if currency_obj else '$'
         except Exception:
+            selected_currency = 'USD'
             context['selected_currency_symbol'] = '$'
+            
+        # Set active currency context on all rooms on the current page
+        rooms = context.get('rooms', [])
+        for r in rooms:
+            r.set_active_currency(selected_currency)
             
         return context
 
@@ -82,7 +98,33 @@ class RoomDetailView(DetailView):
     slug_url_kwarg = 'slug'
 
     def get_queryset(self):
-        return super().get_queryset().filter(is_published=True).prefetch_related('images', 'facilities', 'policies', 'seasonal_prices')
+        selected_currency = self.request.COOKIES.get('currency', 'USD')
+        from django.db.models import Prefetch
+        from rooms.models.room_currency_price import RoomCurrencyPrice
+        return super().get_queryset().filter(is_published=True).prefetch_related(
+            'images', 'facilities', 'policies', 'seasonal_prices',
+            Prefetch(
+                'currency_prices',
+                queryset=RoomCurrencyPrice.objects.filter(currency__iso_code=selected_currency),
+                to_attr='active_currency_price'
+            )
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        selected_currency = self.request.COOKIES.get('currency', 'USD')
+        if self.object:
+            self.object.set_active_currency(selected_currency)
+        
+        # Resolve active currency symbol
+        from settings_manager.models.currency import Currency
+        try:
+            currency_obj = Currency.objects.filter(iso_code=selected_currency, is_published=True).first()
+            context['selected_currency_symbol'] = currency_obj.symbol if currency_obj else '$'
+        except Exception:
+            context['selected_currency_symbol'] = '$'
+            
+        return context
 
 @require_GET
 def check_room_availability(request, room_id):

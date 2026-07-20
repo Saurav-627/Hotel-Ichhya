@@ -99,10 +99,48 @@ class RoomCategoryForm(TailwindFormMixin, forms.ModelForm):
         model = RoomCategory
         fields = '__all__'
 
+from rooms.models.room_currency_price import RoomCurrencyPrice
+
 class RoomForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
         model = Room
+        exclude = ['created_at', 'updated_at']
+
+class RoomCurrencyPriceForm(TailwindFormMixin, forms.ModelForm):
+    class Meta:
+        model = RoomCurrencyPrice
         fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['currency'].required = False
+        self.fields['base_price'].required = False
+
+    def clean(self):
+        cleaned_data = super().clean()
+        currency = cleaned_data.get('currency')
+        base_price = cleaned_data.get('base_price')
+
+        # If one is provided, both must be provided
+        if currency and base_price is None:
+            self.add_error('base_price', 'Base price is required when currency is selected.')
+        elif base_price is not None and not currency:
+            self.add_error('currency', 'Currency is required when base price is entered.')
+            
+        return cleaned_data
+
+    def has_changed(self):
+        # If both fields are submitted empty/blank, treat the form as unchanged so Django ignores it
+        prefix = self.prefix
+        curr_key = f"{prefix}-currency" if prefix else "currency"
+        price_key = f"{prefix}-base_price" if prefix else "base_price"
+        
+        curr_val = self.data.get(curr_key)
+        price_val = self.data.get(price_key)
+        
+        if not curr_val and not price_val:
+            return False
+        return super().has_changed()
 
 class RoomImageForm(TailwindFormMixin, forms.ModelForm):
     class Meta:

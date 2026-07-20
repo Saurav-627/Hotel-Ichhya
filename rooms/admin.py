@@ -19,6 +19,12 @@ class RoomCategoryAdmin(ModelAdmin):
     list_editable = ('total_rooms', 'order', 'is_published')
     prepopulated_fields = {'slug': ('name',)}
 
+from .models.room_currency_price import RoomCurrencyPrice
+
+class RoomCurrencyPriceInline(TabularInline):
+    model = RoomCurrencyPrice
+    extra = 2
+
 class RoomPolicyInline(TabularInline):
     model = RoomPolicy
     extra = 1
@@ -29,22 +35,37 @@ class RoomPriceInline(TabularInline):
 
 @admin.register(Room)
 class RoomAdmin(ModelAdmin):
-    list_display = ('title', 'category', 'base_price', 'discount_price', 'tax_amount', 'price_with_tax_display', 'currency', 'inventory_rooms', 'is_published', 'is_featured')
-    list_filter = ('category', 'currency', 'is_published', 'is_featured', 'facilities')
+    list_display = ('title', 'category', 'base_price_display', 'tax_amount', 'price_with_tax_display', 'inventory_rooms', 'is_published', 'is_featured')
+    list_filter = ('category', 'is_published', 'is_featured', 'facilities')
     search_fields = ('title', 'description', 'highlights')
     prepopulated_fields = {'slug': ('title',)}
-    inlines = [RoomImageInline, RoomPolicyInline, RoomPriceInline]
+    inlines = [RoomCurrencyPriceInline, RoomImageInline, RoomPolicyInline, RoomPriceInline]
     actions = ['duplicate_room']
+
+    @admin.display(description='Prices')
+    def base_price_display(self, obj):
+        prices = obj.currency_prices.all()
+        if not prices:
+            return "No prices defined"
+        return ", ".join([f"{p.currency.iso_code} {p.base_price:.2f}" for p in prices])
 
     @admin.display(description='Tax')
     def tax_amount(self, obj):
         tax_pct = obj.tax_percentage or 0
-        amount = obj.final_price * (tax_pct / 100)
-        return f'{obj.currency} {amount:.2f}'
+        final_p = obj.final_price
+        if final_p is None:
+            return "N/A"
+        amount = final_p * (tax_pct / 100)
+        curr = obj.currency.iso_code if obj.currency else "N/A"
+        return f'{curr} {amount:.2f}'
 
     @admin.display(description='Total Amount')
     def price_with_tax_display(self, obj):
-        return f'{obj.currency} {obj.price_with_tax:.2f}'
+        price = obj.price_with_tax
+        if price is None:
+            return "N/A"
+        curr = obj.currency.iso_code if obj.currency else "N/A"
+        return f'{curr} {price:.2f}'
 
     @admin.display(description='Rooms')
     def inventory_rooms(self, obj):
@@ -79,6 +100,11 @@ class RoomAdmin(ModelAdmin):
                 price.pk = None
                 price.room = room
                 price.save()
+
+            for cp in original_room.currency_prices.all():
+                cp.pk = None
+                cp.room = room
+                cp.save()
 
             count += 1
 

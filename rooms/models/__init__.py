@@ -5,6 +5,7 @@ from .room_image import RoomImage
 from .room_price import RoomPrice
 from .room_policy import RoomPolicy
 from .room_availability import RoomAvailability
+from .room_currency_price import RoomCurrencyPrice
 
 __all__ = [
     'RoomCategory',
@@ -14,4 +15,5 @@ __all__ = [
     'RoomPrice',
     'RoomPolicy',
     'RoomAvailability',
+    'RoomCurrencyPrice',
 ]

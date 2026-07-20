@@ -30,6 +30,7 @@ class Booking(models.Model):
     
     # Pricing fields
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
+    currency_code = models.CharField(max_length=10, default='USD', help_text="Currency ISO code used when booking was created")
     coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings')
     discount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     tax = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)

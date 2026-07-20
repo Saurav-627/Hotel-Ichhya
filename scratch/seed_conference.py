@@ -4,7 +4,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
-from conference.models.venue import EventVenue
+from conference.models.venue import EventVenue  # noqa: E402
 
 venues_data = [
     {
