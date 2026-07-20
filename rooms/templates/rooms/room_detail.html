@@ -149,6 +149,24 @@
             checkingAvailability: false,
             isAvailable: true,
             errorMessage: '',
+            async updateMaxRooms() {
+                if (!this.checkIn || !this.checkOut) {
+                    this.maxRooms = {{ room.total_rooms }};
+                    return;
+                }
+                try {
+                    const res = await fetch(`/rooms/api/{{ room.id }}/check-availability/?check_in=${this.checkIn}&check_out=${this.checkOut}&num_rooms=1`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        this.maxRooms = data.available_rooms;
+                        if (this.numRooms > this.maxRooms) {
+                            this.numRooms = Math.max(1, this.maxRooms);
+                        }
+                    }
+                } catch(e) {
+                    console.error('Error updating max rooms:', e);
+                }
+            },
             
             get nights() {
                 if (!this.checkIn || !this.checkOut) return 0;
@@ -210,6 +228,10 @@
                 }
             },
             init() {
+                this.$watch('checkIn', () => this.updateMaxRooms());
+                this.$watch('checkOut', () => this.updateMaxRooms());
+                this.updateMaxRooms();
+
                 const initPickers = () => {
                     if (typeof AirDatepicker === 'undefined') {
                         setTimeout(initPickers, 50);
@@ -368,7 +390,7 @@
                                     :class="numRooms >= maxRooms ? 'opacity-30 cursor-not-allowed' : 'hover:opacity-70 cursor-pointer'"
                                     class="w-9 h-9 rounded-lg border flex items-center justify-center text-base font-bold flex-shrink-0 transition"
                                     :style="{ borderColor: currentTheme !== 'light' ? '#92400e66' : '#d1d5db' }">+</button>
-                            <span class="text-[10px] opacity-50">max <span x-text="maxRooms"></span></span>
+                            <span class="text-[10px] opacity-50">Available Number of Rooms is <span class="font-bold" x-text="maxRooms"></span></span>
                         </div>
                     </div>
 
