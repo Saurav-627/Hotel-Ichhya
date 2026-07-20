@@ -115,4 +115,8 @@ urlpatterns = [
     path('settings/menu/add/', settings.NavigationMenuCreateView.as_view(), name='menu_create'),
     path('settings/menu/<int:pk>/edit/', settings.NavigationMenuUpdateView.as_view(), name='menu_edit'),
     path('settings/menu/<int:pk>/delete/', settings.NavigationMenuDeleteView.as_view(), name='menu_delete'),
+    
+    path('settings/processor/add/', settings.PaymentProcessorCreateView.as_view(), name='processor_create'),
+    path('settings/processor/<int:pk>/edit/', settings.PaymentProcessorUpdateView.as_view(), name='processor_edit'),
+    path('settings/processor/<int:pk>/delete/', settings.PaymentProcessorDeleteView.as_view(), name='processor_delete'),
 ]

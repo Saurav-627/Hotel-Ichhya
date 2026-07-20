@@ -356,26 +356,31 @@ class Command(BaseCommand):
         from settings_manager.models.currency import Currency
         
         processors_to_seed = data.get("payment_processors", [])
-
         
         for p_data in processors_to_seed:
             code = p_data['code']
-            processor, created = PaymentProcessor.objects.get_or_create(
-                code=code,
-                defaults={
-                    'name': p_data['name'],
-                    'apply_tax': p_data['apply_tax'],
-                    'is_published': p_data['is_published']
-                }
-            )
-            if created:
-                self.stdout.write(self.style.SUCCESS(f"Created payment processor: {p_data['name']}"))
+            existing = PaymentProcessor._base_manager.filter(code=code).first()
+            if existing:
+                if not existing.is_active:
+                    existing.is_active = True
+                    existing.deleted_at = None
+                    existing.save()
+                    self.stdout.write(self.style.SUCCESS(f"Restored soft-deleted payment processor: {p_data['name']}"))
+                else:
+                    self.stdout.write(self.style.WARNING(f"Payment processor '{p_data['name']}' already exists. Skipping."))
+                processor = existing
             else:
-                self.stdout.write(self.style.WARNING(f"Payment processor '{p_data['name']}' already exists. Skipping."))
+                processor = PaymentProcessor.objects.create(
+                    code=code,
+                    name=p_data['name'],
+                    apply_tax=p_data['apply_tax'],
+                    is_published=p_data['is_published']
+                )
+                self.stdout.write(self.style.SUCCESS(f"Created payment processor: {p_data['name']}"))
                 
             # Associate currencies
             for cur_code in p_data['currencies']:
-                currency_obj = Currency.objects.filter(iso_code=cur_code).first()
+                currency_obj = Currency.objects.get_queryset().set_active_test(enabled=False).filter(iso_code=cur_code).first()
                 if currency_obj:
                     PaymentProcessorCurrency.objects.get_or_create(
                         payment_processor=processor,

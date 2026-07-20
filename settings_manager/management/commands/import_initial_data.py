@@ -136,4 +136,52 @@ class Command(BaseCommand):
                 SEOData.objects.create(**seo)
                 self.stdout.write(self.style.SUCCESS(f"Created SEO data: {path}"))
 
+        # 5. Import / Seed Payment Processors (per-item, keyed by code)
+        processors = data.get("payment_processors", [])
+        if processors:
+            from payments.models.payment_processor import PaymentProcessor, PaymentProcessorCurrency
+            
+            for p_data in processors:
+                code = p_data.get("code")
+                if not code:
+                    continue
+                
+                existing = PaymentProcessor._base_manager.filter(code=code).first()
+                if existing:
+                    if do_update:
+                        existing.name = p_data.get("name", existing.name)
+                        existing.apply_tax = p_data.get("apply_tax", existing.apply_tax)
+                        existing.is_published = p_data.get("is_published", existing.is_published)
+                        existing.is_active = True
+                        existing.deleted_at = None
+                        existing.save()
+                        self.stdout.write(self.style.SUCCESS(f"Updated payment processor: {code}"))
+                    else:
+                        if not existing.is_active:
+                            existing.is_active = True
+                            existing.deleted_at = None
+                            existing.save()
+                            self.stdout.write(self.style.SUCCESS(f"Restored soft-deleted payment processor: {code}"))
+                        else:
+                            self.stdout.write(self.style.WARNING(f"Payment processor '{code}' already exists. Skipping."))
+                    processor = existing
+                else:
+                    processor = PaymentProcessor.objects.create(
+                        name=p_data.get("name"),
+                        code=code,
+                        apply_tax=p_data.get("apply_tax", True),
+                        is_published=p_data.get("is_published", True),
+                    )
+                    self.stdout.write(self.style.SUCCESS(f"Created payment processor: {code}"))
+                
+                # Associate currencies
+                currency_codes = p_data.get("payment_currencies", [])
+                for cc in currency_codes:
+                    curr = Currency.objects.get_queryset().set_active_test(enabled=False).filter(iso_code=cc).first()
+                    if curr:
+                        PaymentProcessorCurrency.objects.get_or_create(
+                            payment_processor=processor,
+                            currency=curr
+                        )
+
         self.stdout.write(self.style.SUCCESS("Initial data import completed!"))

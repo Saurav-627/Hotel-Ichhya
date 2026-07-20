@@ -58,11 +58,34 @@ class DashboardHomeView(StaffRequiredMixin, TemplateView):
         ).aggregate(total=Sum('amount'))['total'] or 0
         
         # pyrefly: ignore [missing-attribute]
+        payments_today = Payment.objects.filter(
+            status='success', 
+            created_at__date=today
+        ).select_related('currency', 'booking')
+        
+        revenue_today_by_currency = {}
+        for p in payments_today:
+            c_code = p.currency.iso_code if p.currency else (p.booking.currency_code if p.booking else 'USD')
+            revenue_today_by_currency[c_code] = revenue_today_by_currency.get(c_code, 0) + p.amount
+        
+        # pyrefly: ignore [missing-attribute]
         revenue_month = Payment.objects.filter(
             status='success',
             created_at__date__gte=start_of_month,
             created_at__date__lte=today
         ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        # pyrefly: ignore [missing-attribute]
+        payments_month = Payment.objects.filter(
+            status='success',
+            created_at__date__gte=start_of_month,
+            created_at__date__lte=today
+        ).select_related('currency', 'booking')
+        
+        revenue_month_by_currency = {}
+        for p in payments_month:
+            c_code = p.currency.iso_code if p.currency else (p.booking.currency_code if p.booking else 'USD')
+            revenue_month_by_currency[c_code] = revenue_month_by_currency.get(c_code, 0) + p.amount
         
         # 5. Pending Payments (bookings pending/confirmed but payment not successful)
         # pyrefly: ignore [missing-attribute]
@@ -107,7 +130,13 @@ class DashboardHomeView(StaffRequiredMixin, TemplateView):
             # pyrefly: ignore [missing-attribute]
             b_cnt = Booking.objects.filter(created_at__date=date_point).count()
             # pyrefly: ignore [missing-attribute]
-            p_sum = Payment.objects.filter(status='success', created_at__date=date_point).aggregate(total=Sum('amount'))['total'] or 0
+            day_payments = Payment.objects.filter(status='success', created_at__date=date_point).select_related('currency', 'booking')
+            day_rev_by_curr = {}
+            p_sum = 0
+            for p in day_payments:
+                c_code = p.currency.iso_code if p.currency else (p.booking.currency_code if p.booking else 'USD')
+                day_rev_by_curr[c_code] = day_rev_by_curr.get(c_code, 0) + p.amount
+                p_sum += p.amount
             
             rev_height = int((float(p_sum) / max_rev) * 80)
             book_height = int((float(b_cnt) / float(max_book)) * 80)
@@ -120,6 +149,7 @@ class DashboardHomeView(StaffRequiredMixin, TemplateView):
             chart_data.append({
                 'label': date_point.strftime('%b %d'),
                 'revenue': p_sum,
+                'revenue_by_currency': day_rev_by_curr,
                 'bookings': b_cnt,
                 'rev_height': rev_height,
                 'book_height': book_height,
@@ -177,7 +207,9 @@ class DashboardHomeView(StaffRequiredMixin, TemplateView):
             'confirmed_bookings_count': confirmed_bookings_count,
             
             'revenue_today': revenue_today,
+            'revenue_today_by_currency': revenue_today_by_currency,
             'revenue_month': revenue_month,
+            'revenue_month_by_currency': revenue_month_by_currency,
             'pending_payments_count': pending_payments_count,
             
             'dining_reservations_today_count': dining_reservations_today.count(),

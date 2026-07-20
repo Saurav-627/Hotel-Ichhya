@@ -177,3 +177,20 @@ seo_banners:
     header_subtitle: "Resort Journal"
     header_title: "News & Luxury Insights"
     header_description: "Stay updated with our latest festival programs, culinary launches, and travel guides."
+
+payment_processors:
+  - name: "eSewa"
+    code: "esewa"
+    apply_tax: true
+    is_published: true
+    payment_currencies: ["NPR"]
+  - name: "Khalti"
+    code: "khalti"
+    apply_tax: true
+    is_published: true
+    payment_currencies: ["NPR"]
+  - name: "Stripe"
+    code: "stripe"
+    apply_tax: true
+    is_published: true
+    payment_currencies: ["USD"]

@@ -103,7 +103,7 @@
                         <tr>
                             <td class="py-3.5 font-semibold text-neutral-800 dark:text-neutral-200">{{ p.transaction_id }}</td>
                             <td class="py-3.5 text-neutral-600 dark:text-neutral-400 uppercase">{{ p.gateway }}</td>
-                            <td class="py-3.5 text-neutral-900 dark:text-neutral-100 font-medium">{{ p.currency.iso_code|default:booking.room.currency.iso_code }} {{ p.amount }}</td>
+                            <td class="py-3.5 text-neutral-900 dark:text-neutral-100 font-medium">{{ p.currency.iso_code|default:booking.currency_code }} {{ p.amount }}</td>
                             <td class="py-3.5">
                                 <span class="px-2 py-0.5 rounded-full text-xs font-bold
                                              {% if p.status == 'success' %}bg-emerald-500/10 text-emerald-500
@@ -185,21 +185,21 @@
             <div class="space-y-2.5 text-sm">
                  <div class="flex justify-between text-neutral-500">
                     <span>Subtotal Price</span>
-                    <span>{{ booking.room.currency.iso_code }} {{ booking.subtotal }}</span>
+                    <span>{{ booking.currency_code }} {{ booking.subtotal }}</span>
                 </div>
                 {% if booking.coupon %}
                 <div class="flex justify-between text-emerald-500 font-medium">
                     <span>Discount ({{ booking.coupon.code }})</span>
-                    <span>-{{ booking.room.currency.iso_code }} {{ booking.discount }}</span>
+                    <span>-{{ booking.currency_code }} {{ booking.discount }}</span>
                 </div>
                 {% endif %}
                 <div class="flex justify-between text-neutral-500">
                     <span>Tax (13% Standard)</span>
-                    <span>{{ booking.room.currency.iso_code }} {{ booking.tax }}</span>
+                    <span>{{ booking.currency_code }} {{ booking.tax }}</span>
                 </div>
                 <div class="flex justify-between font-bold text-neutral-900 dark:text-neutral-100 pt-2 border-t border-neutral-200 dark:border-neutral-800">
                     <span>Total Bill</span>
-                    <span>{{ booking.room.currency.iso_code }} {{ booking.total }}</span>
+                    <span>{{ booking.currency_code }} {{ booking.total }}</span>
                 </div>
             </div>
             

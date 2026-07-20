@@ -7,7 +7,8 @@ from admin_dashboard.mixins import StaffRequiredMixin
 from settings_manager.models.hotel_settings import HotelSettings
 from settings_manager.models.currency import Currency
 from settings_manager.models.navigation import NavigationMenu
-from admin_dashboard.forms import HotelSettingsForm, CurrencyForm, NavigationMenuForm
+from payments.models.payment_processor import PaymentProcessor
+from admin_dashboard.forms import HotelSettingsForm, CurrencyForm, NavigationMenuForm, PaymentProcessorForm
 
 class SettingsDashboardView(StaffRequiredMixin, View):
     def get(self, request):
@@ -21,6 +22,7 @@ class SettingsDashboardView(StaffRequiredMixin, View):
         currencies = Currency.objects.all()
         # pyrefly: ignore [missing-attribute]
         menus = NavigationMenu.objects.all().select_related('parent')
+        processors = PaymentProcessor.objects.all().prefetch_related('payment_currencies')
         
         # Determine active tab
         active_tab = request.GET.get('tab', 'general')
@@ -29,6 +31,7 @@ class SettingsDashboardView(StaffRequiredMixin, View):
             'settings_form': settings_form,
             'currencies': currencies,
             'menus': menus,
+            'processors': processors,
             'active_tab': active_tab,
         })
         
@@ -49,10 +52,12 @@ class SettingsDashboardView(StaffRequiredMixin, View):
         currencies = Currency.objects.all()
         # pyrefly: ignore [missing-attribute]
         menus = NavigationMenu.objects.all()
+        processors = PaymentProcessor.objects.all().prefetch_related('payment_currencies')
         return render(request, 'admin_dashboard/settings_manager.html', {
             'settings_form': settings_form,
             'currencies': currencies,
             'menus': menus,
+            'processors': processors,
             'active_tab': 'general',
         })
 
@@ -109,3 +114,31 @@ class NavigationMenuDeleteView(StaffRequiredMixin, DeleteView):
     def get_success_url(self):
         messages.success(self.request, "Navigation menu item deleted successfully.")
         return reverse('admin_dashboard:settings_dashboard') + "?tab=navigation"
+
+
+# Payment Processor Views
+class PaymentProcessorCreateView(StaffRequiredMixin, CreateView):
+    model = PaymentProcessor
+    form_class = PaymentProcessorForm
+    template_name = 'admin_dashboard/generic_form.html'
+    
+    def get_success_url(self):
+        messages.success(self.request, "Payment processor created successfully.")
+        return reverse('admin_dashboard:settings_dashboard') + "?tab=processors"
+
+class PaymentProcessorUpdateView(StaffRequiredMixin, UpdateView):
+    model = PaymentProcessor
+    form_class = PaymentProcessorForm
+    template_name = 'admin_dashboard/generic_form.html'
+    
+    def get_success_url(self):
+        messages.success(self.request, "Payment processor updated successfully.")
+        return reverse('admin_dashboard:settings_dashboard') + "?tab=processors"
+
+class PaymentProcessorDeleteView(StaffRequiredMixin, DeleteView):
+    model = PaymentProcessor
+    template_name = 'admin_dashboard/confirm_delete.html'
+    
+    def get_success_url(self):
+        messages.success(self.request, "Payment processor deleted successfully.")
+        return reverse('admin_dashboard:settings_dashboard') + "?tab=processors"

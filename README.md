@@ -8,7 +8,9 @@ A premium, high-performance Django-based hospitality and booking management plat
 
 *   **Server-Side Currency Persistence**: Persistent cookie-driven currency switcher (desktop dropdown, mobile sidebar native select) that filters room listings and payment flows dynamically.
 *   **Dynamic Theme System**: Dynamic theme-aware layout styling supporting Light, Dark, Luxury Gold, and Festival modes without client-side render flickering.
-*   **Django Unfold Admin CMS**: Custom-branded administrative dashboard for managing rooms, facilities, nearby attractions, navigation menus, and global configurations.
+*   **Custom Admin Dashboard**: Custom-branded administrative dashboard (`/admin/`) featuring check-ins/check-outs, occupancy analytics, dynamic 7-day charts, recent activity logs, and a dedicated **Payment Processors** CRUD manager tab.
+*   **Multi-Currency Revenue Tracking**: Auto-grouped dashboard revenue statistics today/monthly and daily trend charts categorizing transactions by currency code (e.g. NPR, USD).
+*   **Correct Booking Currency Rendering**: Booking list and details views display the exact currency code used at booking registration rather than defaulting to the base room currency code.
 *   **Responsive Booking Engine**: Full booking initiation flow complete with a dynamic reservation calculator, checkout page, and gateway integrations (Stripe, eSewa, Khalti).
 *   **Optimized Performance**: Packaged with `uv` for lightning-fast Python dependency management and compilation.
 
@@ -25,37 +27,42 @@ A premium, high-performance Django-based hospitality and booking management plat
 
 ## ⚙️ Quick Start & Installation
 
-### 1. Clone & Prepare Environment
-Ensure you have Python and `uv` installed. Run:
+### Option A: Using Makefile (Recommended)
+If you have `make` installed on your system, you can use the single-step helper targets:
 ```bash
-# Sync virtual environment and install dependencies
+# 1. Complete one-step setup (installs environment, runs migrations, and seeds data)
+make setup
+
+# 2. Start local development server (binds on all interfaces)
+make run
+
+# 3. Run the automated test suite
+make test
+```
+
+### Option B: Manual Setup
+If `make` is not available, execute the manual setup commands:
+
+```bash
+# 1. Sync virtual environment and install dependencies
 uv sync
-```
 
-### 2. Database Migrations
-Run the migrations to create the database schema:
-```bash
+# 2. Run the migrations to create the database schema
 uv run python manage.py migrate
-```
 
-### 3. Load Initial Configuration Data
-Load standard default currencies, global settings, and header menu layouts from the YAML file:
-```bash
+# 3. Load currencies, settings, and navigation layout
 uv run python manage.py import_initial_data
-```
 
-### 4. Create Administrative User
-Create a superuser to access the Unfold admin dashboard:
-```bash
+# 4. Import room categories, dining venues, attractions, and test data
+uv run python manage.py seed_all
+
+# 5. Create administrative user
 uv run python manage.py createsuperuser
-```
 
-### 5. Start Development Server
-Run the local server:
-```bash
+# 6. Start development server
 uv run python manage.py runserver
 ```
-Visit the homepage at `http://127.0.0.1:8000/` and the admin portal at `http://127.0.0.1:8000/admin/`.
+Visit the homepage at `http://127.0.0.1:8000/` and the custom admin portal at `http://127.0.0.1:8000/admin/`.
 
 ---
 

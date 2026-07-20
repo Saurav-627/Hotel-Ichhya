@@ -1,5 +1,6 @@
 from django import forms
 from settings_manager.models.hotel_settings import HotelSettings
+from payments.models.payment_processor import PaymentProcessor, PaymentProcessorCurrency
 from settings_manager.models.navigation import NavigationMenu
 from settings_manager.models.currency import Currency
 from homepage.models.hero_slide import HeroSlide
@@ -37,8 +38,11 @@ class TailwindFormMixin:
         for field_name, field in self.fields.items():
             widget = field.widget
             
+            # Checkbox Select Multiple
+            if isinstance(widget, forms.CheckboxSelectMultiple):
+                css_classes = ""
             # Checkbox
-            if isinstance(widget, forms.CheckboxInput):
+            elif isinstance(widget, forms.CheckboxInput):
                 if field_name == 'DELETE':
                     css_classes = "rounded border-neutral-300 dark:border-neutral-700 text-luxuryGold-500 focus:ring-luxuryGold-500 bg-white dark:bg-neutral-800 transition duration-150 ease-in-out cursor-pointer"
                 else:
@@ -115,6 +119,7 @@ class RoomCurrencyPriceForm(TailwindFormMixin, forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['currency'].required = False
         self.fields['base_price'].required = False
+        self.fields['currency'].queryset = Currency.objects.filter(is_published=True)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -241,3 +246,44 @@ class UserForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'phone', 'is_active', 'is_staff', 'is_superuser', 'is_hotel_admin', 'is_guest', 'avatar', 'groups', 'user_permissions']
+
+
+class PaymentProcessorForm(TailwindFormMixin, forms.ModelForm):
+    payment_currencies = forms.ModelMultipleChoiceField(
+        queryset=Currency.objects.filter(is_published=True),
+        widget=forms.CheckboxSelectMultiple(),
+        required=False,
+        label="Supported Currencies"
+    )
+
+    class Meta:
+        model = PaymentProcessor
+        fields = ['name', 'code', 'apply_tax', 'is_published']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields['payment_currencies'].initial = self.instance.payment_currencies.all()
+
+    def save(self, commit=True):
+        processor = super().save(commit=commit)
+        if commit:
+            self.save_currencies(processor)
+        else:
+            original_save_m2m = self.save_m2m
+            def new_save_m2m():
+                original_save_m2m()
+                self.save_currencies(processor)
+            self.save_m2m = new_save_m2m
+        return processor
+
+    def save_currencies(self, processor):
+        selected_currencies = self.cleaned_data.get('payment_currencies', [])
+        PaymentProcessorCurrency.objects.filter(payment_processor=processor).exclude(
+            currency__in=selected_currencies
+        ).delete()
+        for currency in selected_currencies:
+            PaymentProcessorCurrency.objects.get_or_create(
+                payment_processor=processor,
+                currency=currency
+            )
