@@ -13,23 +13,53 @@
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
     <div class="custom-card rounded-2xl p-5">
         <span class="text-xs text-neutral-400 font-semibold uppercase block">Total Net Captures</span>
-        <strong class="text-xl font-bold text-neutral-900 dark:text-neutral-100 block mt-2">NPR {{ total_collected|floatformat:2 }}</strong>
+        <div class="mt-2 space-y-1">
+            {% for cur, val in total_collected.items %}
+                <strong class="text-xl font-bold text-neutral-900 dark:text-neutral-100 block">{{ cur }} {{ val|floatformat:2 }}</strong>
+            {% empty %}
+                <strong class="text-xl font-bold text-neutral-900 dark:text-neutral-100 block">NPR 0.00</strong>
+            {% endfor %}
+        </div>
     </div>
     <div class="custom-card rounded-2xl p-5">
         <span class="text-xs text-neutral-400 font-semibold uppercase block">Stripe Collection</span>
-        <strong class="text-xl font-bold text-neutral-900 dark:text-neutral-100 block mt-2">NPR {{ stripe_collected|floatformat:2 }}</strong>
+        <div class="mt-2 space-y-1">
+            {% for cur, val in stripe_collected.items %}
+                <strong class="text-xl font-bold text-neutral-900 dark:text-neutral-100 block">{{ cur }} {{ val|floatformat:2 }}</strong>
+            {% empty %}
+                <strong class="text-xl font-bold text-neutral-900 dark:text-neutral-100 block">NPR 0.00</strong>
+            {% endfor %}
+        </div>
     </div>
     <div class="custom-card rounded-2xl p-5">
         <span class="text-xs text-neutral-400 font-semibold uppercase block">eSewa Collection</span>
-        <strong class="text-xl font-bold text-neutral-900 dark:text-neutral-100 block mt-2">NPR {{ esewa_collected|floatformat:2 }}</strong>
+        <div class="mt-2 space-y-1">
+            {% for cur, val in esewa_collected.items %}
+                <strong class="text-xl font-bold text-neutral-900 dark:text-neutral-100 block">{{ cur }} {{ val|floatformat:2 }}</strong>
+            {% empty %}
+                <strong class="text-xl font-bold text-neutral-900 dark:text-neutral-100 block">NPR 0.00</strong>
+            {% endfor %}
+        </div>
     </div>
     <div class="custom-card rounded-2xl p-5">
         <span class="text-xs text-neutral-400 font-semibold uppercase block">Khalti Collection</span>
-        <strong class="text-xl font-bold text-neutral-900 dark:text-neutral-100 block mt-2">NPR {{ khalti_collected|floatformat:2 }}</strong>
+        <div class="mt-2 space-y-1">
+            {% for cur, val in khalti_collected.items %}
+                <strong class="text-xl font-bold text-neutral-900 dark:text-neutral-100 block">{{ cur }} {{ val|floatformat:2 }}</strong>
+            {% empty %}
+                <strong class="text-xl font-bold text-neutral-900 dark:text-neutral-100 block">NPR 0.00</strong>
+            {% endfor %}
+        </div>
     </div>
     <div class="custom-card rounded-2xl p-5 border-rose-500/10">
         <span class="text-xs text-rose-500 font-semibold uppercase block">Refund Logs</span>
-        <strong class="text-xl font-bold text-rose-500 block mt-2">NPR {{ refunded_collected|floatformat:2 }}</strong>
+        <div class="mt-2 space-y-1">
+            {% for cur, val in refunded_collected.items %}
+                <strong class="text-xl font-bold text-rose-500 block">{{ cur }} {{ val|floatformat:2 }}</strong>
+            {% empty %}
+                <strong class="text-xl font-bold text-rose-500 block">NPR 0.00</strong>
+            {% endfor %}
+        </div>
     </div>
 </div>
 
