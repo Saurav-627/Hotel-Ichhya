@@ -208,6 +208,68 @@
                 } finally {
                     this.checkingAvailability = false;
                 }
+            },
+            init() {
+                const initPickers = () => {
+                    if (typeof AirDatepicker === 'undefined') {
+                        setTimeout(initPickers, 50);
+                        return;
+                    }
+                    
+                    const formatDate = (d) => {
+                        const year = d.getFullYear();
+                        const month = String(d.getMonth() + 1).padStart(2, '0');
+                        const day = String(d.getDate()).padStart(2, '0');
+                        return `${year}-${month}-${day}`;
+                    };
+                    
+                    fetch(`/rooms/api/{{ room.id }}/booked-dates/`)
+                        .then(r => r.json())
+                        .then(data => {
+                            const booked = data.booked_dates || [];
+                            
+                            const checkInPicker = new AirDatepicker('#room_check_in', {
+                                ...window.defaultAirDatepickerConfig,
+                                minDate: new Date(),
+                                selectedDates: this.checkIn ? [new Date(this.checkIn)] : undefined,
+                                onRenderCell: ({date, cellType}) => {
+                                    if (cellType === 'day') {
+                                        const formatted = formatDate(date);
+                                        if (booked.includes(formatted)) {
+                                            return { disabled: true };
+                                        }
+                                    }
+                                },
+                                onSelect: ({date, formattedDate}) => {
+                                    this.checkIn = formattedDate || '';
+                                    if (checkOutPicker && date) {
+                                        checkOutPicker.update({
+                                            minDate: date
+                                        });
+                                    }
+                                }
+                            });
+                            
+                            const checkOutPicker = new AirDatepicker('#room_check_out', {
+                                ...window.defaultAirDatepickerConfig,
+                                minDate: this.checkIn ? new Date(this.checkIn) : new Date(),
+                                selectedDates: this.checkOut ? [new Date(this.checkOut)] : undefined,
+                                onRenderCell: ({date, cellType}) => {
+                                    if (cellType === 'day') {
+                                        const formatted = formatDate(date);
+                                        if (booked.includes(formatted)) {
+                                            return { disabled: true };
+                                        }
+                                    }
+                                },
+                                onSelect: ({date, formattedDate}) => {
+                                    this.checkOut = formattedDate || '';
+                                }
+                            });
+                        })
+                        .catch(err => console.error('Error loading booked dates:', err));
+                };
+                initPickers();
             }
         }">
             <div class="rounded-2xl p-6 border shadow-xl sticky top-28"
@@ -259,12 +321,12 @@
                 <form @submit.prevent="submitReservation()" class="space-y-4">
                     <div>
                         <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Arrival</label>
-                        <input type="date" name="check_in" x-model="checkIn" required min="{% now 'Y-m-d' %}" class="w-full px-3 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
+                        <input type="text" name="check_in" id="room_check_in" x-model="checkIn" required placeholder="Select check-in date" class="w-full px-3 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-luxuryGold-400 cursor-pointer"
                                :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
                     </div>
                     <div>
                         <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Departure</label>
-                        <input type="date" name="check_out" x-model="checkOut" required min="{% now 'Y-m-d' %}" class="w-full px-3 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
+                        <input type="text" name="check_out" id="room_check_out" x-model="checkOut" required placeholder="Select check-out date" class="w-full px-3 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-luxuryGold-400 cursor-pointer"
                                :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
                     </div>
                     

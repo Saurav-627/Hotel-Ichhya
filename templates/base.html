@@ -44,6 +44,9 @@
     <!-- Animate.css -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
+    <!-- Air Datepicker CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.5.0/air-datepicker.css">
+
     <!-- Tailwind CSS v4 Browser Compiler -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -153,6 +156,88 @@
         a:active, button:active {
             background-color: transparent;
         }
+
+        /* Premium Custom Air Datepicker Theme styling */
+        .air-datepicker {
+            --ad-background-color: var(--card-bg) !important;
+            --ad-text-color: var(--text-color) !important;
+            --ad-border-color: var(--border-color) !important;
+            --ad-selected-background-color: var(--accent-color) !important;
+            --ad-selected-color: #121212 !important;
+            --ad-today-color: var(--accent-color) !important;
+            --ad-font-family: 'Outfit', sans-serif !important;
+            border-radius: 16px !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 0 20px rgba(211, 170, 94, 0.1) !important;
+            border: 1px solid var(--border-color) !important;
+            padding: 8px !important;
+        }
+        .theme-light .air-datepicker {
+            --ad-background-color: #FFFFFF !important;
+            --ad-text-color: #1C1A17 !important;
+            --ad-border-color: #E5E5E5 !important;
+            --ad-selected-color: #000000 !important;
+        }
+        .theme-dark .air-datepicker {
+            --ad-background-color: #1E1E1E !important;
+            --ad-text-color: #E5E5E5 !important;
+            --ad-border-color: #2D2D2D !important;
+            --ad-selected-color: #000000 !important;
+        }
+        .theme-luxury .air-datepicker {
+            --ad-background-color: #161412 !important;
+            --ad-text-color: #E5CC94 !important;
+            --ad-border-color: rgba(229, 204, 148, 0.2) !important;
+            --ad-selected-color: #0A0908 !important;
+        }
+        .theme-festival .air-datepicker {
+            --ad-background-color: #25060A !important;
+            --ad-text-color: #F3E7CA !important;
+            --ad-border-color: rgba(243, 231, 202, 0.25) !important;
+            --ad-selected-color: #3F0C10 !important;
+        }
+        .air-datepicker-cell.-day-.-other-month-, .air-datepicker-cell.-year-.-other-decade- {
+            color: rgba(120, 120, 120, 0.4) !important;
+        }
+        .air-datepicker-cell.-day-.-disabled- {
+            color: rgba(120, 120, 120, 0.3) !important;
+            text-decoration: line-through !important;
+        }
+        .air-datepicker-cell.-today- {
+            font-weight: bold !important;
+            color: var(--accent-color) !important;
+            border: 1px solid var(--accent-color) !important;
+            border-radius: 8px !important;
+        }
+        .air-datepicker-cell.-selected- {
+            background: var(--accent-color) !important;
+            color: var(--bg-color) !important;
+            border-radius: 8px !important;
+        }
+        .air-datepicker-cell.-day- {
+            border-radius: 8px !important;
+        }
+        .air-datepicker-button {
+            color: var(--accent-color) !important;
+            font-weight: 600 !important;
+            border-radius: 8px !important;
+            padding: 4px 8px !important;
+            transition: all 0.2s !important;
+        }
+        .air-datepicker-button:hover {
+            background: rgba(180, 120, 37, 0.15) !important;
+            color: var(--text-color) !important;
+        }
+        .air-datepicker-nav--title, .air-datepicker-nav--title i {
+            color: var(--text-color) !important;
+            font-weight: bold !important;
+        }
+        .air-datepicker-nav--action svg {
+            stroke: var(--text-color) !important;
+        }
+        .air-datepicker-nav--action:hover {
+            background: rgba(180, 120, 37, 0.15) !important;
+            border-radius: 8px !important;
+        }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
@@ -222,6 +307,24 @@
         }
     </style>
     <script>
+        window.defaultAirDatepickerConfig = {
+            locale: {
+                days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                daysShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                daysMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+                months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                today: 'Today',
+                clear: 'Clear',
+                dateFormat: 'yyyy-MM-dd',
+                timeFormat: 'hh:ii aa',
+                firstDay: 0
+            },
+            autoClose: true,
+            buttons: ['today', 'clear'],
+            dateFormat: 'yyyy-MM-dd',
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -261,9 +364,52 @@
                     a.style.borderBottom = '2px solid #D3AA5E';
                 }
             });
+
+            // Automatically upgrade all input[type="date"] elements to Air Datepicker
+            document.querySelectorAll('input[type="date"]').forEach(el => {
+                if (el.id === 'room_check_in' || el.id === 'room_check_out') {
+                    return;
+                }
+                
+                let checkOutEl = null;
+                if (el.name === 'check_in') {
+                    const form = el.closest('form');
+                    if (form) {
+                        checkOutEl = form.querySelector('input[name="check_out"]');
+                    }
+                }
+
+                // Convert to text so native date picker is disabled
+                el.type = 'text';
+                el.placeholder = 'YYYY-MM-DD';
+                el.classList.add('cursor-pointer');
+
+                const minDateVal = el.getAttribute('min');
+                const maxDateVal = el.getAttribute('max');
+
+                const picker = new AirDatepicker(el, {
+                    ...window.defaultAirDatepickerConfig,
+                    minDate: minDateVal ? new Date(minDateVal) : undefined,
+                    maxDate: maxDateVal ? new Date(maxDateVal) : undefined,
+                    onSelect({date}) {
+                        el.dispatchEvent(new Event('input', { bubbles: true }));
+                        el.dispatchEvent(new Event('change', { bubbles: true }));
+                        
+                        if (checkOutEl && checkOutEl.airDatepicker && date) {
+                            checkOutEl.airDatepicker.update({
+                                minDate: date
+                            });
+                        }
+                    }
+                });
+                
+                el.airDatepicker = picker;
+            });
         });
     </script>
 
+    <!-- Air Datepicker JS -->
+    <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.5.0/air-datepicker.js"></script>
 
     {% block extra_js %}{% endblock %}
 </body>

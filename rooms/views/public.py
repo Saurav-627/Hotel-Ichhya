@@ -170,3 +170,29 @@ def check_room_availability(request, room_id):
         'available_rooms': max(0, available_rooms),
     })
 
+
+@require_GET
+def get_room_booked_dates(request, room_id):
+    try:
+        room = Room.objects.get(id=room_id)
+    except Room.DoesNotExist:
+        return JsonResponse({'booked_dates': []}, status=404)
+        
+    # Get all occupancies from today onwards
+    today = datetime.date.today()
+    
+    # We aggregate total booked rooms grouped by date
+    occupancies = RoomAvailability.objects.filter(
+        room__category=room.category,
+        date__gte=today
+    ).values('date').annotate(total_booked=Sum('rooms_booked'))
+    
+    booked_dates = []
+    for occ in occupancies:
+        # If total booked rooms matches or exceeds total rooms of this category
+        if occ['total_booked'] >= room.total_rooms:
+            booked_dates.append(occ['date'].strftime('%Y-%m-%d'))
+            
+    return JsonResponse({'booked_dates': booked_dates})
+
+
