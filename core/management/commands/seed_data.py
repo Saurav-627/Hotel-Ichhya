@@ -184,13 +184,13 @@ class Command(BaseCommand):
                 defaults={k: v for k, v in room_data.items()}
             )
             
-            from rooms.models.room_currency_price import RoomCurrencyPrice
+            from rooms.models.room_base_price import RoomBasePrice
             from settings_manager.models.currency import Currency
             for p_data in prices_data:
                 ccode = p_data.get("currency")
                 c_obj = Currency.objects.filter(iso_code=ccode).first()
                 if c_obj:
-                    RoomCurrencyPrice.objects.update_or_create(
+                    RoomBasePrice.objects.update_or_create(
                         room=room_obj,
                         currency=c_obj,
                         defaults={
@@ -224,9 +224,9 @@ class Command(BaseCommand):
                     )
                 
                 # Seed Room Seasonal Prices
-                from rooms.models.room_price import RoomPrice
+                from rooms.models.room_seasonal_price import RoomSeasonalPrice
                 for prc in seasonal_prices:
-                    RoomPrice.objects.create(
+                    RoomSeasonalPrice.objects.create(
                         room=room_obj,
                         name=prc.get("name"),
                         start_date=prc.get("start_date"),

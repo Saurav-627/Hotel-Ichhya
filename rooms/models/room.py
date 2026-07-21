@@ -35,14 +35,14 @@ class Room(models.Model):
             matches = [p for p in self.active_currency_price if p.currency.iso_code == currency_code]
             self._active_price = matches[0] if matches else None
         else:
-            self._active_price = self.currency_prices.filter(currency__iso_code=currency_code).first()
+            self._active_price = self.base_prices.filter(currency__iso_code=currency_code).first()
 
     @property
     def base_price(self):
         active_price = getattr(self, '_active_price', None)
         if active_price:
             return active_price.base_price
-        first_price = self.currency_prices.first()
+        first_price = self.base_prices.first()
         return first_price.base_price if first_price else None
 
     @property
@@ -50,7 +50,7 @@ class Room(models.Model):
         active_price = getattr(self, '_active_price', None)
         if active_price:
             return active_price.discount_price
-        first_price = self.currency_prices.first()
+        first_price = self.base_prices.first()
         return first_price.discount_price if first_price else None
 
     @property
@@ -58,7 +58,7 @@ class Room(models.Model):
         active_price = getattr(self, '_active_price', None)
         if active_price:
             return active_price.currency
-        first_price = self.currency_prices.first()
+        first_price = self.base_prices.first()
         return first_price.currency if first_price else None
 
     def __str__(self):
@@ -70,6 +70,27 @@ class Room(models.Model):
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
+
+    @property
+    def active_seasonal(self):
+        """Return the active RoomSeasonalPrice override for today matching the active currency, or None."""
+        import datetime
+        today = datetime.date.today()
+        active_currency_code = getattr(self, '_active_currency_code', None)
+        seasonal_qs = getattr(self, '_prefetched_objects_cache', {}).get('seasonal_prices', None)
+        if seasonal_qs is None:
+            seasonal_qs = list(self.seasonal_prices.filter(is_active=True).select_related('currency'))
+        for sp in seasonal_qs:
+            if sp.start_date <= today <= sp.end_date and sp.is_active:
+                if sp.currency_id is None or (active_currency_code and sp.currency.iso_code == active_currency_code):
+                    return sp
+        return None
+
+    @property
+    def current_price(self):
+        """Return today's effective price: seasonal override or base_price."""
+        sp = self.active_seasonal
+        return sp.price_override if sp else self.base_price
 
     @property
     def final_price(self):

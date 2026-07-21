@@ -45,7 +45,7 @@ def process_payment(request, booking_uid, gateway):
         currency_obj = processor_meta.payment_currencies.first()
     if not currency_obj:
         # Fall back to the first currency price defined for the room
-        first_cp = booking.room.currency_prices.first()
+        first_cp = booking.room.base_prices.first()
         if first_cp:
             currency_obj = first_cp.currency
 
@@ -244,12 +244,15 @@ def payment_callback(request, payment_id):
         })
 
 def view_invoice(request, booking_uid):
+    from django.utils import timezone
     booking = get_object_or_404(Booking, booking_uid=booking_uid)
-    payment = booking.payments.filter(status='success').first()
+    booking.room.set_active_currency(booking.currency_code)
+    payments = Payment.objects.filter(booking=booking, status='success')
     
     context = {
         'booking': booking,
-        'payment': payment,
+        'payments': payments,
+        'print_date': timezone.now(),
     }
-    return render(request, 'payments/invoice.html', context)
+    return render(request, 'admin_dashboard/bookings/invoice.html', context)
 

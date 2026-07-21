@@ -29,20 +29,21 @@ class HomeView(TemplateView):
         context['about_preview'] = AboutPreview.objects.first()
         
         from django.db.models import Prefetch
-        from rooms.models.room_currency_price import RoomCurrencyPrice
+        from rooms.models.room_base_price import RoomBasePrice
         
         rooms = list(Room.objects.filter(
             is_featured=True,
             is_published=True,
-            currency_prices__currency__iso_code=selected_currency
+            base_prices__currency__iso_code=selected_currency
         ).prefetch_related(
             Prefetch(
-                'currency_prices',
-                queryset=RoomCurrencyPrice.objects.filter(currency__iso_code=selected_currency),
+                'base_prices',
+                queryset=RoomBasePrice.objects.filter(currency__iso_code=selected_currency),
                 to_attr='active_currency_price'
             ),
             'images',
-            'facilities'
+            'facilities',
+            'seasonal_prices__currency',
         )[:3])
         
         for room in rooms:

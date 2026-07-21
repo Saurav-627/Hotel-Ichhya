@@ -5,7 +5,7 @@ from .models.room_category import RoomCategory
 from .models.room import Room
 from .models.room_image import RoomImage
 from .models.room_facility import RoomFacility
-from .models.room_price import RoomPrice
+from .models.room_seasonal_price import RoomSeasonalPrice
 from .models.room_policy import RoomPolicy
 from .models.room_availability import RoomAvailability
 
@@ -19,10 +19,10 @@ class RoomCategoryAdmin(ModelAdmin):
     list_editable = ('total_rooms', 'order', 'is_published')
     prepopulated_fields = {'slug': ('name',)}
 
-from .models.room_currency_price import RoomCurrencyPrice
+from .models.room_base_price import RoomBasePrice
 
-class RoomCurrencyPriceInline(TabularInline):
-    model = RoomCurrencyPrice
+class RoomBasePriceInline(TabularInline):
+    model = RoomBasePrice
     extra = 2
 
 class RoomPolicyInline(TabularInline):
@@ -30,7 +30,7 @@ class RoomPolicyInline(TabularInline):
     extra = 1
 
 class RoomPriceInline(TabularInline):
-    model = RoomPrice
+    model = RoomSeasonalPrice
     extra = 1
 
 @admin.register(Room)
@@ -39,12 +39,12 @@ class RoomAdmin(ModelAdmin):
     list_filter = ('category', 'is_published', 'is_featured', 'facilities')
     search_fields = ('title', 'description', 'highlights')
     prepopulated_fields = {'slug': ('title',)}
-    inlines = [RoomCurrencyPriceInline, RoomImageInline, RoomPolicyInline, RoomPriceInline]
+    inlines = [RoomBasePriceInline, RoomImageInline, RoomPolicyInline, RoomPriceInline]
     actions = ['duplicate_room']
 
     @admin.display(description='Prices')
     def base_price_display(self, obj):
-        prices = obj.currency_prices.all()
+        prices = obj.base_prices.all()
         if not prices:
             return "No prices defined"
         return ", ".join([f"{p.currency.iso_code} {p.base_price:.2f}" for p in prices])
@@ -101,7 +101,7 @@ class RoomAdmin(ModelAdmin):
                 price.room = room
                 price.save()
 
-            for cp in original_room.currency_prices.all():
+            for cp in original_room.base_prices.all():
                 cp.pk = None
                 cp.room = room
                 cp.save()
@@ -115,7 +115,7 @@ class RoomFacilityAdmin(ModelAdmin):
     list_display = ('name', 'icon_class', 'is_featured')
     search_fields = ('name',)
 
-@admin.register(RoomPrice)
+@admin.register(RoomSeasonalPrice)
 class RoomPriceAdmin(ModelAdmin):
     list_display = ('room', 'name', 'start_date', 'end_date', 'price_override', 'is_active')
     list_filter = ('is_active', 'start_date', 'room')

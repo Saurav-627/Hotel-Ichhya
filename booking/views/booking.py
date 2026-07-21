@@ -15,13 +15,13 @@ import json
 @require_POST
 def create_booking(request, room_id):
     from django.db.models import Prefetch
-    from rooms.models.room_currency_price import RoomCurrencyPrice
+    from rooms.models.room_base_price import RoomBasePrice
     
     selected_currency = request.COOKIES.get('currency', 'USD')
     room_qs = Room.objects.prefetch_related(
         Prefetch(
-            'currency_prices',
-            queryset=RoomCurrencyPrice.objects.filter(currency__iso_code=selected_currency),
+            'base_prices',
+            queryset=RoomBasePrice.objects.filter(currency__iso_code=selected_currency),
             to_attr='active_currency_price'
         )
     )
@@ -72,7 +72,18 @@ def create_booking(request, room_id):
 
     nights = (check_out - check_in).days
     daily_price = room.base_price
-    seasonal = room.seasonal_prices.filter(start_date__lte=check_in, end_date__gte=check_out, is_active=True).first()
+    # Match any seasonal override that overlaps with the booking dates (not just fully covers it).
+    # Currency-specific override wins; wildcard (no currency) is fallback.
+    seasonal = (
+        room.seasonal_prices.filter(
+            start_date__lte=check_out, end_date__gte=check_in, is_active=True,
+            currency__iso_code=selected_currency
+        ).order_by('-start_date').first()
+        or room.seasonal_prices.filter(
+            start_date__lte=check_out, end_date__gte=check_in, is_active=True,
+            currency__isnull=True
+        ).order_by('-start_date').first()
+    )
     if seasonal:
         daily_price = seasonal.price_override
 
@@ -121,14 +132,14 @@ def create_booking(request, room_id):
 
 def checkout_page(request, booking_uid):
     from django.db.models import Prefetch
-    from rooms.models.room_currency_price import RoomCurrencyPrice
+    from rooms.models.room_base_price import RoomBasePrice
     
     selected_currency = request.COOKIES.get('currency', 'USD')
     
     booking_qs = Booking.objects.prefetch_related(
         Prefetch(
-            'room__currency_prices',
-            queryset=RoomCurrencyPrice.objects.filter(currency__iso_code=selected_currency),
+            'room__base_prices',
+            queryset=RoomBasePrice.objects.filter(currency__iso_code=selected_currency),
             to_attr='active_currency_price'
         )
     )
@@ -163,7 +174,7 @@ def channel_manager_sync(request):
         return JsonResponse({'status': 'error', 'message': 'Missing required fields'}, status=400)
         
     try:
-        room = Room.objects.prefetch_related('currency_prices').get(id=room_id)
+        room = Room.objects.prefetch_related('base_prices').get(id=room_id)
     except Room.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Room not found'}, status=404)
         

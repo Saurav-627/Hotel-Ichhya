@@ -13,10 +13,10 @@ from rooms.models.room_category import RoomCategory
 from rooms.models.room_facility import RoomFacility
 from rooms.models.room_image import RoomImage
 from rooms.models.room_policy import RoomPolicy
-from rooms.models.room_price import RoomPrice
+from rooms.models.room_seasonal_price import RoomSeasonalPrice
 from rooms.models.room_availability import RoomAvailability
-from rooms.models.room_currency_price import RoomCurrencyPrice
-from admin_dashboard.forms import RoomForm, RoomCategoryForm, RoomFacilityForm, RoomPriceForm, RoomImageForm, RoomPolicyForm, RoomCurrencyPriceForm
+from rooms.models.room_base_price import RoomBasePrice
+from admin_dashboard.forms import RoomForm, RoomCategoryForm, RoomFacilityForm, RoomPriceForm, RoomImageForm, RoomPolicyForm, RoomBasePriceForm
 
 # Formsets for inline editing on Room
 RoomImageFormSet = inlineformset_factory(
@@ -30,12 +30,12 @@ RoomPolicyFormSet = inlineformset_factory(
     extra=2, can_delete=True
 )
 RoomPriceFormSet = inlineformset_factory(
-    Room, RoomPrice, form=RoomPriceForm,
-    fields=('name', 'start_date', 'end_date', 'price_override', 'is_active'), 
+    Room, RoomSeasonalPrice, form=RoomPriceForm,
+    fields=('name', 'currency', 'start_date', 'end_date', 'price_override', 'is_active'), 
     extra=2, can_delete=True
 )
-RoomCurrencyPriceFormSet = inlineformset_factory(
-    Room, RoomCurrencyPrice, form=RoomCurrencyPriceForm,
+RoomBasePriceFormSet = inlineformset_factory(
+    Room, RoomBasePrice, form=RoomBasePriceForm,
     fields=('currency', 'base_price', 'discount_price'),
     extra=2, can_delete=True
 )
@@ -43,7 +43,7 @@ RoomCurrencyPriceFormSet = inlineformset_factory(
 class RoomDashboardView(StaffRequiredMixin, View):
     def get(self, request):
         # pyrefly: ignore [missing-attribute]
-        rooms = Room.objects.all().select_related('category').prefetch_related('currency_prices__currency')
+        rooms = Room.objects.all().select_related('category').prefetch_related('base_prices__currency')
         # pyrefly: ignore [missing-attribute]
         categories = RoomCategory.objects.all()
         # pyrefly: ignore [missing-attribute]
@@ -68,7 +68,7 @@ class RoomCreateView(StaffRequiredMixin, View):
         image_formset = RoomImageFormSet()
         policy_formset = RoomPolicyFormSet()
         price_formset = RoomPriceFormSet()
-        currency_price_formset = RoomCurrencyPriceFormSet()
+        currency_price_formset = RoomBasePriceFormSet()
         return render(request, 'admin_dashboard/rooms/form.html', {
             'form': form,
             'image_formset': image_formset,
@@ -86,7 +86,7 @@ class RoomCreateView(StaffRequiredMixin, View):
             image_formset = RoomImageFormSet(request.POST, request.FILES, instance=room)
             policy_formset = RoomPolicyFormSet(request.POST, instance=room)
             price_formset = RoomPriceFormSet(request.POST, instance=room)
-            currency_price_formset = RoomCurrencyPriceFormSet(request.POST, instance=room)
+            currency_price_formset = RoomBasePriceFormSet(request.POST, instance=room)
             
             if image_formset.is_valid() and policy_formset.is_valid() and price_formset.is_valid() and currency_price_formset.is_valid():
                 image_formset.save()
@@ -102,7 +102,7 @@ class RoomCreateView(StaffRequiredMixin, View):
             image_formset = RoomImageFormSet(request.POST, request.FILES)
             policy_formset = RoomPolicyFormSet(request.POST)
             price_formset = RoomPriceFormSet(request.POST)
-            currency_price_formset = RoomCurrencyPriceFormSet(request.POST)
+            currency_price_formset = RoomBasePriceFormSet(request.POST)
             
         return render(request, 'admin_dashboard/rooms/form.html', {
             'form': form,
@@ -121,7 +121,7 @@ class RoomUpdateView(StaffRequiredMixin, View):
         image_formset = RoomImageFormSet(instance=room)
         policy_formset = RoomPolicyFormSet(instance=room)
         price_formset = RoomPriceFormSet(instance=room)
-        currency_price_formset = RoomCurrencyPriceFormSet(instance=room)
+        currency_price_formset = RoomBasePriceFormSet(instance=room)
         return render(request, 'admin_dashboard/rooms/form.html', {
             'form': form,
             'image_formset': image_formset,
@@ -139,7 +139,7 @@ class RoomUpdateView(StaffRequiredMixin, View):
         image_formset = RoomImageFormSet(request.POST, request.FILES, instance=room)
         policy_formset = RoomPolicyFormSet(request.POST, instance=room)
         price_formset = RoomPriceFormSet(request.POST, instance=room)
-        currency_price_formset = RoomCurrencyPriceFormSet(request.POST, instance=room)
+        currency_price_formset = RoomBasePriceFormSet(request.POST, instance=room)
         
         if form.is_valid() and image_formset.is_valid() and policy_formset.is_valid() and price_formset.is_valid() and currency_price_formset.is_valid():
             form.save()
@@ -225,8 +225,8 @@ class RoomFacilityDeleteView(StaffRequiredMixin, DeleteView):
         return reverse('admin_dashboard:room_dashboard') + "?tab=facilities"
 
 # Room Price (Seasonal Prices) Views
-class RoomPriceCreateView(StaffRequiredMixin, CreateView):
-    model = RoomPrice
+class RoomSeasonalPriceCreateView(StaffRequiredMixin, CreateView):
+    model = RoomSeasonalPrice
     form_class = RoomPriceForm
     template_name = 'admin_dashboard/generic_form.html'
     
@@ -234,8 +234,8 @@ class RoomPriceCreateView(StaffRequiredMixin, CreateView):
         messages.success(self.request, "Seasonal price created successfully.")
         return reverse('admin_dashboard:room_dashboard')
 
-class RoomPriceUpdateView(StaffRequiredMixin, UpdateView):
-    model = RoomPrice
+class RoomSeasonalPriceUpdateView(StaffRequiredMixin, UpdateView):
+    model = RoomSeasonalPrice
     form_class = RoomPriceForm
     template_name = 'admin_dashboard/generic_form.html'
     
@@ -243,8 +243,8 @@ class RoomPriceUpdateView(StaffRequiredMixin, UpdateView):
         messages.success(self.request, "Seasonal price updated successfully.")
         return reverse('admin_dashboard:room_dashboard')
 
-class RoomPriceDeleteView(StaffRequiredMixin, DeleteView):
-    model = RoomPrice
+class RoomSeasonalPriceDeleteView(StaffRequiredMixin, DeleteView):
+    model = RoomSeasonalPrice
     template_name = 'admin_dashboard/confirm_delete.html'
     
     def get_success_url(self):
@@ -327,9 +327,9 @@ class RoomBulkPriceUpdateView(StaffRequiredMixin, View):
             messages.warning(request, "No rooms selected for bulk pricing update.")
             return redirect('admin_dashboard:room_dashboard')
             
-        from rooms.models.room_currency_price import RoomCurrencyPrice
-        currency_prices = RoomCurrencyPrice.objects.filter(room_id__in=room_ids)
-        for cp in currency_prices:
+        from rooms.models.room_base_price import RoomBasePrice
+        room_base_prices = RoomBasePrice.objects.filter(room_id__in=room_ids)
+        for cp in room_base_prices:
             if adjustment_type == 'percentage':
                 cp.base_price = cp.base_price * (Decimal('1') + adjustment_value / Decimal('100'))
             else:

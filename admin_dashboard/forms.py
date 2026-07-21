@@ -10,7 +10,7 @@ from rooms.models.room import Room
 from rooms.models.room_image import RoomImage
 from rooms.models.room_facility import RoomFacility
 from rooms.models.room_policy import RoomPolicy
-from rooms.models.room_price import RoomPrice
+from rooms.models.room_seasonal_price import RoomSeasonalPrice
 from booking.models.booking import Booking
 from booking.models.coupon import Coupon
 from dining.models.venue import DiningVenue
@@ -103,16 +103,16 @@ class RoomCategoryForm(TailwindFormMixin, forms.ModelForm):
         model = RoomCategory
         fields = '__all__'
 
-from rooms.models.room_currency_price import RoomCurrencyPrice
+from rooms.models.room_base_price import RoomBasePrice
 
 class RoomForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
         model = Room
         exclude = ['created_at', 'updated_at']
 
-class RoomCurrencyPriceForm(TailwindFormMixin, forms.ModelForm):
+class RoomBasePriceForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
-        model = RoomCurrencyPrice
+        model = RoomBasePrice
         fields = '__all__'
 
     def __init__(self, *args, **kwargs):
@@ -162,10 +162,30 @@ class RoomPolicyForm(TailwindFormMixin, forms.ModelForm):
         model = RoomPolicy
         fields = '__all__'
 
+class CurrencyChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return f"{obj.iso_code} — {obj.name}"
+
 class RoomPriceForm(TailwindFormMixin, forms.ModelForm):
+    currency = CurrencyChoiceField(
+        queryset=Currency.objects.all().order_by('sequence', 'name'),
+        required=False,
+        empty_label="— All Currencies (wildcard) —",
+        help_text="Select a specific currency this override applies to, or leave blank to apply to all.",
+    )
+    start_date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}),
+        help_text="Season start date",
+    )
+    end_date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}),
+        help_text="Season end date",
+    )
+
     class Meta:
-        model = RoomPrice
+        model = RoomSeasonalPrice
         fields = '__all__'
+
 
 class BookingForm(TailwindFormMixin, forms.ModelForm):
     class Meta:

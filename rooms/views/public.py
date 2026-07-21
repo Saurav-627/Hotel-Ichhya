@@ -29,17 +29,18 @@ class RoomListView(ListView):
         except Exception:
             selected_currency = 'USD'
 
-        queryset = queryset.filter(currency_prices__currency__iso_code=selected_currency)
+        queryset = queryset.filter(base_prices__currency__iso_code=selected_currency)
         
         # Prefetch the active currency price
         from django.db.models import Prefetch
-        from rooms.models.room_currency_price import RoomCurrencyPrice
+        from rooms.models.room_base_price import RoomBasePrice
         queryset = queryset.prefetch_related(
             Prefetch(
-                'currency_prices',
-                queryset=RoomCurrencyPrice.objects.filter(currency__iso_code=selected_currency),
+                'base_prices',
+                queryset=RoomBasePrice.objects.filter(currency__iso_code=selected_currency),
                 to_attr='active_currency_price'
-            )
+            ),
+            'seasonal_prices__currency',
         )
         
         # Filtering parameters
@@ -57,12 +58,12 @@ class RoomListView(ListView):
                 pass
         if price_min:
             try:
-                queryset = queryset.filter(currency_prices__currency__iso_code=selected_currency, currency_prices__base_price__gte=float(price_min))
+                queryset = queryset.filter(base_prices__currency__iso_code=selected_currency, base_prices__base_price__gte=float(price_min))
             except ValueError:
                 pass
         if price_max:
             try:
-                queryset = queryset.filter(currency_prices__currency__iso_code=selected_currency, currency_prices__base_price__lte=float(price_max))
+                queryset = queryset.filter(base_prices__currency__iso_code=selected_currency, base_prices__base_price__lte=float(price_max))
             except ValueError:
                 pass
                 
@@ -100,12 +101,12 @@ class RoomDetailView(DetailView):
     def get_queryset(self):
         selected_currency = self.request.COOKIES.get('currency', 'USD')
         from django.db.models import Prefetch
-        from rooms.models.room_currency_price import RoomCurrencyPrice
+        from rooms.models.room_base_price import RoomBasePrice
         return super().get_queryset().filter(is_published=True).prefetch_related(
-            'images', 'facilities', 'policies', 'seasonal_prices',
+            'images', 'facilities', 'policies', 'seasonal_prices__currency',
             Prefetch(
-                'currency_prices',
-                queryset=RoomCurrencyPrice.objects.filter(currency__iso_code=selected_currency),
+                'base_prices',
+                queryset=RoomBasePrice.objects.filter(currency__iso_code=selected_currency),
                 to_attr='active_currency_price'
             )
         )

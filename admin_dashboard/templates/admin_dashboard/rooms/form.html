@@ -335,10 +335,14 @@
             {% for price_form in price_formset %}
             <div class="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-950/20 space-y-3">
                 {{ price_form.id }}
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-neutral-700 mb-1">Season Name</label>
                         {{ price_form.name }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-neutral-700 mb-1">Currency</label>
+                        {{ price_form.currency }}
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-neutral-700 mb-1">Override Price Rate</label>

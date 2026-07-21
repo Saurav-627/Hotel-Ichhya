@@ -120,7 +120,7 @@
                     </td>
                     <td class="px-6 py-4 text-neutral-600 dark:text-neutral-400 font-medium">{{ room.category.name }}</td>
                     <td class="px-6 py-4 text-neutral-900 dark:text-neutral-100 font-semibold">
-                        {% for cp in room.currency_prices.all %}
+                        {% for cp in room.base_prices.all %}
                         <span class="block text-xs">{{ cp.currency.iso_code }} {{ cp.base_price }}</span>
                         {% empty %}
                         <span class="text-neutral-400 text-xs italic">No price set</span>

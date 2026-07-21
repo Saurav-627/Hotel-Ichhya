@@ -59,6 +59,35 @@ class Booking(models.Model):
     def is_reserved(self):
         return self.status in {'confirmed', 'checked_in', 'checked_out'}
 
+    @property
+    def nights(self):
+        return (self.check_out - self.check_in).days
+
+    @property
+    def daily_rate(self):
+        n = self.nights
+        if n > 0 and self.num_rooms > 0:
+            return self.subtotal / (n * self.num_rooms)
+        return self.subtotal
+
+    @property
+    def active_seasonal_price(self):
+        """Returns the active RoomSeasonalPrice override if one applies to this booking's dates/currency."""
+        return (
+            self.room.seasonal_prices.filter(
+                start_date__lte=self.check_out,
+                end_date__gte=self.check_in,
+                is_active=True,
+                currency__iso_code=self.currency_code
+            ).order_by('-start_date').first()
+            or self.room.seasonal_prices.filter(
+                start_date__lte=self.check_out,
+                end_date__gte=self.check_in,
+                is_active=True,
+                currency__isnull=True
+            ).order_by('-start_date').first()
+        )
+
     def has_room_availability(self):
         from django.db.models import Sum
         from rooms.models.room_availability import RoomAvailability

@@ -164,7 +164,7 @@
                     <div>
                         <span class="text-neutral-400 block">Base Price Per Night</span>
                         <strong class="text-neutral-800 dark:text-neutral-200 font-medium">
-                            {% for cp in booking.room.currency_prices.all %}
+                            {% for cp in booking.room.base_prices.all %}
                             <span class="block">{{ cp.currency.iso_code }} {{ cp.base_price }}</span>
                             {% empty %}
                             <span class="italic text-neutral-400">No price defined</span>

@@ -142,9 +142,25 @@
                 <td>
                     Accommodation Lodging: <strong>{{ booking.room.title }}</strong><br>
                     <small style="color: #666;">Room Category: {{ booking.room.category.name }}</small>
+                    {% with seasonal=booking.active_seasonal_price %}
+                        {% if seasonal %}
+                            <div style="margin-top: 6px; font-size: 11px; color: #b47825; font-weight: bold; display: inline-block; padding: 2px 8px; background-color: #fcf6ec; border: 1px solid #ebd7b3; border-radius: 4px;">
+                                🏷️ Seasonal Price: {{ seasonal.name }}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
                 </td>
-                <td>{{ booking.num_rooms }} room(s)</td>
-                <td>{{ booking.room.currency_prices.first.currency.iso_code|default:booking.currency_code }} {{ booking.room.base_price }}</td>
+                <td>{{ booking.num_rooms }} room(s) x {{ booking.nights }} night(s)</td>
+                <td>
+                    {% with seasonal=booking.active_seasonal_price %}
+                        {% if seasonal %}
+                            <div style="font-weight: bold; color: #b47825; margin-bottom: 2px;">{{ booking.currency_code }} {{ booking.daily_rate|floatformat:2 }}</div>
+                            <del style="color: #999; font-size: 11px; display: block;">Base: {{ booking.currency_code }} {{ booking.room.base_price|floatformat:2 }}</del>
+                        {% else %}
+                            {{ booking.currency_code }} {{ booking.room.base_price|floatformat:2 }}
+                        {% endif %}
+                    {% endwith %}
+                </td>
                 <td style="text-align: right;">{{ booking.currency_code }} {{ booking.subtotal }}</td>
             </tr>
         </tbody>

@@ -31,9 +31,9 @@ urlpatterns = [
     path('rooms/facility/<int:pk>/edit/', rooms.RoomFacilityUpdateView.as_view(), name='room_facility_edit'),
     path('rooms/facility/<int:pk>/delete/', rooms.RoomFacilityDeleteView.as_view(), name='room_facility_delete'),
     
-    path('rooms/price/add/', rooms.RoomPriceCreateView.as_view(), name='room_price_create'),
-    path('rooms/price/<int:pk>/edit/', rooms.RoomPriceUpdateView.as_view(), name='room_price_edit'),
-    path('rooms/price/<int:pk>/delete/', rooms.RoomPriceDeleteView.as_view(), name='room_price_delete'),
+    path('rooms/price/add/', rooms.RoomSeasonalPriceCreateView.as_view(), name='room_seasonal_price_create'),
+    path('rooms/price/<int:pk>/edit/', rooms.RoomSeasonalPriceUpdateView.as_view(), name='room_seasonal_price_edit'),
+    path('rooms/price/<int:pk>/delete/', rooms.RoomSeasonalPriceDeleteView.as_view(), name='room_seasonal_price_delete'),
     
     path('rooms/availability/', rooms.RoomAvailabilityCalendarView.as_view(), name='room_availability_calendar'),
     path('rooms/bulk-price/', rooms.RoomBulkPriceUpdateView.as_view(), name='room_bulk_price'),
