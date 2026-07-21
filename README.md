@@ -7,6 +7,10 @@ A premium, high-performance Django-based hospitality and booking management plat
 ## 🚀 Key Features
 
 *   **Server-Side Currency Persistence**: Persistent cookie-driven currency switcher (desktop dropdown, mobile sidebar native select) that filters room listings and payment flows dynamically.
+*   **Renamed Multi-Currency Pricing Schema**: Clear, logical database modeling using `RoomBasePrice` (standard nightly rates per currency) and `RoomSeasonalPrice` (temporary seasonal overrides with optional currency-specific restrictions or wildcards).
+*   **Air Datepicker Integration**: Automatic calendar conversion in the admin panel using modern `type="date"` inputs, along with a custom select list showing ISO codes and name combinations (e.g. "NPR — Nepalese Rupee").
+*   **Standardized Invoicing Engine**: Guest-facing and staff-facing views use the same unified, print-ready layout (`invoice.html`) showing itemized room unit/night tallies, clear payment status tags, and visual callouts comparing base rate with active seasonal override rates.
+*   **Overlapping Seasonal Rules**: High-fidelity date overlap calculations during checkout ensures the guest gets their promotional rate for any night of their stay, prioritizing specific currency overrides over wildcard ones.
 *   **Dynamic Theme System**: Dynamic theme-aware layout styling supporting Light, Dark, Luxury Gold, and Festival modes without client-side render flickering.
 *   **Custom Admin Dashboard**: Custom-branded administrative dashboard (`/admin/`) featuring check-ins/check-outs, occupancy analytics, dynamic 7-day charts, recent activity logs, and a dedicated **Payment Processors** CRUD manager tab.
 *   **Multi-Currency Revenue Tracking**: Auto-grouped dashboard revenue statistics today/monthly and daily trend charts categorizing transactions by currency code (e.g. NPR, USD).

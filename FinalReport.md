@@ -148,7 +148,7 @@ The "About the Hotel" section below the hero slider:
 
 ### 6. Rooms & Accommodation
 **Admin path:** `Rooms -> Rooms`
-**Models:** `rooms/models/room.py`, `room_category.py`, `room_image.py`, `room_facility.py`, `room_price.py`, `room_policy.py`, `room_availability.py`
+**Models:** `rooms/models/room.py`, `room_category.py`, `room_image.py`, `room_facility.py`, `room_seasonal_price.py` (renamed from `room_price.py`), `room_policy.py`, `room_availability.py`, `room_base_price.py` (renamed from `room_currency_price.py`)
 
 This is the core of the platform. Admin has full control over:
 
@@ -159,9 +159,6 @@ This is the core of the platform. Admin has full control over:
 | `category` | ForeignKey to Room Category (managed dynamically in admin) |
 | `description` | Full room description |
 | `highlights` | Comma-separated or line-separated bullet highlights |
-| `base_price` | Price per night |
-| `currency` | USD / NPR / EUR / GBP |
-| `discount_price` | Optional discounted price |
 | `tax_percentage` | VAT/tax rate (default 13%) |
 | `room_size` | Size in sq. ft. or sq. meters |
 | `max_adults` | Maximum adult guests |
@@ -172,6 +169,14 @@ This is the core of the platform. Admin has full control over:
 | `video_url` | YouTube/Vimeo embed for room video |
 | `is_featured` | Pin to "Featured Rooms" section on homepage |
 | `is_published` | Show/hide room from listings |
+
+
+#### Room Base Price (ForeignKey linked to Room, managed in admin)
+| Field | Description |
+|---|---|
+| `currency` | Linked currency (USD / NPR / EUR / GBP) |
+| `base_price` | Standard nightly base price for the currency |
+| `discount_price` | Optional discounted price for the currency |
 
 #### Room Images (Inline on Room form)
 | Field | Description |
@@ -184,6 +189,7 @@ This is the core of the platform. Admin has full control over:
 | Field | Description |
 |---|---|
 | `name` | e.g. "Christmas Season", "Summer Special" |
+| `currency` | Optional currency override. Leave blank to apply as wildcard to all currencies. |
 | `start_date / end_date` | Date range for the special price |
 | `price_override` | Price per night during this period |
 | `is_active` | Enable/disable the seasonal price |
