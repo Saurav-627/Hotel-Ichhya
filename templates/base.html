@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth theme-{{ selected_theme }}">
+<html lang="en" class="scroll-smooth theme-light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -257,7 +257,7 @@
         document.cookie = 'currency=' + currency + '; path=/; max-age=' + (365*24*60*60);
         window.location.reload();
     }
-}" class="theme-{{ selected_theme }} min-h-screen flex flex-col" :class="'theme-' + currentTheme">
+}" class="theme-light min-h-screen flex flex-col">
 
     <!-- Django Messages / Toast Notification -->
     {% if messages %}

@@ -54,7 +54,7 @@ def global_settings(request):
         if selected_currency not in valid_codes:
             selected_currency = default_currency
             
-        selected_theme = request.COOKIES.get('theme', 'light')
+        selected_theme = 'light'
         
     except (ProgrammingError, OperationalError):
         # Database tables do not exist yet (running migrations or setup)
