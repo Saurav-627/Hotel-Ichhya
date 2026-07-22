@@ -6,13 +6,14 @@ A premium, high-performance Django-based hospitality and booking management plat
 
 ## 🚀 Key Features
 
+*   **Full White-Label & Dynamic Branding**: Completely dynamic hotel site identity managed from the Admin Panel — including Site Name, Light & Dark Logos, Admin Dashboard Logo, Browser Favicon (.png, .ico, .svg), Admin Tab Title, Admin Sidebar Label, Footer Story, and Contact Details.
 *   **Server-Side Currency Persistence**: Persistent cookie-driven currency switcher (desktop dropdown, mobile sidebar native select) that filters room listings and payment flows dynamically.
 *   **Renamed Multi-Currency Pricing Schema**: Clear, logical database modeling using `RoomBasePrice` (standard nightly rates per currency) and `RoomSeasonalPrice` (temporary seasonal overrides with optional currency-specific restrictions or wildcards).
-*   **Air Datepicker Integration**: Automatic calendar conversion in the admin panel using modern `type="date"` inputs, along with a custom select list showing ISO codes and name combinations (e.g. "NPR — Nepalese Rupee").
-*   **Standardized Invoicing Engine**: Guest-facing and staff-facing views use the same unified, print-ready layout (`invoice.html`) showing itemized room unit/night tallies, clear payment status tags, and visual callouts comparing base rate with active seasonal override rates.
+*   **Air Datepicker & Enhanced File Upload Widgets**: Modern `type="date"` inputs with Air Datepicker UI and a custom file uploader widget with live thumbnail image previews and one-click remove buttons.
+*   **Standardized Invoicing Engine**: Guest-facing and staff-facing views use the same unified, print-ready layout (`invoice.html`) showing dynamic hotel header branding, itemized room unit/night tallies, clear payment status tags, and visual callouts.
 *   **Overlapping Seasonal Rules**: High-fidelity date overlap calculations during checkout ensures the guest gets their promotional rate for any night of their stay, prioritizing specific currency overrides over wildcard ones.
 *   **Dynamic Theme System**: Dynamic theme-aware layout styling supporting Light, Dark, Luxury Gold, and Festival modes without client-side render flickering.
-*   **Custom Admin Dashboard**: Custom-branded administrative dashboard (`/admin/`) featuring check-ins/check-outs, occupancy analytics, dynamic 7-day charts, recent activity logs, and a dedicated **Payment Processors** CRUD manager tab.
+*   **Custom Admin Dashboard**: Custom-branded administrative dashboard (`/admin/`) featuring check-ins/check-outs, occupancy analytics, dynamic 7-day charts, recent activity logs, and dedicated **Settings Manager** and **Payment Processors** CRUD manager tabs.
 *   **Multi-Currency Revenue Tracking**: Auto-grouped dashboard revenue statistics today/monthly and daily trend charts categorizing transactions by currency code (e.g. NPR, USD).
 *   **Correct Booking Currency Rendering**: Booking list and details views display the exact currency code used at booking registration rather than defaulting to the base room currency code.
 *   **Responsive Booking Engine**: Full booking initiation flow complete with a dynamic reservation calculator, checkout page, and gateway integrations (Stripe, eSewa, Khalti).
@@ -40,7 +41,10 @@ make setup
 # 2. Start local development server (binds on all interfaces)
 make run
 
-# 3. Run the automated test suite
+# 3. Collect static files into staticfiles directory
+make collectstatic
+
+# 4. Run the automated test suite
 make test
 ```
 

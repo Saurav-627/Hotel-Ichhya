@@ -11,8 +11,12 @@
             
             <!-- Brand Logo -->
             <div class="flex-shrink-0">
-                <a href="{% url 'homepage:home' %}" class="flex items-center">
-                    <img src="{% static 'images/hotel-ichchha-logo.png' %}" alt="Hotel Ichchha Logo" class="h-14 w-auto object-contain">
+                <a href="{% url 'homepage:home' %}" class="flex items-center gap-3">
+                    {% if hotel_settings.logo %}
+                    <img src="{{ hotel_settings.logo.url }}" alt="{{ hotel_settings.site_name }}" class="h-14 w-auto object-contain">
+                    {% else %}
+                    <img src="{% static 'images/hotel-logo.png' %}" alt="{{ hotel_settings.site_name }}" class="h-14 w-auto object-contain">
+                    {% endif %}
                 </a>
             </div>
 

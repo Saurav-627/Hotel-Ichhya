@@ -277,7 +277,7 @@
                     {{ image_form.image.errors }}
                 </div>
                 
-                {% if image_form.instance.pk %}
+                {% if image_form.instance.pk and image_form.instance.image %}
                 <div class="h-16 w-16 shrink-0 rounded overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-neutral-100">
                     <img src="{{ image_form.instance.image.url }}" alt="Room Image" class="h-full w-full object-cover">
                 </div>

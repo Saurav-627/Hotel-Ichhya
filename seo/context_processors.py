@@ -1,12 +1,22 @@
 from django.db.utils import ProgrammingError, OperationalError
 from .models.seo_data import SEOData
 
+from settings_manager.models.hotel_settings import HotelSettings
+
 def seo_meta(request):
+    site_name = 'Hotel Ichchha'
+    try:
+        hs = HotelSettings.objects.first()
+        if hs and hs.site_name:
+            site_name = hs.site_name
+    except Exception:
+        pass
+
     meta = {
-        'title': 'Hotel Ichchha | Premium Five-Star Luxury Hotel & CMS',
-        'description': 'Experience ultimate luxury, fine dining, and elite wellness spas at Hotel Ichchha, a five-star international standard resort.',
+        'title': f'{site_name} | Premium Five-Star Luxury Hotel & CMS',
+        'description': f'Experience ultimate luxury, fine dining, and elite wellness spas at {site_name}, a five-star international standard resort.',
         'canonical': request.build_absolute_uri(),
-        'og_title': 'Hotel Ichchha | Five-Star Luxury Hotel',
+        'og_title': f'{site_name} | Five-Star Luxury Hotel',
         'og_description': 'Experience ultimate luxury, fine dining, and elite wellness spas.',
         'og_image': '',
         'twitter_card': 'summary_large_image',

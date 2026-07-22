@@ -4,9 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Login - Hotel Ichchha</title>
+    <title>Dashboard Login - {{ hotel_settings.site_name }}</title>
     
-    <link rel="icon" type="image/png" href="{% static 'images/hotel-ichchha-logo.png' %}">
+    <!-- Dynamic Favicon -->
+    {% if hotel_settings.favicon %}
+    <link rel="icon" href="{{ hotel_settings.favicon.url }}">
+    {% else %}
+    <link rel="icon" type="image/png" href="{% static 'images/hotel-logo.png' %}">
+    {% endif %}
     
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
@@ -55,9 +60,15 @@
         
         <!-- Header -->
         <div class="text-center mb-8">
-            <img src="{% static 'images/hotel-ichchha-logo.png' %}" alt="Logo" class="h-16 w-auto mx-auto mb-4 rounded-lg shadow-lg">
-            <h1 class="font-serif text-2xl font-bold tracking-wide text-luxuryGold-400">Hotel Ichchha</h1>
-            <p class="text-xs text-neutral-500 mt-1 uppercase tracking-widest font-semibold">CMS Admin Portal Login</p>
+            {% if hotel_settings.admin_logo %}
+            <img src="{{ hotel_settings.admin_logo.url }}" alt="Logo" class="h-16 w-auto mx-auto mb-4 rounded-lg shadow-lg object-contain">
+            {% elif hotel_settings.logo %}
+            <img src="{{ hotel_settings.logo.url }}" alt="Logo" class="h-16 w-auto mx-auto mb-4 rounded-lg shadow-lg object-contain">
+            {% else %}
+            <img src="{% static 'images/hotel-logo.png' %}" alt="Logo" class="h-16 w-auto mx-auto mb-4 rounded-lg shadow-lg object-contain">
+            {% endif %}
+            <h1 class="font-serif text-2xl font-bold tracking-wide text-luxuryGold-400">{{ hotel_settings.site_name }}</h1>
+            <p class="text-xs text-neutral-500 mt-1 uppercase tracking-widest font-semibold">{{ hotel_settings.admin_label|default:"CMS Admin Portal Login" }}</p>
         </div>
 
         <!-- Messages list -->

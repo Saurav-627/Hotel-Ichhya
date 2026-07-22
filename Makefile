@@ -1,4 +1,4 @@
-.PHONY: help install sync migrate makemigrations import-data seed-data seed-conference seed-all superuser run shell backup test clean docker-up docker-down docker-logs docker-clean setup
+.PHONY: help install sync migrate makemigrations collectstatic import-data seed-data seed-conference seed-all superuser run shell backup test clean docker-up docker-down docker-logs docker-clean setup
 
 # Default shell
 SHELL := /bin/bash
@@ -17,7 +17,7 @@ help: ## Show this help message (default)
 				name = $$1; \
 				sub(/:$$/, "", name); \
 				printf "  \033[36m%-20s\033[0m %s\n", name, helpLine; \
-			} \
+				} \
 		} \
 		/^##@/ { \
 			printf "\n\033[1m%s\033[0m\n", substr($$0, 5); \
@@ -42,6 +42,9 @@ run: ## Start the local development server (accessible from other devices)
 
 shell: ## Open a Django shell with models and database access
 	$(PYTHON) manage.py shell
+
+collectstatic: ## Collect static files into staticfiles directory
+	$(PYTHON) manage.py collectstatic --noinput
 
 ##@ Database & Migrations
 makemigrations: ## Generate new migrations based on model changes

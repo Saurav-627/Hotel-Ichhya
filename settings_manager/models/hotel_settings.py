@@ -10,6 +10,13 @@ class HotelSettings(models.Model):
     ]
 
     site_name = models.CharField(max_length=100, default="Hotel Ichchha")
+    favicon = models.ImageField(
+        upload_to=UploadTo('settings/favicons'),
+        blank=True,
+        null=True,
+        help_text="Browser favicon icon (.png, .ico, .svg)",
+        validators=[ValidateFileSize(2)]
+    )
     logo = models.ImageField(
         upload_to=UploadTo('settings/logos'),
         blank=True,
@@ -22,6 +29,23 @@ class HotelSettings(models.Model):
         null=True,
         help_text="Dark mode logo version",
         validators=[ValidateFileSize(2)]
+    )
+    admin_logo = models.ImageField(
+        upload_to=UploadTo('settings/logos'),
+        blank=True,
+        null=True,
+        help_text="Admin panel logo (falls back to main logo if blank)",
+        validators=[ValidateFileSize(2)]
+    )
+    admin_title = models.CharField(
+        max_length=100,
+        default="Hotel Ichchha CMS Admin Dashboard",
+        help_text="Admin panel browser tab title"
+    )
+    admin_label = models.CharField(
+        max_length=100,
+        default="Ichchha Portal",
+        help_text="Admin sidebar header label"
     )
     theme = models.CharField(max_length=20, choices=THEME_CHOICES, default='luxury')
     

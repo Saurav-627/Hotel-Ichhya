@@ -97,7 +97,7 @@
                      }">
                     <!-- Room Cover Image -->
                     <div class="relative h-64 overflow-hidden">
-                        <img src="{% if room.images.first %}{{ room.images.first.image.url }}{% else %}https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=600{% endif %}" 
+                        <img src="{% if room.images.first and room.images.first.image %}{{ room.images.first.image.url }}{% else %}https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=600{% endif %}" 
                              alt="{{ room.title }}" class="w-full h-full object-cover group-hover:scale-105 duration-700">
                         <span class="absolute top-4 right-4 px-4 py-1 text-xs font-semibold bg-black/70 text-luxuryGold-300 rounded-full">
                             {{ room.category.name|default:"Luxury Suite" }}

@@ -48,13 +48,17 @@ The admin can control the entire site-wide identity from one place:
 
 | Field | What it controls |
 |---|---|
-| `site_name` | Hotel name shown across all pages |
-| `logo` | Light mode logo image |
+| `site_name` | Hotel name shown across all user and admin pages |
+| `logo` | Light mode main logo image |
 | `logo_dark` | Dark mode logo variant |
+| `favicon` | Browser tab icon (`.png`, `.ico`, `.svg`) |
+| `admin_logo` | Admin dashboard panel logo (falls back to main logo if un-set) |
+| `admin_title` | Admin panel browser tab title |
+| `admin_label` | Admin panel sidebar brand title label |
 | `theme` | Default site theme: Light / Dark / Luxury Gold / Festival |
-| `contact_phone` | Phone number shown in header and footer |
-| `contact_email` | Email shown in header and footer |
-| `address` | Hotel address shown in footer and contact page |
+| `contact_phone` | Phone number shown in header, footer, and invoice |
+| `contact_email` | Email shown in header, footer, and invoice |
+| `address` | Hotel address shown in footer, contact page, and invoice |
 | `google_maps_iframe` | Embedded Google Maps on contact/branch pages |
 | `facebook_url` | Facebook social link in footer |
 | `instagram_url` | Instagram social link in footer |
@@ -472,7 +476,7 @@ These items are **built into the code or templates** and cannot be changed from 
 
 | Section | Admin Controlled | Guest Submitted | Static / Hardcoded |
 |---|:---:|:---:|:---:|
-| Hotel name, logo, theme | YES | | |
+| Hotel name, logos, favicon, admin title & label, theme | YES | | |
 | Navigation menus | YES | | |
 | Currencies | YES | | |
 | Homepage hero slides | YES | | |

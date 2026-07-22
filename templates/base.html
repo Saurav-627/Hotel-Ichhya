@@ -30,8 +30,12 @@
     </script>
     {% endif %}
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{% static 'images/hotel-ichchha-logo.png' %}">
+    <!-- Dynamic Favicon -->
+    {% if hotel_settings.favicon %}
+    <link rel="icon" href="{{ hotel_settings.favicon.url }}">
+    {% else %}
+    <link rel="icon" type="image/png" href="{% static 'images/hotel-logo.png' %}">
+    {% endif %}
 
     <!-- Google Fonts: Outfit & Playfair Display -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

@@ -1,7 +1,7 @@
 {% extends 'admin_dashboard/base.html' %}
 
 {% block page_title %}Dashboard Overview{% endblock %}
-{% block page_subtitle %}Welcome back! Here is what is happening at Hotel Ichchha today.{% endblock %}
+{% block page_subtitle %}Welcome back! Here is what is happening at {{ hotel_settings.site_name }} today.{% endblock %}
 
 {% block content %}
 <!-- Grid of stats cards -->

@@ -58,7 +58,9 @@ class TailwindFormMixin:
                 css_classes = "w-full px-4 py-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-luxuryGold-500/20 focus:border-luxuryGold-500 outline-none transition-all duration-200 cursor-pointer"
             # File Uploads
             elif isinstance(widget, forms.FileInput):
-                css_classes = "block w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-luxuryGold-50/50 file:text-luxuryGold-700 hover:file:bg-luxuryGold-100/50 file:cursor-pointer bg-white dark:bg-neutral-800 rounded-lg border border-neutral-300 dark:border-neutral-700 px-4 py-2"
+                if isinstance(widget, forms.ClearableFileInput):
+                    widget.template_name = 'admin_dashboard/widgets/custom_clearable_file_input.html'
+                css_classes = "block w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-luxuryGold-500/10 file:text-luxuryGold-700 dark:file:text-luxuryGold-400 hover:file:bg-luxuryGold-500/20 file:cursor-pointer bg-white dark:bg-neutral-800 rounded-lg border border-neutral-300 dark:border-neutral-700 px-3 py-2 transition"
             # Standard Text Inputs
             else:
                 css_classes = "w-full px-4 py-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-luxuryGold-500/20 focus:border-luxuryGold-500 outline-none transition-all duration-200"
