@@ -369,9 +369,9 @@
                 }
             });
 
-            // Automatically upgrade all date inputs to Air Datepicker
+            // Automatically upgrade all date inputs to Air Datepicker (skipping hidden form inputs)
             document.querySelectorAll('input[type="date"], input[name="check_in"], input[name="check_out"]').forEach(el => {
-                if (el.id === 'room_check_in' || el.id === 'room_check_out') {
+                if (el.id === 'room_check_in' || el.id === 'room_check_out' || el.type === 'hidden') {
                     return;
                 }
                 

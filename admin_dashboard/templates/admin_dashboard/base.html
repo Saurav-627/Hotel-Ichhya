@@ -437,6 +437,9 @@
         document.addEventListener("DOMContentLoaded", function() {
             // Automatically upgrade all input[type="date"] and check_in/check_out elements in the admin area to Air Datepicker
             document.querySelectorAll('input[type="date"], input[name="check_in"], input[name="check_out"]').forEach(el => {
+                if (el.type === 'hidden') {
+                    return;
+                }
                 // Convert to text so native date picker is disabled
                 el.type = 'text';
                 el.placeholder = 'YYYY-MM-DD';

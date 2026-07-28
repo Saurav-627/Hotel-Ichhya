@@ -51,24 +51,6 @@
                     <a href="{% url 'contact:contact_page' %}" class="block py-2 text-base font-medium hover:text-luxuryGold-400">Contact</a>
                 {% endfor %}
 
-                <div class="pt-6 border-t mt-6" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/20': currentTheme !== 'light' }">
-                    <h4 class="text-xs font-semibold tracking-widest uppercase mb-3 opacity-60">Currency</h4>
-                    <div class="relative">
-                        <select @change="setCurrency($event.target.value)" 
-                                class="w-full appearance-none px-3 py-2.5 text-xs rounded border bg-transparent focus:outline-none focus:ring-1 focus:ring-luxuryGold-400 font-medium"
-                                :class="currentTheme === 'light' ? 'border-gray-300 text-gray-800 bg-white' : 'border-amber-900/40 text-amber-200 bg-[#161412]'">
-                            {% for c in published_currencies %}
-                                <option value="{{ c.iso_code }}" {% if c.iso_code == selected_currency %}selected{% endif %} :selected="currentCurrency === '{{ c.iso_code }}'">{{ c.name }} ({{ c.iso_code }})</option>
-                            {% empty %}
-                                <option value="USD" {% if selected_currency == 'USD' %}selected{% endif %} :selected="currentCurrency === 'USD'">US Dollar (USD)</option>
-                            {% endfor %}
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-luxuryGold-500">
-                            <i class="fa-solid fa-chevron-down text-[10px]"></i>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="pt-6">
                     <a href="{% url 'rooms:room_list' %}" class="block text-center w-full py-3 text-sm font-semibold uppercase tracking-wider rounded-lg border border-luxuryGold-400 {% if selected_theme == 'light' %}bg-amber-800 text-white{% else %}bg-luxuryGold-500 text-black{% endif %}"
                        :class="{

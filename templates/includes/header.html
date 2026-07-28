@@ -138,9 +138,60 @@
                 </a>
             </div>
 
-            <!-- Mobile Burger Menu Trigger -->
-            <div class="md:hidden flex items-center space-x-4">
-                <button @click="mobileMenuOpen = true" class="p-2 rounded-lg hover:bg-luxuryGold-900/10 focus:outline-none transition-colors">
+            <!-- Mobile Right Controls (Currency Switcher & Hamburger Menu) -->
+            <div class="md:hidden flex items-center gap-2">
+                <!-- Mobile Currency Dropdown -->
+                <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                    <button @click="open = !open" 
+                            class="px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors flex items-center gap-1"
+                            :class="currentTheme === 'light' ? 'border-gray-300 bg-gray-50 text-gray-800' : 'border-amber-900/30 bg-[#161412] text-luxuryGold-300'"
+                            title="Switch Currency">
+                        <i class="fa-solid fa-coins text-xs text-luxuryGold-500"></i>
+                        <span x-text="currentCurrency">{{ selected_currency }}</span>
+                        <i class="fa-solid fa-chevron-down text-[9px] opacity-70"></i>
+                    </button>
+                    
+                    <!-- Mobile Currency Dropdown Menu -->
+                    <div x-show="open" 
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0 translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-100"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 translate-y-1"
+                         class="absolute right-0 mt-2 w-44 rounded-xl shadow-2xl border z-50 focus:outline-none py-1.5"
+                         :class="{
+                             'bg-white border-gray-200 text-gray-800': currentTheme === 'light',
+                             'bg-[#1E1E1E] border-[#2D2D2D] text-gray-200': currentTheme === 'dark',
+                             'bg-[#161412] border-amber-900/30 text-amber-200': currentTheme === 'luxury' || currentTheme === 'festival'
+                         }"
+                         style="display: none;">
+                        {% for c in published_currencies %}
+                        <button @click="setCurrency('{{ c.iso_code }}'); open = false" 
+                                class="flex w-full items-center justify-between px-3 py-2 text-left transition-colors text-xs font-medium"
+                                :class="currentTheme === 'light' ? 'hover:bg-gray-100' : 'hover:bg-luxuryGold-900/20'">
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-bold text-luxuryGold-400 text-xs">{{ c.symbol }}</span>
+                                <span class="font-bold">{{ c.iso_code }}</span>
+                            </div>
+                            <span class="text-xs font-bold text-luxuryGold-500" x-show="currentCurrency === '{{ c.iso_code }}'">✓</span>
+                        </button>
+                        {% empty %}
+                        <button @click="setCurrency('USD'); open = false" 
+                                class="flex w-full items-center justify-between px-3 py-2 text-left transition-colors text-xs font-medium"
+                                :class="currentTheme === 'light' ? 'hover:bg-gray-100' : 'hover:bg-luxuryGold-900/20'">
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-bold text-luxuryGold-400 text-xs">$</span>
+                                <span class="font-bold">USD</span>
+                            </div>
+                            <span class="text-xs font-bold text-luxuryGold-500" x-show="currentCurrency === 'USD'">✓</span>
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Hamburger Button -->
+                <button @click="mobileMenuOpen = true" class="p-2 rounded-lg hover:bg-luxuryGold-900/10 focus:outline-none transition-colors" aria-label="Open Navigation Menu">
                     <i class="fa-solid fa-bars text-xl"></i>
                 </button>
             </div>
