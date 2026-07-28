@@ -1,0 +1,159 @@
+rooms:
+- title: Deluxe Room
+  slug: deluxe
+  category: deluxe
+  subtitle: Elegantly furnished luxury room for travelers
+  description: Step into comfort with our Deluxe Rooms.
+  max_guests: 2
+  bed_type: King or Twin Beds
+  view_type: Garden View
+  is_featured: true
+  is_published: true
+  facilities:
+  - Free High-Speed Wi-Fi
+  - Centralized Climate Control
+  - 24/7 Room Service
+  prices:
+  - currency: NPR
+    base_price: 8500.0
+    discount_price: 7500.0
+  - currency: USD
+    base_price: 65.0
+    discount_price: 58.0
+  room_size: 350
+- title: Super Deluxe Room
+  slug: super_deluxe
+  category: super_deluxe
+  subtitle: Spacious room with modern amenities and pool view
+  description: Super Deluxe rooms offer extra space.
+  max_guests: 3
+  bed_type: King Size Bed
+  view_type: Pool View
+  is_featured: true
+  is_published: true
+  facilities:
+  - Free High-Speed Wi-Fi
+  - Centralized Climate Control
+  - 24/7 Room Service
+  - Smart LED TV with Satellite Channels
+  prices:
+  - currency: NPR
+    base_price: 10500.0
+    discount_price: 9200.0
+  - currency: USD
+    base_price: 80.0
+    discount_price: 70.0
+  room_size: 420
+- title: Premium Room
+  slug: premium
+  category: premium
+  subtitle: Refined elegance with premium furnishings and balcony
+  description: Designed for distinguished guests.
+  max_guests: 3
+  bed_type: Super King Bed
+  view_type: Resort & Pool View
+  is_featured: true
+  is_published: true
+  facilities:
+  - Free High-Speed Wi-Fi
+  - Centralized Climate Control
+  - 24/7 Room Service
+  - Personal Mini Bar & Refreshment Center
+  prices:
+  - currency: NPR
+    base_price: 13000.0
+    discount_price: 11500.0
+  - currency: USD
+    base_price: 100.0
+    discount_price: 88.0
+  room_size: 480
+- title: Premium Junior Suite
+  slug: premium_suite
+  category: premium_suite
+  subtitle: Spacious suite with dedicated sitting lounge
+  description: Junior suite with open plan lounge.
+  max_guests: 3
+  bed_type: King Size Plush Bed
+  view_type: Panoramic View
+  is_featured: true
+  is_published: true
+  facilities:
+  - Free High-Speed Wi-Fi
+  - Centralized Climate Control
+  - 24/7 Room Service
+  - In-Room Electronic Safe
+  prices:
+  - currency: NPR
+    base_price: 17500.0
+    discount_price: 15500.0
+  - currency: USD
+    base_price: 135.0
+    discount_price: 120.0
+  room_size: 600
+- title: Deluxe Suite
+  slug: deluxe_suite
+  category: deluxe_suite
+  subtitle: Opulent multi-room suite with private parlor
+  description: Top tier luxury suite.
+  max_guests: 4
+  bed_type: King Bed + Sofa Bed
+  view_type: 360 Resort View
+  is_featured: true
+  is_published: true
+  facilities:
+  - Free High-Speed Wi-Fi
+  - Centralized Climate Control
+  - 24/7 Room Service
+  - Personal Mini Bar & Refreshment Center
+  prices:
+  - currency: NPR
+    base_price: 22000.0
+    discount_price: 19500.0
+  - currency: USD
+    base_price: 170.0
+    discount_price: 150.0
+  room_size: 750
+- title: Honeymoon Suite
+  slug: honeymoon_suite
+  category: honeymoon_suite
+  subtitle: Romantic sanctuary with private jacuzzi
+  description: Exclusive suite for couples.
+  max_guests: 2
+  bed_type: Canopy King Bed
+  view_type: Private Garden & Pool View
+  is_featured: true
+  is_published: true
+  facilities:
+  - Free High-Speed Wi-Fi
+  - Centralized Climate Control
+  - 24/7 Room Service
+  prices:
+  - currency: NPR
+    base_price: 25000.0
+    discount_price: 22000.0
+  - currency: USD
+    base_price: 190.0
+    discount_price: 168.0
+  room_size: 680
+- title: Executive Room
+  slug: executive
+  category: executive
+  subtitle: Tailored for corporate leaders with workstation
+  description: Executive room featuring ergonomic workspace.
+  max_guests: 2
+  bed_type: King Size Bed
+  view_type: City View
+  is_featured: false
+  is_published: true
+  facilities:
+  - Free High-Speed Wi-Fi
+  - Centralized Climate Control
+  - 24/7 Room Service
+  prices:
+  - currency: NPR
+    base_price: 9500.0
+    discount_price: 8500.0
+  - currency: USD
+    base_price: 72.0
+    discount_price: 65.0
+  room_size: 400

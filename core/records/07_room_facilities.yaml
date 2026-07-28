@@ -1,0 +1,25 @@
+room_facilities:
+- name: Free High-Speed Wi-Fi
+  icon_class: fa-solid fa-wifi
+  category: tech
+  is_featured: true
+- name: Centralized Climate Control
+  icon_class: fa-solid fa-snowflake
+  category: comfort
+  is_featured: true
+- name: 24/7 Room Service
+  icon_class: fa-solid fa-bell
+  category: service
+  is_featured: true
+- name: Smart LED TV with Satellite Channels
+  icon_class: fa-solid fa-tv
+  category: tech
+  is_featured: false
+- name: In-Room Electronic Safe
+  icon_class: fa-solid fa-vault
+  category: security
+  is_featured: false
+- name: Personal Mini Bar & Refreshment Center
+  icon_class: fa-solid fa-wine-glass
+  category: food
+  is_featured: false

@@ -1,0 +1,45 @@
+dining_venues:
+- name: Simara Fine Dining
+  slug: simara-fine-dining
+  cuisine_type: Multi-Cuisine / Nepalese
+  tagline: Savor Every Moment
+  description: Experience world-class culinary creations crafted by top chefs.
+  capacity: 120
+  opening_hours: 06:30 AM - 10:30 PM
+  is_active: true
+- name: Ichchha Lounge & Bar
+  slug: ichchha-lounge-bar
+  cuisine_type: Cocktails & Tapas
+  tagline: Relax & Unwind
+  description: Premium selection of wines, spirits, and artisanal cocktails in an
+    opulent setting.
+  capacity: 60
+  opening_hours: 11:00 AM - 11:00 PM
+  is_active: true
+- name: Poolside Cafe
+  slug: poolside-cafe
+  cuisine_type: Snacks & Beverages
+  tagline: Refreshment by the Water
+  description: Enjoy fresh juices, mocktails, and light bites by our sparkling swimming
+    pool.
+  capacity: 40
+  opening_hours: 08:00 AM - 08:00 PM
+  is_active: true
+- name: The Coffee Shop
+  slug: the-coffee-shop
+  cuisine_type: Bakery & Coffee
+  tagline: Freshly Brewed Moments
+  description: Artisanal coffees, teas, fresh pastries, and light savory treats throughout
+    the day.
+  capacity: 30
+  opening_hours: 07:00 AM - 09:00 PM
+  is_active: true
+- name: Royal Banquet Restaurant
+  slug: royal-banquet-restaurant
+  cuisine_type: Buffet & Event Dining
+  tagline: Feasts for Special Occasions
+  description: Spacious venue tailored for large celebrations, wedding buffets, and
+    corporate dinners.
+  capacity: 250
+  opening_hours: On Request / Events
+  is_active: true

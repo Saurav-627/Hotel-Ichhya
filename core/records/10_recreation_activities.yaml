@@ -1,0 +1,62 @@
+recreation_activities:
+- name: Infinity Swimming Pool
+  slug: infinity-swimming-pool
+  activity_type: pool
+  description: Unwind in our crystalline swimming pool with poolside lounge beds and
+    bar service.
+  timing: 06:00 AM - 08:00 PM
+  price_text: Complimentary for Guests
+  is_featured: true
+  is_active: true
+- name: Ichchha Wellness Spa
+  slug: ichchha-wellness-spa
+  activity_type: spa
+  description: Revitalize your mind and body with traditional Ayurvedic massages and
+    luxury therapies.
+  timing: 08:00 AM - 08:00 PM
+  price_text: Varies by Treatment
+  is_featured: true
+  is_active: true
+- name: State-of-the-Art Fitness Center
+  slug: fitness-center
+  activity_type: gym
+  description: Maintain your fitness routine with top-of-the-line cardio and strength
+    training equipment.
+  timing: 06:00 AM - 10:00 PM
+  price_text: Complimentary for Guests
+  is_featured: true
+  is_active: true
+- name: Sauna & Steam Bath
+  slug: sauna-steam-bath
+  activity_type: wellness
+  description: Detoxify and relax in our modern sauna and steam bath facilities.
+  timing: 07:00 AM - 09:00 PM
+  price_text: Complimentary for In-House Guests
+  is_featured: false
+  is_active: true
+- name: Kids Play Area & Pool
+  slug: kids-play-area
+  activity_type: recreation
+  description: Safe and engaging outdoor play zone and shallow wading pool for children.
+  timing: 08:00 AM - 07:00 PM
+  price_text: Free Access
+  is_featured: false
+  is_active: true
+- name: Lush Green Gardens & Walkway
+  slug: gardens-walkway
+  activity_type: nature
+  description: Beautifully manicured gardens ideal for morning walks, quiet reading,
+    or evening strolls.
+  timing: 24 Hours
+  price_text: Open Access
+  is_featured: false
+  is_active: true
+- name: Billiards & Game Room
+  slug: billiards-game-room
+  activity_type: games
+  description: Indoor entertainment featuring pool tables, table tennis, and board
+    games.
+  timing: 10:00 AM - 10:00 PM
+  price_text: Complimentary
+  is_featured: false
+  is_active: true

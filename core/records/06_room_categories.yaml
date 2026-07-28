@@ -1,0 +1,29 @@
+room_categories:
+- name: Deluxe Room
+  slug: deluxe
+  order: 1
+  is_published: true
+- name: Super Deluxe Room
+  slug: super_deluxe
+  order: 2
+  is_published: true
+- name: Premium Room
+  slug: premium
+  order: 3
+  is_published: true
+- name: Premium Junior Suite
+  slug: premium_suite
+  order: 4
+  is_published: true
+- name: Deluxe Suite
+  slug: deluxe_suite
+  order: 5
+  is_published: true
+- name: Honeymoon Suite
+  slug: honeymoon_suite
+  order: 6
+  is_published: true
+- name: Executive Room
+  slug: executive
+  order: 7
+  is_published: true

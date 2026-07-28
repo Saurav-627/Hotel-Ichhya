@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import FileExtensionValidator
 from core.utils import UploadTo, ValidateFileSize
 
 class AboutPreview(models.Model):
@@ -10,6 +11,13 @@ class AboutPreview(models.Model):
         blank=True,
         null=True,
         validators=[ValidateFileSize(2)]
+    )
+    video_file = models.FileField(
+        upload_to=UploadTo('homepage/about/videos'),
+        blank=True,
+        null=True,
+        validators=[ValidateFileSize(50), FileExtensionValidator(allowed_extensions=['mp4', 'webm', 'ogg', 'mov', 'm4v'])],
+        help_text="Uploaded promo video file (MP4/WebM/MOV)"
     )
     video_url = models.URLField(blank=True, null=True, help_text="Promo video YouTube/Vimeo link")
 

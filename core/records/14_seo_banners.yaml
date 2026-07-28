@@ -1,0 +1,52 @@
+seo_banners:
+- path: /
+  meta_title: Hotel Ichchha | 5-Star Luxury Resort in Bara, Nepal
+  meta_description: Book rooms at Hotel Ichchha in Simara, Bara, Nepal.
+  twitter_card: summary_large_image
+- path: /rooms/
+  meta_title: Rooms & Accommodation | Hotel Ichchha
+  meta_description: Browse our premium rooms and suites at Hotel Ichchha.
+  header_subtitle: Sanctuary Suites
+  header_title: Rooms & Accommodation
+  header_description: Explore our premium selection of spaces crafted with an eye
+    for elegance and class.
+- path: /dining/
+  meta_title: Gastronomy & Dining | Hotel Ichchha
+  meta_description: Discover award-winning dining experiences at Hotel Ichchha.
+  header_subtitle: Culinary Experiences
+  header_title: Gastronomy & Lounge
+  header_description: Discover the finest culinary venues, featuring award-winning
+    chefs and cocktails.
+- path: /recreation/
+  meta_title: Recreation & Wellness | Hotel Ichchha
+  meta_description: Recharge at Hotel Ichchha with our elite spa, pool, and gym.
+  header_subtitle: Sanctuary Spa & Wellness
+  header_title: Recreation & Wellness
+  header_description: Recharge, refresh, and indulge with our elite spa, gym, and
+    outdoor adventures.
+- path: /gallery/
+  meta_title: Photo Gallery | Hotel Ichchha
+  meta_description: Take a visual tour of Hotel Ichchha.
+  header_subtitle: Visual Tour
+  header_title: Resort Photo Gallery
+  header_description: Take a visual tour through our luxury suites and fine restaurants.
+- path: /conference/
+  meta_title: Conferences & Events | Hotel Ichchha
+  meta_description: Host prestigious conferences and galas at Hotel Ichchha.
+  header_subtitle: Opulent Spaces & Venues
+  header_title: Conferences & Celebrations
+  header_description: Host your prestigious meetings and galas in Simara's finest
+    5-star venue halls.
+- path: /contact/
+  meta_title: Contact & Concierge | Hotel Ichchha
+  meta_description: Get in touch with Hotel Ichchha.
+  header_subtitle: Get In Touch
+  header_title: Concierge & Contact
+  header_description: We are here to assist you with room bookings or event planning.
+- path: /blogs/
+  meta_title: News & Luxury Insights | Hotel Ichchha
+  meta_description: Read the latest from Hotel Ichchha.
+  header_subtitle: Resort Journal
+  header_title: News & Luxury Insights
+  header_description: Stay updated with our latest festival programs and culinary
+    launches.

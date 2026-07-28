@@ -1,4 +1,4 @@
-.PHONY: help install sync migrate makemigrations collectstatic import-data seed-data seed-conference seed-all superuser run shell backup test clean docker-up docker-down docker-logs docker-clean setup
+.PHONY: help install sync migrate makemigrations collectstatic seed-all superuser run shell backup test clean docker-up docker-down docker-logs docker-clean setup
 
 # Default shell
 SHELL := /bin/bash
@@ -53,17 +53,8 @@ makemigrations: ## Generate new migrations based on model changes
 migrate: ## Apply database migrations
 	$(PYTHON) manage.py migrate
 
-import-data: ## Load initial currency, global settings, and header menu layout from initial_data.yaml
-	$(PYTHON) manage.py import_initial_data
-
-seed-data: ## Seed hotel sample data from seed_data.yaml (rooms, dining, activities, SEO etc.)
+seed-all: ## Import all modular YAML data from core/records/ using seed_data command
 	$(PYTHON) manage.py seed_data
-
-seed-conference: ## Seed conference/event venue halls from seed_conference.yaml
-	$(PYTHON) manage.py seed_conference
-
-seed-all: ## Import ALL YAML data in one command (initial_data + seed_data + seed_conference)
-	$(PYTHON) manage.py seed_all
 
 superuser: ## Create an administrative superuser (interactive)
 	$(PYTHON) manage.py createsuperuser

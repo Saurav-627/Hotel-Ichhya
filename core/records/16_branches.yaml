@@ -1,0 +1,7 @@
+branches:
+- name: Simara Main Resort
+  city: Simara
+  address: Simara-03, Bara, Nepal
+  phone: +977-53-520591
+  email: simara@hotelichchha.com
+  is_main_branch: true

@@ -1,0 +1,8 @@
+testimonials:
+- guest_name: Rajesh Sharma
+  guest_title: Corporate Executive
+  rating: 5
+  content: Hotel Ichchha provided exceptional service during our annual business conference.
+    The rooms were spotless, food was superb, and staff was attentive.
+  source: Google Reviews
+  is_featured: true

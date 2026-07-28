@@ -1,0 +1,43 @@
+hero_slides:
+- title: Hotel Ichchha, Hospitality at its best!
+  subtitle: Hotel Ichchha
+  cta_text: Book Your Stay
+  cta_url: /rooms/
+  order: 1
+  overlay_opacity: 0.6
+  is_active: true
+- title: 'Crafting Dreams into Concrete Realities: Your Ultimate Destination'
+  subtitle: Hotel Ichchha
+  cta_text: Book Your Stay
+  cta_url: /rooms/
+  order: 2
+  overlay_opacity: 0.6
+  is_active: true
+- title: 'Rooms Designed for Comfort, Styled for Luxury: Unwind Here!'
+  subtitle: Hotel Ichchha
+  cta_text: Book Your Stay
+  cta_url: /rooms/
+  order: 3
+  overlay_opacity: 0.6
+  is_active: true
+- title: 'Elegant Halls, Timeless Memories: Celebrate Life''s Special Moments Here'
+  subtitle: Hotel Ichchha
+  cta_text: Book Your Stay
+  cta_url: /rooms/
+  order: 4
+  overlay_opacity: 0.6
+  is_active: true
+- title: 'Savor Every Bite, Indulge in Culinary Delights: Our Restaurant Beckons'
+  subtitle: Hotel Ichchha
+  cta_text: Book Your Stay
+  cta_url: /rooms/
+  order: 5
+  overlay_opacity: 0.6
+  is_active: true
+- title: 'Seamless Transitions: Our Indoor-Outdoor Spaces Embrace Nature''s Beauty'
+  subtitle: Hotel Ichchha
+  cta_text: Book Your Stay
+  cta_url: /rooms/
+  order: 6
+  overlay_opacity: 0.6
+  is_active: true

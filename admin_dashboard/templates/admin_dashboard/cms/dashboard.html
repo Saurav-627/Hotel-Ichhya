@@ -122,11 +122,20 @@
                         {{ about_form.content }}
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Illustration image</label>
+                        <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase mb-2">Illustration image</label>
                         {{ about_form.image }}
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Promo Video URL</label>
+                        <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase mb-2">Promo Video File (Upload MP4/WebM)</label>
+                        {{ about_form.video_file }}
+                        {% if about_form.instance.video_file %}
+                        <p class="mt-1 text-xs text-amber-600 dark:text-amber-400">
+                            Current video: <a href="{{ about_form.instance.video_file.url }}" target="_blank" class="underline font-mono inline-flex items-center gap-1"><i class="fa-solid fa-file-video text-xs"></i> View Video</a>
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase mb-2">Promo Video URL (External Embed/Link)</label>
                         {{ about_form.video_url }}
                     </div>
                 </div>

@@ -1,48 +1,123 @@
 import os
 import yaml
+from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from datetime import timedelta
+from django.apps import apps
 
 User = get_user_model()
+
+# Global Model Mapping Registry:
+# key -> (app_label, model_name, lookup_fields, is_singleton)
+GLOBAL_MODEL_REGISTRY = {
+    # Settings & Config
+    "hotel_settings": ("settings_manager", "HotelSettings", None, True),
+    "currencies": ("settings_manager", "Currency", ["iso_code"], False),
+    "navigation_menus": ("settings_manager", "NavigationMenu", ["name", "position"], False),
+    "seo_banners": ("seo", "SEOData", ["path"], False),
+    "seo_data": ("seo", "SEOData", ["path"], False),
+    "payment_processors": ("payments", "PaymentProcessor", ["code"], False),
+
+    # Homepage & CMS
+    "about_preview": ("homepage", "AboutPreview", None, True),
+    "hero_slides": ("homepage", "HeroSlide", ["title"], False),
+
+    # Rooms & Facilities
+    "room_categories": ("rooms", "RoomCategory", ["slug"], False),
+    "room_facilities": ("rooms", "RoomFacility", ["name"], False),
+
+    # Dining, Recreation & Events
+    "dining_venues": ("dining", "DiningVenue", ["slug"], False),
+    "recreation_activities": ("recreation", "RecreationActivity", ["slug"], False),
+    "event_venues": ("conference", "EventVenue", ["name"], False),
+
+    # Other Apps
+    "attractions": ("nearby_places", "Attraction", ["name"], False),
+    "testimonials": ("testimonials", "Testimonial", ["guest_name", "source"], False),
+    "branches": ("contact", "Branch", ["name"], False),
+    "coupons": ("booking", "Coupon", ["code"], False),
+}
+
+
+def filter_model_fields(model, data_dict):
+    """Dynamically filters dictionary keys to match only real fields present on the target Django model."""
+    valid_field_names = {f.name for f in model._meta.get_fields() if not f.is_relation or f.concrete}
+    return {k: v for k, v in data_dict.items() if k in valid_field_names}
+
+
+def prepare_item_data(key, item, valid_data):
+    """Applies model-specific dynamic preprocessing (e.g. date calculation for Coupons)."""
+    if key == "coupons":
+        valid_days = item.get("valid_days_from_now", 365)
+        if "valid_from" not in valid_data:
+            valid_data["valid_from"] = timezone.now() - timedelta(days=1)
+        if "valid_to" not in valid_data:
+            valid_data["valid_to"] = timezone.now() + timedelta(days=valid_days)
+    return valid_data
+
+
+def post_process_item(key, obj, item):
+    """Applies post-creation/update relationship logic (e.g. PaymentProcessor Currency links)."""
+    if key == "payment_processors":
+        currencies_list = item.get("currencies") or item.get("payment_currencies") or []
+        if currencies_list:
+            from payments.models.payment_processor import PaymentProcessorCurrency
+            from settings_manager.models.currency import Currency
+            for ccode in currencies_list:
+                curr = Currency.objects.get_queryset().set_active_test(enabled=False).filter(iso_code=ccode).first()
+                if curr:
+                    PaymentProcessorCurrency.objects.get_or_create(
+                        payment_processor=obj,
+                        currency=curr
+                    )
 
 
 class Command(BaseCommand):
     help = (
-        "Seeds the database with premium 5-star hotel data from seed_data.yaml. "
-        "Uses get_or_create — existing records are NEVER deleted or overwritten."
+        "Single Unified Data Importer for Hotel Ichchha. "
+        "Imports data from modular YAML files in core/records or specified file. "
+        "If data exists: SKIPS. If --update: UPDATES. If missing: CREATES."
     )
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--file",
             type=str,
-            default="seed_data.yaml",
-            help="Path to the seed YAML file (default: seed_data.yaml in project root)",
+            default=None,
+            help="Path to specific YAML data file",
+        )
+        parser.add_argument(
+            "--folder",
+            type=str,
+            default="core/records",
+            help="Path to directory containing modular YAML data files (default: core/records)",
+        )
+        parser.add_argument(
+            "--update",
+            action="store_true",
+            default=False,
+            help="If set, update existing records instead of skipping them.",
         )
 
     def handle(self, *args, **options):
-        file_path = options["file"]
+        file_path = options.get("file")
+        folder_path = options.get("folder")
+        do_update = options.get("update", False)
 
-        if not os.path.exists(file_path):
-            self.stderr.write(self.style.ERROR(f"Seed file not found: {file_path}"))
-            return
+        files_to_process = []
+        if file_path:
+            files_to_process.append(file_path)
+        else:
+            if folder_path and os.path.exists(folder_path):
+                folder_files = [
+                    os.path.join(folder_path, f)
+                    for f in sorted(os.listdir(folder_path))
+                    if f.endswith(".yaml") or f.endswith(".yml")
+                ]
+                files_to_process.extend(folder_files)
 
-        self.stdout.write(self.style.NOTICE(f"Loading seed data from {file_path}..."))
-
-        with open(file_path, "r", encoding="utf-8") as f:
-            try:
-                data = yaml.safe_load(f)
-            except yaml.YAMLError as exc:
-                self.stderr.write(self.style.ERROR(f"Error parsing YAML: {exc}"))
-                return
-
-        if not data:
-            self.stderr.write(self.style.ERROR("YAML file is empty."))
-            return
-
-        # -- 1. Superuser
+        # -- 1. Ensure Superuser Admin
         if not User.objects.filter(username="admin").exists():
             User.objects.create_superuser(
                 "admin", "admin@hotelichchha.com", "admin123",
@@ -52,340 +127,192 @@ class Command(BaseCommand):
         else:
             self.stdout.write(self.style.WARNING("Superuser 'admin' already exists. Skipping."))
 
-        # -- 2. Currencies
-        from settings_manager.models.currency import Currency
-        for c in data.get("currencies", []):
-            iso = c.get("iso_code")
-            if not iso:
+        for current_file in files_to_process:
+            if not os.path.exists(current_file):
                 continue
-            qs = Currency.objects.get_queryset().set_active_test(enabled=False)
-            if qs.filter(iso_code=iso).exists():
-                self.stdout.write(self.style.WARNING(f"Currency '{iso}' already exists. Skipping."))
-            else:
-                Currency.objects.create(
-                    iso_code=iso,
-                    name=c.get("name"),
-                    symbol=c.get("symbol"),
-                    sequence=c.get("sequence"),
-                    is_published=c.get("is_published", True),
-                    is_custom=c.get("is_custom", False),
-                )
-                self.stdout.write(self.style.SUCCESS(f"Created currency: {iso}"))
 
-        # -- 3. Hotel Settings (singleton)
-        from settings_manager.models.hotel_settings import HotelSettings
-        s = data.get("hotel_settings")
-        if s:
-            _, created = HotelSettings.objects.get_or_create(id=1, defaults=s)
-            if created:
-                self.stdout.write(self.style.SUCCESS("Created Hotel Settings."))
-            else:
-                self.stdout.write(self.style.WARNING("Hotel Settings already exist. Skipping."))
+            self.stdout.write(self.style.NOTICE(f"\nProcessing data from {current_file}..."))
 
-        # -- 4. About Preview (singleton)
-        from homepage.models.about_preview import AboutPreview
-        ap = data.get("about_preview")
-        if ap:
-            _, created = AboutPreview.objects.get_or_create(id=1, defaults=ap)
-            if created:
-                self.stdout.write(self.style.SUCCESS("Created About Preview."))
-            else:
-                self.stdout.write(self.style.WARNING("About Preview already exists. Skipping."))
+            with open(current_file, "r", encoding="utf-8") as f:
+                try:
+                    data = yaml.safe_load(f)
+                except yaml.YAMLError as exc:
+                    self.stderr.write(self.style.ERROR(f"Error parsing YAML ({current_file}): {exc}"))
+                    continue
 
-        # -- 5. Navigation Menus
-        from settings_manager.models.navigation import NavigationMenu
-        for m in data.get("navigation_menus", []):
-            name = m.get("name")
-            position = m.get("position")
-            if not name or not position:
+            if not data:
+                self.stderr.write(self.style.ERROR(f"YAML file is empty: {current_file}"))
                 continue
-            _, created = NavigationMenu.objects.get_or_create(
-                name=name, position=position,
-                defaults={
-                    "url": m.get("url", "/"),
-                    "order": m.get("order", 0),
-                    "is_published": m.get("is_published", True),
-                }
-            )
-            if created:
-                self.stdout.write(self.style.SUCCESS(f"Created nav item: {name} ({position})"))
-            else:
-                self.stdout.write(self.style.WARNING(f"Nav item '{name}' ({position}) already exists. Skipping."))
 
-        # -- 6. Hero Slides
-        from homepage.models.hero_slide import HeroSlide
-        for slide in data.get("hero_slides", []):
-            title = slide.get("title")
-            if not title:
-                continue
-            _, created = HeroSlide.objects.get_or_create(
-                title=title,
-                defaults={k: v for k, v in slide.items() if k != "title"}
-            )
-            if created:
-                self.stdout.write(self.style.SUCCESS(f"Created hero slide: {title}"))
-            else:
-                self.stdout.write(self.style.WARNING(f"Hero slide '{title}' already exists. Skipping."))
+            # -- 2. Process All Registered Models Dynamically
+            for key, config in GLOBAL_MODEL_REGISTRY.items():
+                if key not in data:
+                    continue
 
-        # -- 7. Room Facilities
-        from rooms.models.room_facility import RoomFacility
-        for fac in data.get("room_facilities", []):
-            name = fac.get("name")
-            if not name:
-                continue
-            _, created = RoomFacility.objects.get_or_create(
-                name=name,
-                defaults={k: v for k, v in fac.items() if k != "name"}
-            )
-            if created:
-                self.stdout.write(self.style.SUCCESS(f"Created facility: {name}"))
-            else:
-                self.stdout.write(self.style.WARNING(f"Facility '{name}' already exists. Skipping."))
+                app_label, model_name, lookup_fields, is_singleton = config
+                try:
+                    model = apps.get_model(app_label, model_name)
+                except LookupError:
+                    self.stderr.write(self.style.ERROR(f"Model {app_label}.{model_name} not found."))
+                    continue
 
-        # -- 7.5. Room Categories
-        from rooms.models.room_category import RoomCategory
-        for cat in data.get("room_categories", []):
-            slug = cat.get("slug")
-            if not slug:
-                continue
-            _, created = RoomCategory.objects.get_or_create(
-                slug=slug,
-                defaults={
-                    "name": cat.get("name"),
-                    "order": cat.get("order", 0),
-                    "is_published": cat.get("is_published", True),
-                }
-            )
-            if created:
-                self.stdout.write(self.style.SUCCESS(f"Created Room Category: {cat.get('name')}"))
-            else:
-                self.stdout.write(self.style.WARNING(f"Room Category '{slug}' already exists. Skipping."))
+                raw_data = data[key]
 
-        # -- 8. Rooms
-        from rooms.models.room import Room
-        from rooms.models.room_category import RoomCategory
-        for room_data in data.get("rooms", []):
-            slug = room_data.get("slug")
-            if not slug:
-                continue
-            facility_names = room_data.pop("facilities", [])
-            images = room_data.pop("images", [])
-            policies = room_data.pop("policies", [])
-            seasonal_prices = room_data.pop("seasonal_prices", [])
-            prices_data = room_data.pop("prices", [])
-            
-            category_slug = room_data.get("category")
-            if category_slug:
-                cat_obj = RoomCategory.objects.filter(slug=category_slug).first()
-                room_data["category"] = cat_obj
+                # SINGLETON MODELS
+                if is_singleton:
+                    if not isinstance(raw_data, dict):
+                        continue
+                    valid_data = filter_model_fields(model, raw_data)
+                    valid_data = prepare_item_data(key, raw_data, valid_data)
 
-            room_obj, created = Room.objects.get_or_create(
-                slug=slug,
-                defaults={k: v for k, v in room_data.items()}
-            )
-            
-            from rooms.models.room_base_price import RoomBasePrice
-            from settings_manager.models.currency import Currency
-            for p_data in prices_data:
-                ccode = p_data.get("currency")
-                c_obj = Currency.objects.filter(iso_code=ccode).first()
-                if c_obj:
-                    RoomBasePrice.objects.update_or_create(
-                        room=room_obj,
-                        currency=c_obj,
-                        defaults={
-                            'base_price': p_data.get("base_price"),
-                            'discount_price': p_data.get("discount_price")
-                        }
-                    )
-            if created:
-                for fname in facility_names:
-                    fac = RoomFacility.objects.filter(name=fname).first()
-                    if fac:
-                        room_obj.facilities.add(fac)
-                
-                # Seed Room Images
-                from rooms.models.room_image import RoomImage
-                for img in images:
-                    RoomImage.objects.create(
-                        room=room_obj,
-                        image=img.get("image"),
-                        is_primary=img.get("is_primary", False),
-                        alt_text=img.get("alt_text", "")
-                    )
-                
-                # Seed Room Policies
-                from rooms.models.room_policy import RoomPolicy
-                for pol in policies:
-                    RoomPolicy.objects.create(
-                        room=room_obj,
-                        title=pol.get("title"),
-                        description=pol.get("description")
-                    )
-                
-                # Seed Room Seasonal Prices
-                from rooms.models.room_seasonal_price import RoomSeasonalPrice
-                for prc in seasonal_prices:
-                    RoomSeasonalPrice.objects.create(
-                        room=room_obj,
-                        name=prc.get("name"),
-                        start_date=prc.get("start_date"),
-                        end_date=prc.get("end_date"),
-                        price_override=prc.get("price_override"),
-                        is_active=prc.get("is_active", True)
-                    )
+                    existing = model.objects.first()
+                    if existing:
+                        if do_update:
+                            for k, v in valid_data.items():
+                                setattr(existing, k, v)
+                            existing.save()
+                            post_process_item(key, existing, raw_data)
+                            self.stdout.write(self.style.SUCCESS(f"  - Updated {model_name} (Singleton)"))
+                        else:
+                            self.stdout.write(self.style.WARNING(f"  - {model_name} already exists. Skipping."))
+                    else:
+                        new_obj = model.objects.create(**valid_data)
+                        post_process_item(key, new_obj, raw_data)
+                        self.stdout.write(self.style.SUCCESS(f"  - Created {model_name} (Singleton)"))
 
-                self.stdout.write(self.style.SUCCESS(f"Created room: {room_obj.title} (with images, policies, and seasonal prices)"))
-            else:
-                self.stdout.write(self.style.WARNING(f"Room '{slug}' already exists. Skipping."))
-
-        # -- 9. Dining Venues
-        from dining.models.venue import DiningVenue
-        for venue in data.get("dining_venues", []):
-            slug = venue.get("slug")
-            if not slug:
-                continue
-            venue_obj, created = DiningVenue.objects.get_or_create(
-                slug=slug,
-                defaults={k: v for k, v in venue.items() if k != "slug"}
-            )
-            if created:
-                self.stdout.write(self.style.SUCCESS(f"Created dining venue: {venue_obj.name}"))
-            else:
-                self.stdout.write(self.style.WARNING(f"Dining venue '{slug}' already exists. Skipping."))
-
-        # -- 10. Recreation Activities
-        from recreation.models.activity import RecreationActivity
-        for act in data.get("recreation_activities", []):
-            slug = act.get("slug")
-            if not slug:
-                continue
-            act_obj, created = RecreationActivity.objects.get_or_create(
-                slug=slug,
-                defaults={k: v for k, v in act.items() if k != "slug"}
-            )
-            if created:
-                self.stdout.write(self.style.SUCCESS(f"Created activity: {act_obj.name}"))
-            else:
-                self.stdout.write(self.style.WARNING(f"Activity '{slug}' already exists. Skipping."))
-
-        # -- 11. Nearby Attractions
-        from nearby_places.models.attraction import Attraction
-        for attr in data.get("attractions", []):
-            name = attr.get("name")
-            if not name:
-                continue
-            _, created = Attraction.objects.get_or_create(
-                name=name,
-                defaults={k: v for k, v in attr.items() if k != "name"}
-            )
-            if created:
-                self.stdout.write(self.style.SUCCESS(f"Created attraction: {name}"))
-            else:
-                self.stdout.write(self.style.WARNING(f"Attraction '{name}' already exists. Skipping."))
-
-        # -- 12. Testimonials
-        from testimonials.models.testimonial import Testimonial
-        for t in data.get("testimonials", []):
-            guest_name = t.get("guest_name")
-            source = t.get("source")
-            if not guest_name:
-                continue
-            _, created = Testimonial.objects.get_or_create(
-                guest_name=guest_name, source=source,
-                defaults={k: v for k, v in t.items() if k not in ("guest_name", "source")}
-            )
-            if created:
-                self.stdout.write(self.style.SUCCESS(f"Created testimonial: {guest_name}"))
-            else:
-                self.stdout.write(self.style.WARNING(f"Testimonial '{guest_name}' already exists. Skipping."))
-
-        # -- 13. SEO Data (page meta + banner defaults)
-        from seo.models.seo_data import SEOData
-        for seo in data.get("seo_data", []):
-            path = seo.get("path")
-            if not path:
-                continue
-            _, created = SEOData.objects.get_or_create(
-                path=path,
-                defaults={k: v for k, v in seo.items() if k != "path"}
-            )
-            if created:
-                self.stdout.write(self.style.SUCCESS(f"Created SEO data: {path}"))
-            else:
-                self.stdout.write(self.style.WARNING(f"SEO data for '{path}' already exists. Skipping."))
-
-        # -- 14. Coupons
-        from booking.models.coupon import Coupon
-        for coupon in data.get("coupons", []):
-            code = coupon.get("code")
-            if not code:
-                continue
-            if Coupon.objects.filter(code=code).exists():
-                self.stdout.write(self.style.WARNING(f"Coupon '{code}' already exists. Skipping."))
-                continue
-            days = coupon.pop("valid_days_from_now", 365)
-            Coupon.objects.create(
-                code=code,
-                discount_type=coupon.get("discount_type", "percentage"),
-                discount_value=coupon.get("discount_value", 10),
-                min_spend=coupon.get("min_spend", 0),
-                valid_from=timezone.now() - timedelta(days=1),
-                valid_to=timezone.now() + timedelta(days=days),
-                is_active=coupon.get("is_active", True),
-            )
-            self.stdout.write(self.style.SUCCESS(f"Created coupon: {code}"))
-
-        # -- 15. Branches
-        from contact.models.branch import Branch
-        for b in data.get("branches", []):
-            name = b.get("name")
-            if not name:
-                continue
-            _, created = Branch.objects.get_or_create(
-                name=name,
-                defaults={k: v for k, v in b.items() if k != "name"}
-            )
-            if created:
-                self.stdout.write(self.style.SUCCESS(f"Created branch: {name}"))
-            else:
-                self.stdout.write(self.style.WARNING(f"Branch '{name}' already exists. Skipping."))
-
-        # -- 16. Payment Processors
-        from payments.models.payment_processor import PaymentProcessor, PaymentProcessorCurrency
-        from settings_manager.models.currency import Currency
-        
-        processors_to_seed = data.get("payment_processors", [])
-        
-        for p_data in processors_to_seed:
-            code = p_data['code']
-            existing = PaymentProcessor._base_manager.filter(code=code).first()
-            if existing:
-                if not existing.is_active:
-                    existing.is_active = True
-                    existing.deleted_at = None
-                    existing.save()
-                    self.stdout.write(self.style.SUCCESS(f"Restored soft-deleted payment processor: {p_data['name']}"))
+                # COLLECTION MODELS
                 else:
-                    self.stdout.write(self.style.WARNING(f"Payment processor '{p_data['name']}' already exists. Skipping."))
-                processor = existing
-            else:
-                processor = PaymentProcessor.objects.create(
-                    code=code,
-                    name=p_data['name'],
-                    apply_tax=p_data['apply_tax'],
-                    is_published=p_data['is_published']
-                )
-                self.stdout.write(self.style.SUCCESS(f"Created payment processor: {p_data['name']}"))
-                
-            # Associate currencies
-            for cur_code in p_data['currencies']:
-                currency_obj = Currency.objects.get_queryset().set_active_test(enabled=False).filter(iso_code=cur_code).first()
-                if currency_obj:
-                    PaymentProcessorCurrency.objects.get_or_create(
-                        payment_processor=processor,
-                        currency=currency_obj
+                    if not isinstance(raw_data, list):
+                        continue
+
+                    count_created = 0
+                    count_updated = 0
+                    count_skipped = 0
+
+                    for item in raw_data:
+                        if not isinstance(item, dict):
+                            continue
+
+                        valid_data = filter_model_fields(model, item)
+                        valid_data = prepare_item_data(key, item, valid_data)
+
+                        # Special active manager lookup for Currency / PaymentProcessor
+                        if model_name == "Currency" and "iso_code" in item:
+                            existing = model.objects.get_queryset().set_active_test(enabled=False).filter(iso_code=item["iso_code"]).first()
+                        elif model_name == "PaymentProcessor" and "code" in item:
+                            existing = model._base_manager.filter(code=item["code"]).first()
+                        else:
+                            lookup_kwargs = {field: item.get(field) for field in lookup_fields if item.get(field) is not None}
+                            if not lookup_kwargs:
+                                continue
+                            existing = model.objects.filter(**lookup_kwargs).first()
+
+                        if existing:
+                            if do_update:
+                                for k, v in valid_data.items():
+                                    setattr(existing, k, v)
+                                if hasattr(existing, 'is_active'):
+                                    existing.is_active = True
+                                if hasattr(existing, 'deleted_at'):
+                                    existing.deleted_at = None
+                                existing.save()
+                                post_process_item(key, existing, item)
+                                count_updated += 1
+                            else:
+                                count_skipped += 1
+                        else:
+                            new_obj = model.objects.create(**valid_data)
+                            post_process_item(key, new_obj, item)
+                            count_created += 1
+
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            f"  - Processed {model_name}: {count_created} created, {count_updated} updated, {count_skipped} skipped."
+                        )
                     )
 
-        self.stdout.write(self.style.SUCCESS("\nDatabase seeding completed successfully!"))
+            # -- 3. Complex Models: Rooms with nested FKs, M2Ms, Images, Policies, Seasonal Prices & Prices
+            if "rooms" in data:
+                from rooms.models.room import Room
+                from rooms.models.room_category import RoomCategory
+                from rooms.models.room_facility import RoomFacility
+                from rooms.models.room_base_price import RoomBasePrice
+                from rooms.models.room_image import RoomImage
+                from rooms.models.room_policy import RoomPolicy
+                from rooms.models.room_seasonal_price import RoomSeasonalPrice
+                from settings_manager.models.currency import Currency
 
+                if do_update:
+                    Room.objects.all().delete()
+
+                for room_data in data.get("rooms", []):
+                    slug = room_data.get("slug")
+                    if not slug:
+                        continue
+                    facility_names = room_data.pop("facilities", [])
+                    images = room_data.pop("images", [])
+                    policies = room_data.pop("policies", [])
+                    seasonal_prices = room_data.pop("seasonal_prices", [])
+                    prices_data = room_data.pop("prices", [])
+
+                    category_slug = room_data.get("category")
+                    if category_slug:
+                        cat_obj = RoomCategory.objects.filter(slug=category_slug).first()
+                        room_data["category"] = cat_obj
+
+                    valid_room_fields = filter_model_fields(Room, room_data)
+
+                    room_obj, created = Room.objects.get_or_create(
+                        slug=slug,
+                        defaults=valid_room_fields
+                    )
+
+                    for p_data in prices_data:
+                        ccode = p_data.get("currency")
+                        c_obj = Currency.objects.filter(iso_code=ccode).first()
+                        if c_obj:
+                            RoomBasePrice.objects.update_or_create(
+                                room=room_obj,
+                                currency=c_obj,
+                                defaults={
+                                    'base_price': p_data.get("base_price"),
+                                    'discount_price': p_data.get("discount_price")
+                                }
+                            )
+
+                    for fname in facility_names:
+                        fac = RoomFacility.objects.filter(name=fname).first()
+                        if fac:
+                            room_obj.facilities.add(fac)
+
+                    for img in images:
+                        img_path = img.get("image")
+                        if img_path:
+                            RoomImage.objects.get_or_create(
+                                room=room_obj,
+                                image=img_path,
+                                defaults={"is_primary": img.get("is_primary", False), "alt_text": img.get("alt_text", "")}
+                            )
+
+                    for pol in policies:
+                        RoomPolicy.objects.get_or_create(
+                            room=room_obj,
+                            title=pol.get("title"),
+                            defaults={"description": pol.get("description")}
+                        )
+
+                    for prc in seasonal_prices:
+                        RoomSeasonalPrice.objects.get_or_create(
+                            room=room_obj,
+                            name=prc.get("name"),
+                            start_date=prc.get("start_date"),
+                            end_date=prc.get("end_date"),
+                            defaults={
+                                "price_override": prc.get("price_override"),
+                                "is_active": prc.get("is_active", True)
+                            }
+                        )
+
+                    self.stdout.write(self.style.SUCCESS(f"  - Processed room: {room_obj.title}"))
+
+        self.stdout.write(self.style.SUCCESS("\nAll data import tasks completed successfully!"))

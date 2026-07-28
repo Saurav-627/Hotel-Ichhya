@@ -1,0 +1,65 @@
+attractions:
+- name: Simara Airport
+  category: transport
+  distance: 2.5 km
+  travel_time: 5 mins drive
+  description: Closest regional airport providing quick flights to Kathmandu.
+  is_active: true
+- name: Parsa National Park
+  category: nature
+  distance: 18 km
+  travel_time: 25 mins drive
+  description: Famous wildlife sanctuary hosting wild elephants, Royal Bengal tigers,
+    and dense sub-tropical forests.
+  is_active: true
+- name: Gadhimai Temple Complex
+  category: culture
+  distance: 14 km
+  travel_time: 20 mins drive
+  description: Historically significant temple complex in Bariyarpur, attracting millions
+    during festival seasons.
+  is_active: true
+- name: Birgunj City Center & Integrated Checkpost
+  category: shopping
+  distance: 19 km
+  travel_time: 30 mins drive
+  description: Major commercial hub for cross-border trade, shopping centers, and
+    local bazaars.
+  is_active: true
+- name: Raxaul (India Border)
+  category: transport
+  distance: 22 km
+  travel_time: 35 mins drive
+  description: Key international border crossing connecting Nepal with India.
+  is_active: true
+- name: Pathlaiya Intersection
+  category: transport
+  distance: 6 km
+  travel_time: 8 mins drive
+  description: Major highway junction connecting Mahendra Highway and Tribhuvan Highway.
+  is_active: true
+- name: Amlekhgunj Oil Depot & Heritage Railway Site
+  category: history
+  distance: 12 km
+  travel_time: 15 mins drive
+  description: Historic site of Nepal's first narrow-gauge railway system.
+  is_active: true
+- name: Hetauda Industrial Estate & City
+  category: city
+  distance: 35 km
+  travel_time: 45 mins drive
+  description: Clean industrial city nestled in the hills with parks, temples, and
+    rivers.
+  is_active: true
+- name: Churiyamai Tunnel Site
+  category: history
+  distance: 28 km
+  travel_time: 35 mins drive
+  description: Historical vehicle tunnel constructed in 1917, one of Asia's first.
+  is_active: true
+- name: Bhutaswar Temple
+  category: culture
+  distance: 8 km
+  travel_time: 12 mins drive
+  description: Serene local Shiva temple nestled amidst natural green surroundings.
+  is_active: true

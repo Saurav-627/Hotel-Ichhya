@@ -1,0 +1,7 @@
+coupons:
+- code: WELCOME10
+  discount_type: percentage
+  discount_value: 10.0
+  min_spend: 50.0
+  valid_days_from_now: 365
+  is_active: true
