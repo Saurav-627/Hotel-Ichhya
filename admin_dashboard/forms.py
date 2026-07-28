@@ -224,10 +224,31 @@ class GalleryItemForm(TailwindFormMixin, forms.ModelForm):
         model = GalleryItem
         fields = '__all__'
 
+from conference.models.venue_base_price import VenueBasePrice
+
+class VenueBasePriceForm(TailwindFormMixin, forms.ModelForm):
+    class Meta:
+        model = VenueBasePrice
+        fields = ('currency', 'base_price')
+
+VenueBasePriceFormSet = forms.inlineformset_factory(
+    EventVenue,
+    VenueBasePrice,
+    form=VenueBasePriceForm,
+    extra=1,
+    can_delete=True,
+    min_num=1,
+    validate_min=True
+)
+
 class EventVenueForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
         model = EventVenue
-        fields = '__all__'
+        fields = ['name', 'slug', 'description', 'capacity', 'layout_options', 'image', 'is_active']
+        help_texts = {
+            'layout_options': "Enter each layout style and capacity on a separate line. Format: 'Layout Name: Capacity' (e.g. 'Banquet: 200 pax' or 'Theatre: 300 pax' or 'Classroom: 150').",
+            'capacity': "Maximum total seating/floating capacity of the event venue."
+        }
 
 class EventInquiryForm(TailwindFormMixin, forms.ModelForm):
     class Meta:

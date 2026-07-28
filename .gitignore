@@ -15,7 +15,9 @@ wheels/
 # Environment files
 .env
 
-# Database backups
+# Database files & backups
+db.sqlite3
+*.sqlite3
 backups/
 
 # User-uploaded media files (local development only)

@@ -259,35 +259,109 @@
     }
 }" class="theme-light min-h-screen flex flex-col">
 
-    <!-- Django Messages / Toast Notification -->
-    {% if messages %}
-    <div class="fixed top-24 right-6 z-50 space-y-4 max-w-sm w-full pointer-events-none" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" style="display: none;">
-        {% for message in messages %}
-        <div class="p-4 rounded-xl shadow-2xl border flex items-start gap-3 pointer-events-auto animate__animated animate__fadeInRight bg-black/90 backdrop-blur-md"
-             :class="{
-                 'border-emerald-500/30 text-emerald-200': '{{ message.tags }}' === 'success',
-                 'border-rose-500/30 text-rose-200': '{{ message.tags }}' === 'error',
-                 'border-amber-500/30 text-amber-200': '{{ message.tags }}' === 'warning' || '{{ message.tags }}' === 'info'
-             }">
-            <div class="text-lg">
-                {% if message.tags == 'success' %}
-                    <i class="fa-solid fa-circle-check text-emerald-400"></i>
-                {% elif message.tags == 'error' %}
-                    <i class="fa-solid fa-circle-exclamation text-rose-400"></i>
-                {% else %}
-                    <i class="fa-solid fa-triangle-exclamation text-amber-400"></i>
-                {% endif %}
+    <!-- Toast Notification Container (Django Messages & HTMX Events) -->
+    <div x-data="toastManager()"
+         @show-toast.window="addToast($event.detail)"
+         class="fixed top-24 right-6 z-[9999] space-y-3 max-w-sm w-full pointer-events-none">
+        
+        <!-- Django Server Messages on Page Load -->
+        {% if messages %}
+            {% for message in messages %}
+            <div x-data="{ show: true }" 
+                 x-show="show" 
+                 x-init="setTimeout(() => show = false, 5000)"
+                 x-transition:leave="transition ease-in duration-300 transform"
+                 x-transition:leave-start="translate-x-0 opacity-100"
+                 x-transition:leave-end="translate-x-full opacity-0"
+                 class="p-4 rounded-xl shadow-2xl border flex items-start gap-3 pointer-events-auto animate__animated animate__fadeInRight bg-black/90 backdrop-blur-md text-amber-100 transition-all duration-300"
+                 :class="{
+                     'border-emerald-500/40 text-emerald-200': '{{ message.tags }}' === 'success',
+                     'border-rose-500/40 text-rose-200': '{{ message.tags }}' === 'error',
+                     'border-amber-500/40 text-amber-200': '{{ message.tags }}' === 'warning' || '{{ message.tags }}' === 'info'
+                 }">
+                <div class="text-lg shrink-0">
+                    {% if message.tags == 'success' %}
+                        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                    {% elif message.tags == 'error' %}
+                        <i class="fa-solid fa-circle-exclamation text-rose-400"></i>
+                    {% else %}
+                        <i class="fa-solid fa-triangle-exclamation text-amber-400"></i>
+                    {% endif %}
+                </div>
+                <div class="flex-1 text-xs font-medium leading-relaxed">
+                    {{ message }}
+                </div>
+                <button @click="show = false" class="opacity-60 hover:opacity-100 transition-opacity pointer-events-auto">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
             </div>
-            <div class="flex-1 text-xs font-medium leading-relaxed">
-                {{ message }}
+            {% endfor %}
+        {% endif %}
+
+        <!-- Dynamic HTMX Toast Notifications -->
+        <template x-for="t in toasts" :key="t.id">
+            <div x-show="t.show"
+                 x-transition:enter="transition ease-out duration-300 transform"
+                 x-transition:enter-start="translate-x-full opacity-0"
+                 x-transition:enter-end="translate-x-0 opacity-100"
+                 x-transition:leave="transition ease-in duration-300 transform"
+                 x-transition:leave-start="translate-x-0 opacity-100"
+                 x-transition:leave-end="translate-x-full opacity-0"
+                 class="p-4 rounded-xl shadow-2xl border flex items-start gap-3 pointer-events-auto bg-black/90 backdrop-blur-md text-amber-100 transition-all duration-300"
+                 :class="{
+                     'border-emerald-500/40 text-emerald-200': t.type === 'success',
+                     'border-rose-500/40 text-rose-200': t.type === 'error',
+                     'border-amber-500/40 text-amber-200': t.type === 'warning' || t.type === 'info'
+                 }">
+                <div class="text-lg shrink-0">
+                    <template x-if="t.type === 'success'">
+                        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                    </template>
+                    <template x-if="t.type === 'error'">
+                        <i class="fa-solid fa-circle-exclamation text-rose-400"></i>
+                    </template>
+                    <template x-if="t.type !== 'success' && t.type !== 'error'">
+                        <i class="fa-solid fa-circle-info text-amber-400"></i>
+                    </template>
+                </div>
+                <div class="flex-1 text-xs font-medium leading-relaxed" x-text="t.message"></div>
+                <button @click="removeToast(t.id)" class="opacity-60 hover:opacity-100 transition-opacity">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
             </div>
-            <button @click="show = false" class="opacity-60 hover:opacity-100 transition-opacity pointer-events-auto">
-                <i class="fa-solid fa-xmark text-xs"></i>
-            </button>
-        </div>
-        {% endfor %}
+        </template>
     </div>
-    {% endif %}
+
+    <script>
+    function toastManager() {
+        return {
+            toasts: [],
+            addToast(detail) {
+                const id = Date.now() + Math.random();
+                const toastObj = {
+                    id: id,
+                    message: typeof detail === 'string' ? detail : (detail.message || 'Notification'),
+                    type: typeof detail === 'object' ? (detail.type || 'success') : 'success',
+                    show: true
+                };
+                this.toasts.push(toastObj);
+                const duration = (typeof detail === 'object' && detail.duration) ? detail.duration : 5000;
+                setTimeout(() => {
+                    this.removeToast(id);
+                }, duration);
+            },
+            removeToast(id) {
+                const target = this.toasts.find(t => t.id === id);
+                if (target) {
+                    target.show = false;
+                    setTimeout(() => {
+                        this.toasts = this.toasts.filter(t => t.id !== id);
+                    }, 400);
+                }
+            }
+        }
+    }
+    </script>
 
     {% include 'includes/header.html' %}
 

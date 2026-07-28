@@ -17,10 +17,58 @@
                 <p class="text-xs sm:text-sm leading-relaxed opacity-85">{{ venue.description }}</p>
             </div>
 
-            {% if venue.chef_specialty %}
-            <div class="p-4 sm:p-6 rounded-2xl border border-amber-900/10" :class="{ 'bg-gray-50': currentTheme === 'light', 'bg-[#161412]': currentTheme !== 'light' }">
-                <h3 class="font-luxury-title text-base sm:text-lg font-semibold mb-2">Chef's Signature Specialty</h3>
-                <p class="text-xs sm:text-sm opacity-80 italic">"{{ venue.chef_specialty }}"</p>
+            <!-- EXECUTIVE CHEF PROFILE -->
+            {% if venue.chef_name or venue.chef_bio or venue.chef_image or venue.chef_specialty %}
+            <div class="p-5 sm:p-7 rounded-2xl border space-y-4"
+                 :class="{ 'bg-gray-50/80 border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
+                <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">Master Culinary Artist</span>
+                
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+                    {% if venue.chef_image %}
+                    <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden shrink-0 border-2 border-luxuryGold-400 shadow-md">
+                        <img src="{{ venue.chef_image.url }}" alt="{{ venue.chef_name|default:'Executive Chef' }}" class="w-full h-full object-cover">
+                    </div>
+                    {% endif %}
+                    
+                    <div class="space-y-1">
+                        {% if venue.chef_name %}
+                        <h3 class="font-luxury-title text-xl sm:text-2xl font-bold">{{ venue.chef_name }}</h3>
+                        {% endif %}
+                        <p class="text-xs font-medium text-luxuryGold-400 uppercase tracking-wider">Head Executive Chef</p>
+                        {% if venue.chef_specialty %}
+                        <p class="text-xs sm:text-sm opacity-90 italic pt-1">
+                            <i class="fa-solid fa-utensils text-luxuryGold-500 mr-1.5"></i>Specialty: "{{ venue.chef_specialty }}"
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if venue.chef_bio %}
+                <p class="text-xs sm:text-sm opacity-85 leading-relaxed pt-2 border-t"
+                   :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
+                    {{ venue.chef_bio }}
+                </p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- FEATURED DISHES -->
+            {% if venue.featured_dishes %}
+            <div class="space-y-3 pt-2">
+                <h3 class="font-luxury-title text-lg sm:text-xl font-bold">Signature Culinary Highlights</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {% for dish in venue.featured_dishes.splitlines %}
+                        {% if dish %}
+                        <div class="p-3.5 rounded-xl border flex items-center gap-3"
+                             :class="{ 'bg-white border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
+                            <div class="w-8 h-8 rounded-full bg-luxuryGold-500/15 text-luxuryGold-500 flex items-center justify-center shrink-0 text-sm">
+                                <i class="fa-solid fa-bowl-food"></i>
+                            </div>
+                            <span class="text-xs sm:text-sm font-medium opacity-90">{{ dish }}</span>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
             </div>
             {% endif %}
 
@@ -43,50 +91,148 @@
                  }">
                 <h3 class="font-luxury-title text-lg sm:text-xl font-semibold mb-2 border-b pb-4" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">Book a Table</h3>
                 
-                <p class="text-xs opacity-75 mb-6">Reserve your table ahead to ensure prime seating. Confirmation is sent via email.</p>
+                <p class="text-xs opacity-75 mb-3">Reserve your table ahead to ensure prime seating. Confirmation is sent via email.</p>
+
+                <!-- Venue Timings & Capacity info badge -->
+                <div class="space-y-1.5 pb-4 mb-4 border-b border-amber-900/10 text-xs opacity-85">
+                    <p class="flex items-center gap-2"><i class="fa-solid fa-clock text-luxuryGold-500 w-4"></i><span>Hours: <strong class="text-luxuryGold-400">{{ venue.timings }}</strong></span></p>
+                    <p class="flex items-center gap-2"><i class="fa-solid fa-chair text-luxuryGold-500 w-4"></i><span>Capacity: <strong class="text-luxuryGold-400">{{ venue.capacity }} Seats Max</strong></span></p>
+                </div>
 
                 <!-- HTMX Response Area -->
                 <div id="reservation-response" class="mb-4"></div>
 
                 <!-- Reservation Form -->
-                <form hx-post="{% url 'dining:book_table_ajax' venue.id %}" hx-target="#reservation-response" hx-swap="innerHTML" class="space-y-4">
+                <form hx-post="{% url 'dining:book_table_ajax' venue.id %}" hx-target="#reservation-response" hx-swap="innerHTML" class="space-y-4"
+                      x-data="{
+                          name: '',
+                          email: '',
+                          phone: '',
+                          date: '',
+                          time: '',
+                          errors: {},
+                          validateName() {
+                              if (!this.name.trim()) {
+                                  this.errors.name = 'Full name is required.';
+                              } else if (this.name.trim().length < 2) {
+                                  this.errors.name = 'Name must be at least 2 characters.';
+                              } else {
+                                  this.errors.name = '';
+                              }
+                          },
+                          validateEmail() {
+                              const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                              if (!this.email.trim()) {
+                                  this.errors.email = 'Email address is required.';
+                              } else if (!re.test(this.email.trim())) {
+                                  this.errors.email = 'Please enter a valid email address.';
+                              } else {
+                                  this.errors.email = '';
+                              }
+                          },
+                          validatePhone() {
+                              const digits = this.phone.replace(/\D/g, '');
+                              if (!this.phone.trim()) {
+                                  this.errors.phone = 'Phone number is required.';
+                              } else if (digits.length < 10) {
+                                  this.errors.phone = 'Phone number must contain at least 10 digits.';
+                              } else if (digits.length > 10) {
+                                  this.errors.phone = 'Phone number cannot exceed 10 digits.';
+                              } else {
+                                  this.errors.phone = '';
+                              }
+                          },
+                          validateDate() {
+                              if (!this.date) {
+                                  this.errors.date = 'Reservation date is required.';
+                                  return;
+                              }
+                              const selected = new Date(this.date + 'T00:00:00');
+                              const today = new Date();
+                              today.setHours(0, 0, 0, 0);
+                              if (selected < today) {
+                                  this.errors.date = 'Reservation date cannot be in the past.';
+                              } else {
+                                  this.errors.date = '';
+                              }
+                          },
+                          validateTime() {
+                              if (!this.time) {
+                                  this.errors.time = 'Reservation time is required.';
+                              } else {
+                                  this.errors.time = '';
+                              }
+                          },
+                          validateForm(e) {
+                              this.validateName();
+                              this.validateEmail();
+                              this.validatePhone();
+                              this.validateDate();
+                              this.validateTime();
+                              if (Object.values(this.errors).some(err => err !== '')) {
+                                  if (e) e.preventDefault();
+                                  return false;
+                              }
+                              return true;
+                          }
+                      }"
+                      @submit="if (!validateForm($event)) $event.preventDefault()">
                     {% csrf_token %}
                     <div>
                         <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Full Name *</label>
-                        <input type="text" name="name" required class="w-full px-3.5 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
-                               :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
+                        <input type="text" name="name" required x-model="name" @blur="validateName()" @input="validateName()"
+                               class="w-full px-3.5 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 cursor-pointer transition-colors"
+                               :class="errors.name ? 'border-red-500 text-red-500 focus:ring-red-500' : (currentTheme === 'light' ? 'border-gray-300 focus:ring-luxuryGold-400' : 'border-amber-900/40 focus:ring-luxuryGold-400')">
+                        <p x-show="errors.name" x-text="errors.name" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                     </div>
                     <div>
                         <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Email *</label>
-                        <input type="email" name="email" required class="w-full px-3.5 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
-                               :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
+                        <input type="email" name="email" required x-model="email" @blur="validateEmail()" @input="validateEmail()"
+                               class="w-full px-3.5 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 cursor-pointer transition-colors"
+                               :class="errors.email ? 'border-red-500 text-red-500 focus:ring-red-500' : (currentTheme === 'light' ? 'border-gray-300 focus:ring-luxuryGold-400' : 'border-amber-900/40 focus:ring-luxuryGold-400')">
+                        <p x-show="errors.email" x-text="errors.email" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                     </div>
                     <div>
                         <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Phone *</label>
-                        <input type="tel" name="phone" required class="w-full px-3.5 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
-                               :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
+                        <input type="tel" name="phone" required x-model="phone" @blur="validatePhone()" @input="validatePhone()"
+                               placeholder="10-digit mobile number"
+                               class="w-full px-3.5 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 cursor-pointer transition-colors"
+                               :class="errors.phone ? 'border-red-500 text-red-500 focus:ring-red-500' : (currentTheme === 'light' ? 'border-gray-300 focus:ring-luxuryGold-400' : 'border-amber-900/40 focus:ring-luxuryGold-400')">
+                        <p x-show="errors.phone" x-text="errors.phone" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Date *</label>
-                            <input type="date" name="date" required class="w-full px-2.5 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-luxuryGold-400 cursor-pointer"
-                                   :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
+                            <input type="date" name="date" required min="{% now 'Y-m-d' %}" x-model="date" @blur="validateDate()" @change="validateDate()"
+                                   class="w-full px-2.5 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 cursor-pointer transition-colors"
+                                   :class="errors.date ? 'border-red-500 text-red-500 focus:ring-red-500' : (currentTheme === 'light' ? 'border-gray-300 focus:ring-luxuryGold-400' : 'border-amber-900/40 focus:ring-luxuryGold-400')">
+                            <p x-show="errors.date" x-text="errors.date" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                         </div>
                         <div>
                             <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Time *</label>
-                            <input type="time" name="time" required class="w-full px-2.5 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-luxuryGold-400 cursor-pointer"
-                                   :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
+                            <input type="time" name="time" required x-model="time" @blur="validateTime()" @change="validateTime()"
+                                   class="w-full px-2.5 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 cursor-pointer transition-colors"
+                                   :class="errors.time ? 'border-red-500 text-red-500 focus:ring-red-500' : (currentTheme === 'light' ? 'border-gray-300 focus:ring-luxuryGold-400' : 'border-amber-900/40 focus:ring-luxuryGold-400')">
+                            <p x-show="errors.time" x-text="errors.time" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Guests Count</label>
-                        <select name="guests" class="w-full px-3.5 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Guests Count *</label>
+                        <select name="guests" required class="w-full px-3.5 py-2.5 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
                                 :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
                             <option value="1">1 Guest</option>
                             <option value="2" selected>2 Guests</option>
+                            <option value="3">3 Guests</option>
                             <option value="4">4 Guests</option>
+                            {% if venue.capacity >= 6 %}
                             <option value="6">6 Guests</option>
-                            <option value="8">8+ Guests</option>
+                            {% endif %}
+                            {% if venue.capacity >= 8 %}
+                            <option value="8">8 Guests</option>
+                            {% endif %}
+                            {% if venue.capacity > 8 %}
+                            <option value="{{ venue.capacity }}">{{ venue.capacity }} Guests (Max Seating)</option>
+                            {% endif %}
                         </select>
                     </div>
                     <div>

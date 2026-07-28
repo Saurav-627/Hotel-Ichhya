@@ -14,10 +14,42 @@
             <div class="space-y-3 sm:space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4">
                     <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">Premium Event Space</span>
-                    <span class="text-xs sm:text-sm font-bold text-luxuryGold-500 font-luxury-title">Base Price: NPR {{ venue.base_price|floatformat:0 }}</span>
+                    <span class="text-xs sm:text-sm font-bold text-luxuryGold-500 font-luxury-title">Base Rental: {{ venue.currency_symbol }} {{ venue.current_base_price|floatformat:0 }}</span>
                 </div>
                 <h1 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold tracking-wide">{{ venue.name }}</h1>
                 <p class="text-xs sm:text-sm leading-relaxed opacity-85">{{ venue.description }}</p>
+            </div>
+
+            <!-- KEY SPECIFICATIONS BAR -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-2xl border text-xs"
+                 :class="{ 'bg-gray-50 border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
+                <div class="flex items-center gap-3 p-2">
+                    <div class="w-9 h-9 rounded-full bg-luxuryGold-500/15 text-luxuryGold-500 flex items-center justify-center shrink-0 text-sm">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                        <span class="block text-[10px] uppercase tracking-wider font-semibold opacity-60">Maximum Capacity</span>
+                        <strong class="text-xs sm:text-sm font-bold text-luxuryGold-500 dark:text-luxuryGold-300">{{ venue.capacity }} Guests Max</strong>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 p-2 border-t sm:border-t-0 sm:border-l" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
+                    <div class="w-9 h-9 rounded-full bg-luxuryGold-500/15 text-luxuryGold-500 flex items-center justify-center shrink-0 text-sm">
+                        <i class="fa-solid fa-tag"></i>
+                    </div>
+                    <div>
+                        <span class="block text-[10px] uppercase tracking-wider font-semibold opacity-60">Base Rental Rate</span>
+                        <strong class="text-xs sm:text-sm font-bold text-luxuryGold-500 dark:text-luxuryGold-300">{{ venue.currency_symbol }} {{ venue.current_base_price|floatformat:0 }}</strong>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 p-2 border-t sm:border-t-0 sm:border-l" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
+                    <div class="w-9 h-9 rounded-full bg-luxuryGold-500/15 text-luxuryGold-500 flex items-center justify-center shrink-0 text-sm">
+                        <i class="fa-solid fa-shapes"></i>
+                    </div>
+                    <div>
+                        <span class="block text-[10px] uppercase tracking-wider font-semibold opacity-60">Seating Styles</span>
+                        <strong class="text-xs sm:text-sm font-bold text-luxuryGold-500 dark:text-luxuryGold-300">{{ venue.parsed_layouts|length }} Layout Styles</strong>
+                    </div>
+                </div>
             </div>
 
             <!-- LAYOUTS AND CAPACITY SPECIFICATION TABLE -->
@@ -31,11 +63,11 @@
                         <h4 class="text-[10px] sm:text-xs font-bold uppercase tracking-wider opacity-60">Max Capacity</h4>
                         <p class="text-base sm:text-lg font-bold mt-1 text-luxuryGold-300">{{ venue.capacity }} pax</p>
                     </div>
-                    {% for layout in venue.layout_options.splitlines %}
-                    <div class="text-center p-3 sm:p-4 rounded-xl border border-white/5 bg-black/10">
+                    {% for layout in venue.parsed_layouts %}
+                    <div class="text-center p-3 sm:p-4 rounded-xl border border-white/5 bg-black/10 flex flex-col items-center justify-center">
                         <i class="fa-solid fa-chair text-xl sm:text-2xl text-luxuryGold-500 mb-1.5"></i>
-                        <h4 class="text-[10px] sm:text-xs font-bold uppercase tracking-wider opacity-60 truncate">{{ layout|slice:":15" }}</h4>
-                        <p class="text-base sm:text-lg font-bold mt-1 text-luxuryGold-300 truncate">{{ layout|slice:"15:" }}</p>
+                        <h4 class="text-[10px] sm:text-xs font-bold uppercase tracking-wider opacity-60 break-words leading-tight">{{ layout.name }}</h4>
+                        <p class="text-xs sm:text-sm font-bold mt-1 text-luxuryGold-300 break-words leading-tight">{{ layout.value }}</p>
                     </div>
                     {% endfor %}
                 </div>
@@ -58,38 +90,131 @@
 
                 <!-- Django messages rendering -->
                 {% if messages %}
-                <div class="space-y-2 mb-4">
+                <div class="space-y-3 mb-6">
                     {% for msg in messages %}
-                    <div class="p-3 rounded-lg border text-xs {% if msg.tags == 'success' %}bg-emerald-500/10 border-emerald-500/25 text-emerald-400{% else %}bg-amber-500/10 border-amber-500/25 text-amber-400{% endif %}">
-                        <p>{{ msg }}</p>
+                    <div class="p-4 sm:p-5 rounded-2xl border text-xs sm:text-sm animate__animated animate__fadeIn {% if msg.tags == 'success' %}bg-emerald-500/10 border-emerald-500/30 text-emerald-900 dark:text-emerald-100{% else %}bg-red-500/10 border-red-500/30 text-red-900 dark:text-red-100{% endif %}">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm border {% if msg.tags == 'success' %}bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30{% else %}bg-red-500/20 text-red-600 dark:text-red-400 border-red-500/30{% endif %}">
+                                <i class="fa-solid {% if msg.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+                            </div>
+                            <p class="font-medium leading-relaxed">{{ msg }}</p>
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
                 {% endif %}
 
                 <!-- Inquiry Form -->
-                <form method="POST" action="." class="space-y-4 text-xs">
+                <form method="POST" action="." class="space-y-4 text-xs"
+                      x-data="{
+                          name: '{{ form.name.value|default:'' }}',
+                          email: '{{ form.email.value|default:'' }}',
+                          phone: '{{ form.phone.value|default:'' }}',
+                          eventDate: '{{ form.event_date.value|default:'' }}',
+                          guestCount: '{{ form.guest_count.value|default:'' }}',
+                          maxCapacity: {{ venue.capacity }},
+                          errors: {},
+                          validateName() {
+                              if (!this.name.trim()) {
+                                  this.errors.name = 'Full name is required.';
+                              } else if (this.name.trim().length < 2) {
+                                  this.errors.name = 'Name must be at least 2 characters.';
+                              } else {
+                                  this.errors.name = '';
+                              }
+                          },
+                          validateEmail() {
+                              const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                              if (!this.email.trim()) {
+                                  this.errors.email = 'Email address is required.';
+                              } else if (!re.test(this.email.trim())) {
+                                  this.errors.email = 'Please enter a valid email address.';
+                              } else {
+                                  this.errors.email = '';
+                              }
+                          },
+                          validatePhone() {
+                              const digits = this.phone.replace(/\D/g, '');
+                              if (!this.phone.trim()) {
+                                  this.errors.phone = 'Contact phone is required.';
+                              } else if (digits.length < 10) {
+                                  this.errors.phone = 'Phone number must contain at least 10 digits.';
+                              } else if (digits.length > 10) {
+                                  this.errors.phone = 'Phone number cannot exceed 10 digits.';
+                              } else {
+                                  this.errors.phone = '';
+                              }
+                          },
+                          validateEventDate() {
+                              if (!this.eventDate) {
+                                  this.errors.eventDate = 'Event date is required.';
+                                  return;
+                              }
+                              const selected = new Date(this.eventDate + 'T00:00:00');
+                              const today = new Date();
+                              today.setHours(0, 0, 0, 0);
+                              if (selected < today) {
+                                  this.errors.eventDate = 'Event date cannot be in the past.';
+                              } else {
+                                  this.errors.eventDate = '';
+                              }
+                          },
+                          validateGuestCount() {
+                              if (!this.guestCount || parseInt(this.guestCount) < 1) {
+                                  this.errors.guestCount = 'Guest count must be at least 1.';
+                              } else if (parseInt(this.guestCount) > this.maxCapacity) {
+                                  this.errors.guestCount = `Guest count cannot exceed hall capacity of ${this.maxCapacity} guests.`;
+                              } else {
+                                  this.errors.guestCount = '';
+                              }
+                          },
+                          validateForm(e) {
+                              this.validateName();
+                              this.validateEmail();
+                              this.validatePhone();
+                              this.validateEventDate();
+                              this.validateGuestCount();
+                              if (Object.values(this.errors).some(err => err !== '')) {
+                                  if (e) e.preventDefault();
+                                  return false;
+                              }
+                              return true;
+                          }
+                      }"
+                      @submit="if (!validateForm($event)) $event.preventDefault()">
                     {% csrf_token %}
                     
                     <div>
-                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Full Name</label>
-                        {{ form.name }}
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Full Name *</label>
+                        <input type="text" name="name" required x-model="name" @blur="validateName()" @input="validateName()"
+                               placeholder="Your Full Name"
+                               class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-1 bg-transparent text-inherit transition-colors"
+                               :class="errors.name ? 'border-red-500 text-red-500 focus:ring-red-500' : 'focus:ring-luxuryGold-500'">
+                        <p x-show="errors.name" x-text="errors.name" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                         {% if form.name.errors %}
                         <p class="text-red-500 text-[10px] mt-1">{{ form.name.errors.as_text }}</p>
                         {% endif %}
                     </div>
                     
                     <div>
-                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Email Address</label>
-                        {{ form.email }}
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Email Address *</label>
+                        <input type="email" name="email" required x-model="email" @blur="validateEmail()" @input="validateEmail()"
+                               placeholder="your.email@example.com"
+                               class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-1 bg-transparent text-inherit transition-colors"
+                               :class="errors.email ? 'border-red-500 text-red-500 focus:ring-red-500' : 'focus:ring-luxuryGold-500'">
+                        <p x-show="errors.email" x-text="errors.email" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                         {% if form.email.errors %}
                         <p class="text-red-500 text-[10px] mt-1">{{ form.email.errors.as_text }}</p>
                         {% endif %}
                     </div>
                     
                     <div>
-                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Contact Phone</label>
-                        {{ form.phone }}
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Contact Phone *</label>
+                        <input type="tel" name="phone" required x-model="phone" @blur="validatePhone()" @input="validatePhone()"
+                               placeholder="10-digit mobile number"
+                               class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-1 bg-transparent text-inherit transition-colors"
+                               :class="errors.phone ? 'border-red-500 text-red-500 focus:ring-red-500' : 'focus:ring-luxuryGold-500'">
+                        <p x-show="errors.phone" x-text="errors.phone" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                         {% if form.phone.errors %}
                         <p class="text-red-500 text-[10px] mt-1">{{ form.phone.errors.as_text }}</p>
                         {% endif %}
@@ -97,15 +222,22 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Event Date</label>
-                            {{ form.event_date }}
+                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Event Date *</label>
+                            <input type="date" name="event_date" required min="{% now 'Y-m-d' %}" x-model="eventDate" @blur="validateEventDate()" @change="validateEventDate()"
+                                   class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-1 bg-transparent text-inherit cursor-pointer transition-colors"
+                                   :class="errors.eventDate ? 'border-red-500 text-red-500 focus:ring-red-500' : 'focus:ring-luxuryGold-500'">
+                            <p x-show="errors.eventDate" x-text="errors.eventDate" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                             {% if form.event_date.errors %}
                             <p class="text-red-500 text-[10px] mt-1">{{ form.event_date.errors.as_text }}</p>
                             {% endif %}
                         </div>
                         <div>
-                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Guest Count</label>
-                            {{ form.guest_count }}
+                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Guest Count *</label>
+                            <input type="number" name="guest_count" min="1" max="{{ venue.capacity }}" required x-model="guestCount" @blur="validateGuestCount()" @input="validateGuestCount()"
+                                   placeholder="Expected Guests (Max {{ venue.capacity }})"
+                                   class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-1 bg-transparent text-inherit transition-colors"
+                                   :class="errors.guestCount ? 'border-red-500 text-red-500 focus:ring-red-500' : 'focus:ring-luxuryGold-500'">
+                            <p x-show="errors.guestCount" x-text="errors.guestCount" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                             {% if form.guest_count.errors %}
                             <p class="text-red-500 text-[10px] mt-1">{{ form.guest_count.errors.as_text }}</p>
                             {% endif %}

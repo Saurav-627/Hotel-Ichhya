@@ -58,7 +58,7 @@ def prepare_item_data(key, item, valid_data):
 
 
 def post_process_item(key, obj, item):
-    """Applies post-creation/update relationship logic (e.g. PaymentProcessor Currency links)."""
+    """Applies post-creation/update relationship logic (e.g. PaymentProcessor Currency links, EventVenue Base Prices)."""
     if key == "payment_processors":
         currencies_list = item.get("currencies") or item.get("payment_currencies") or []
         if currencies_list:
@@ -70,6 +70,20 @@ def post_process_item(key, obj, item):
                     PaymentProcessorCurrency.objects.get_or_create(
                         payment_processor=obj,
                         currency=curr
+                    )
+    elif key == "event_venues":
+        prices_data = item.get("base_prices") or item.get("prices") or []
+        if prices_data:
+            from conference.models.venue_base_price import VenueBasePrice
+            from settings_manager.models.currency import Currency
+            for p_data in prices_data:
+                ccode = p_data.get("currency")
+                c_obj = Currency.objects.get_queryset().set_active_test(enabled=False).filter(iso_code=ccode).first()
+                if c_obj:
+                    VenueBasePrice.objects.update_or_create(
+                        venue=obj,
+                        currency=c_obj,
+                        defaults={'base_price': p_data.get("base_price")}
                     )
 
 

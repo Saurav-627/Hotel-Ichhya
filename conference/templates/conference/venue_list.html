@@ -39,7 +39,7 @@
                             <h3 class="font-luxury-title text-xl sm:text-2xl font-bold tracking-wide">{{ venue.name }}</h3>
                         </a>
                         <span class="text-xs font-semibold text-luxuryGold-500 shrink-0">
-                            Starting: NPR {{ venue.base_price|floatformat:0 }}
+                            Starting: {{ venue.currency_symbol }} {{ venue.current_base_price|floatformat:0 }}
                         </span>
                     </div>
                     
@@ -65,8 +65,8 @@
                             <i class="fa-solid fa-shapes mr-1.5"></i>Layout Styles &amp; Capacities:
                         </p>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs opacity-90">
-                            {% for layout in venue.layout_options.splitlines %}
-                                <span class="truncate"><i class="fa-solid fa-circle-check text-[9px] mr-1.5 opacity-60 text-luxuryGold-400"></i>{{ layout }}</span>
+                            {% for layout in venue.parsed_layouts %}
+                                <span class="break-words"><i class="fa-solid fa-circle-check text-[9px] mr-1.5 opacity-60 text-luxuryGold-400"></i><strong>{{ layout.name }}:</strong> {{ layout.value }}</span>
                             {% empty %}
                                 <span>No layout configurations specified.</span>
                             {% endfor %}
