@@ -1,49 +1,55 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="py-20 border-b border-amber-900/10 text-center relative overflow-hidden bg-cover bg-center"
+<!-- HEADER HERO BANNER -->
+<section class="py-12 sm:py-20 border-b border-amber-900/10 text-center relative overflow-hidden bg-cover bg-center"
          style="background-image: url('{% if seo_raw and seo_raw.header_image %}{{ seo_raw.header_image.url }}{% else %}https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=1200{% endif %}');">
     <div class="absolute inset-0 bg-black/75"></div>
-    <div class="relative z-10 space-y-4">
+    <div class="relative z-10 space-y-3 sm:space-y-4 px-4">
         <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-300">{{ seo_raw.header_subtitle|default:"Opulent Spaces &amp; Venues" }}</span>
-        <h1 class="font-luxury-title text-4xl sm:text-6xl font-bold text-white leading-tight">{{ seo_raw.header_title|default:"Conferences &amp; Celebrations" }}</h1>
-        <p class="text-sm text-white/80 max-w-xl mx-auto">{{ seo_raw.header_description|default:"Host your prestigious meetings, weddings, and galas in Simara's finest 5-star venue halls." }}</p>
+        <h1 class="font-luxury-title text-3xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">{{ seo_raw.header_title|default:"Conferences &amp; Celebrations" }}</h1>
+        <p class="text-xs sm:text-sm text-white/80 max-w-xl mx-auto">{{ seo_raw.header_description|default:"Host your prestigious meetings, weddings, and galas in Simara's finest 5-star venue halls." }}</p>
     </div>
 </section>
 
-<section class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- VENUES LISTING CONTAINER -->
+<section class="py-8 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
         {% for venue in venues %}
         <div class="rounded-2xl overflow-hidden border shadow-lg group hover:translate-y-[-4px] duration-500 flex flex-col animate__animated animate__fadeInUp"
              :class="{
                  'bg-white border-gray-200': currentTheme === 'light',
                  'bg-[#161412] border-amber-900/20': currentTheme !== 'light'
              }">
-            <div class="relative h-72 overflow-hidden">
+            <!-- Cover Image (Clickable Link) -->
+            <a href="{% url 'conference:venue_detail' venue.slug %}" class="relative h-52 sm:h-64 lg:h-72 overflow-hidden block">
                 <img src="{% if venue.image %}{{ venue.image.url }}{% else %}https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=600{% endif %}" 
                      alt="{{ venue.name }}" class="w-full h-full object-cover group-hover:scale-105 duration-700">
-                <span class="absolute top-4 right-4 px-4 py-1 text-xs font-semibold bg-black/70 text-luxuryGold-300 rounded-full">
+                <span class="absolute top-4 right-4 px-3 sm:px-4 py-1 text-[11px] sm:text-xs font-semibold bg-black/75 text-luxuryGold-300 rounded-full backdrop-blur-sm">
                     Capacity: {{ venue.capacity }} Pax
                 </span>
-            </div>
+            </a>
             
-            <div class="p-6 flex-grow flex flex-col justify-between">
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h3 class="font-luxury-title text-2xl font-bold tracking-wide">{{ venue.name }}</h3>
-                        <span class="text-xs opacity-75 font-semibold text-luxuryGold-500">
+            <!-- Details -->
+            <div class="p-5 sm:p-6 flex-grow flex flex-col justify-between">
+                <div class="space-y-3 sm:space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4">
+                        <a href="{% url 'conference:venue_detail' venue.slug %}" class="hover:text-luxuryGold-400 transition-colors">
+                            <h3 class="font-luxury-title text-xl sm:text-2xl font-bold tracking-wide">{{ venue.name }}</h3>
+                        </a>
+                        <span class="text-xs font-semibold text-luxuryGold-500 shrink-0">
                             Starting: NPR {{ venue.base_price|floatformat:0 }}
                         </span>
                     </div>
-                    <p class="text-sm opacity-85 leading-relaxed min-h-[72px] line-clamp-3">{{ venue.description }}</p>
+                    <p class="text-xs sm:text-sm opacity-85 leading-relaxed min-h-0 sm:min-h-[72px] line-clamp-3">{{ venue.description }}</p>
                     
-                    <div class="space-y-2 text-xs opacity-75 pt-2">
-                        <p class="font-semibold text-luxuryGold-500">
-                            <i class="fa-solid fa-shapes mr-2"></i>Layout Styles & Capacities:
+                    <div class="space-y-2 text-xs opacity-75 pt-2 border-t border-amber-900/10">
+                        <p class="font-semibold text-luxuryGold-500 text-xs">
+                            <i class="fa-solid fa-shapes mr-1.5"></i>Layout Styles &amp; Capacities:
                         </p>
-                        <div class="pl-6 grid grid-cols-2 gap-2 text-xs opacity-90">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs opacity-90">
                             {% for layout in venue.layout_options.splitlines %}
-                                <span><i class="fa-solid fa-circle-check text-[9px] mr-1.5 opacity-60"></i>{{ layout }}</span>
+                                <span class="truncate"><i class="fa-solid fa-circle-check text-[9px] mr-1.5 opacity-60 text-luxuryGold-400"></i>{{ layout }}</span>
                             {% empty %}
                                 <span>No layout configurations specified.</span>
                             {% endfor %}
@@ -51,18 +57,19 @@
                     </div>
                 </div>
 
-                <div class="pt-6 mt-6 border-t border-amber-900/10 flex items-center justify-between">
-                    <a href="{% url 'conference:venue_detail' venue.slug %}" class="text-xs font-semibold uppercase tracking-wider hover:text-luxuryGold-400 transition-colors">Setup & Amenities</a>
+                <!-- Single Clean CTA Button -->
+                <div class="pt-4 sm:pt-6 mt-4 sm:mt-6 border-t border-amber-900/10">
                     <a href="{% url 'conference:venue_detail' venue.slug %}" 
-                       class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider border hover:bg-luxuryGold-900/10 transition-colors"
-                       :class="{ 'border-amber-800 text-amber-800': currentTheme === 'light', 'border-luxuryGold-500 text-luxuryGold-500': currentTheme !== 'light' }">
-                        Request Proposal / Inquiry
+                       class="w-full py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-center flex items-center justify-center gap-2 transition-colors shadow-sm"
+                       :class="{ 'bg-amber-800 text-white hover:bg-amber-900': currentTheme === 'light', 'bg-luxuryGold-500 text-black hover:bg-luxuryGold-400': currentTheme !== 'light' }">
+                        <span>View Details &amp; Request Proposal</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
                     </a>
                 </div>
             </div>
         </div>
         {% empty %}
-        <div class="col-span-2 text-center py-16">
+        <div class="col-span-1 md:col-span-2 text-center py-16">
             <p class="text-sm opacity-60">No event venue halls registered yet.</p>
         </div>
         {% endfor %}

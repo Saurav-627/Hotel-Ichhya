@@ -1,58 +1,65 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="py-20 border-b border-amber-900/10 text-center relative overflow-hidden bg-cover bg-center"
+<!-- HEADER HERO BANNER -->
+<section class="py-12 sm:py-20 border-b border-amber-900/10 text-center relative overflow-hidden bg-cover bg-center"
          style="background-image: url('{% if seo_raw and seo_raw.header_image %}{{ seo_raw.header_image.url }}{% else %}https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?q=80&w=1200{% endif %}');">
     <div class="absolute inset-0 bg-black/75"></div>
-    <div class="relative z-10 space-y-4">
+    <div class="relative z-10 space-y-3 sm:space-y-4 px-4">
         <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-300">{{ seo_raw.header_subtitle|default:"Culinary Experiences" }}</span>
-        <h1 class="font-luxury-title text-4xl sm:text-6xl font-bold text-white leading-tight">{{ seo_raw.header_title|default:"Gastronomy &amp; Lounge" }}</h1>
-        <p class="text-sm text-white/80 max-w-xl mx-auto">{{ seo_raw.header_description|default:"Discover the finest culinary venues, featuring award-winning chefs and cocktails." }}</p>
+        <h1 class="font-luxury-title text-3xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">{{ seo_raw.header_title|default:"Gastronomy &amp; Lounge" }}</h1>
+        <p class="text-xs sm:text-sm text-white/80 max-w-xl mx-auto">{{ seo_raw.header_description|default:"Discover the finest culinary venues, featuring award-winning chefs and cocktails." }}</p>
     </div>
 </section>
 
-<section class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- DINING LISTING CONTAINER -->
+<section class="py-8 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
         {% for venue in venues %}
         <div class="rounded-2xl overflow-hidden border shadow-lg group hover:translate-y-[-4px] duration-500 flex flex-col animate__animated animate__fadeInUp"
              :class="{
                  'bg-white border-gray-200': currentTheme === 'light',
                  'bg-[#161412] border-amber-900/20': currentTheme !== 'light'
              }">
-            <div class="relative h-64 overflow-hidden">
+            <!-- Cover Image (Clickable Link) -->
+            <a href="{% url 'dining:dining_detail' venue.slug %}" class="relative h-52 sm:h-64 overflow-hidden block">
                 <img src="{% if venue.image %}{{ venue.image.url }}{% else %}https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=600{% endif %}" 
                      alt="{{ venue.name }}" class="w-full h-full object-cover group-hover:scale-105 duration-700">
-                <span class="absolute top-4 right-4 px-4 py-1 text-xs font-semibold bg-black/70 text-luxuryGold-300 rounded-full">
+                <span class="absolute top-4 right-4 px-3 sm:px-4 py-1 text-[11px] sm:text-xs font-semibold bg-black/75 text-luxuryGold-300 rounded-full backdrop-blur-sm">
                     {{ venue.get_category_display }}
                 </span>
-            </div>
+            </a>
             
-            <div class="p-6 flex-grow flex flex-col justify-between">
-                <div class="space-y-4">
-                    <h3 class="font-luxury-title text-xl font-bold tracking-wide">{{ venue.name }}</h3>
-                    <p class="text-sm opacity-85 line-clamp-3 leading-relaxed">{{ venue.description }}</p>
+            <!-- Details -->
+            <div class="p-5 sm:p-6 flex-grow flex flex-col justify-between">
+                <div class="space-y-3 sm:space-y-4">
+                    <a href="{% url 'dining:dining_detail' venue.slug %}" class="hover:text-luxuryGold-400 transition-colors block">
+                        <h3 class="font-luxury-title text-lg sm:text-xl font-bold tracking-wide">{{ venue.name }}</h3>
+                    </a>
+                    <p class="text-xs sm:text-sm opacity-85 line-clamp-3 leading-relaxed min-h-0 sm:min-h-[72px]">{{ venue.description }}</p>
                     
-                    <div class="space-y-2 text-xs opacity-75 pt-2">
-                        <p><i class="fa-solid fa-clock text-luxuryGold-500 mr-2"></i>Hours: {{ venue.timings }}</p>
-                        <p><i class="fa-solid fa-chair text-luxuryGold-500 mr-2"></i>Capacity: {{ venue.capacity }} Seats</p>
+                    <div class="space-y-1.5 sm:space-y-2 text-xs opacity-75 pt-2 border-t border-amber-900/10">
+                        <p class="truncate"><i class="fa-solid fa-clock text-luxuryGold-500 mr-2 shrink-0"></i>Hours: {{ venue.timings }}</p>
+                        <p class="truncate"><i class="fa-solid fa-chair text-luxuryGold-500 mr-2 shrink-0"></i>Capacity: {{ venue.capacity }} Seats</p>
                         {% if venue.chef_specialty %}
-                        <p><i class="fa-solid fa-cookie-bite text-luxuryGold-500 mr-2"></i>Chef specialty: {{ venue.chef_specialty }}</p>
+                        <p class="truncate"><i class="fa-solid fa-cookie-bite text-luxuryGold-500 mr-2 shrink-0"></i>Specialty: {{ venue.chef_specialty }}</p>
                         {% endif %}
                     </div>
                 </div>
 
-                <div class="pt-6 mt-6 border-t border-amber-900/10 flex items-center justify-between">
-                    <a href="{% url 'dining:dining_detail' venue.slug %}" class="text-xs font-semibold uppercase tracking-wider hover:text-luxuryGold-400 transition-colors">Menus & Details</a>
+                <!-- Single Clean CTA Button -->
+                <div class="pt-4 sm:pt-6 mt-4 sm:mt-6 border-t border-amber-900/10">
                     <a href="{% url 'dining:dining_detail' venue.slug %}" 
-                       class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider border hover:bg-luxuryGold-900/10 transition-colors"
-                       :class="{ 'border-amber-800 text-amber-800': currentTheme === 'light', 'border-luxuryGold-500 text-luxuryGold-500': currentTheme !== 'light' }">
-                        Reserve Table
+                       class="w-full py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-center flex items-center justify-center gap-2 transition-colors shadow-sm"
+                       :class="{ 'bg-amber-800 text-white hover:bg-amber-900': currentTheme === 'light', 'bg-luxuryGold-500 text-black hover:bg-luxuryGold-400': currentTheme !== 'light' }">
+                        <span>Reserve Table &amp; View Menu</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
                     </a>
                 </div>
             </div>
         </div>
         {% empty %}
-        <div class="col-span-3 text-center py-16">
+        <div class="col-span-1 sm:col-span-2 lg:col-span-3 text-center py-16">
             <p class="text-sm opacity-60">No dining venues registered yet.</p>
         </div>
         {% endfor %}

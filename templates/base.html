@@ -369,8 +369,8 @@
                 }
             });
 
-            // Automatically upgrade all input[type="date"] elements to Air Datepicker
-            document.querySelectorAll('input[type="date"]').forEach(el => {
+            // Automatically upgrade all date inputs to Air Datepicker
+            document.querySelectorAll('input[type="date"], input[name="check_in"], input[name="check_out"]').forEach(el => {
                 if (el.id === 'room_check_in' || el.id === 'room_check_out') {
                     return;
                 }
@@ -383,9 +383,14 @@
                     }
                 }
 
-                // Convert to text so native date picker is disabled
+                // Convert to text so native date picker is disabled and virtual keyboard is prevented
                 el.type = 'text';
-                el.placeholder = 'YYYY-MM-DD';
+                if (!el.placeholder) {
+                    el.placeholder = 'YYYY-MM-DD';
+                }
+                el.setAttribute('readonly', 'readonly');
+                el.setAttribute('inputmode', 'none');
+                el.setAttribute('autocomplete', 'off');
                 el.classList.add('cursor-pointer');
 
                 const minDateVal = el.getAttribute('min');
@@ -393,7 +398,7 @@
 
                 const picker = new AirDatepicker(el, {
                     ...window.defaultAirDatepickerConfig,
-                    minDate: minDateVal ? new Date(minDateVal) : undefined,
+                    minDate: minDateVal ? new Date(minDateVal) : new Date(),
                     maxDate: maxDateVal ? new Date(maxDateVal) : undefined,
                     onSelect({date}) {
                         el.dispatchEvent(new Event('input', { bubbles: true }));
