@@ -14,9 +14,10 @@
 
 <!-- DINING LISTING CONTAINER -->
 <section class="py-8 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 items-start">
         {% for venue in venues %}
-        <div class="rounded-2xl overflow-hidden border shadow-lg group hover:translate-y-[-4px] duration-500 flex flex-col animate__animated animate__fadeInUp"
+        <div x-data="{ expanded: false }"
+             class="rounded-2xl overflow-hidden border shadow-lg group hover:translate-y-[-4px] duration-500 flex flex-col animate__animated animate__fadeInUp"
              :class="{
                  'bg-white border-gray-200': currentTheme === 'light',
                  'bg-[#161412] border-amber-900/20': currentTheme !== 'light'
@@ -36,7 +37,23 @@
                     <a href="{% url 'dining:dining_detail' venue.slug %}" class="hover:text-luxuryGold-400 transition-colors block">
                         <h3 class="font-luxury-title text-lg sm:text-xl font-bold tracking-wide">{{ venue.name }}</h3>
                     </a>
-                    <p class="text-xs sm:text-sm opacity-85 line-clamp-3 leading-relaxed min-h-0 sm:min-h-[72px]">{{ venue.description }}</p>
+                    
+                    <div class="space-y-1.5">
+                        <p class="text-xs sm:text-sm opacity-85 leading-relaxed transition-all duration-300"
+                           :class="expanded ? 'line-clamp-none animate__animated animate__fadeIn' : 'line-clamp-3 overflow-hidden'"
+                           :style="expanded ? '' : '-webkit-line-clamp: 3; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;'">
+                            {{ venue.description }}
+                        </p>
+                        {% if venue.description|length > 100 %}
+                        <button @click="expanded = !expanded" 
+                                type="button"
+                                class="inline-flex items-center gap-1.5 text-xs font-semibold text-luxuryGold-500 hover:text-luxuryGold-400 transition-colors cursor-pointer focus:outline-none pt-1">
+                            <span x-text="expanded ? 'Show Less' : 'Show More'">Show More</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300"
+                               :class="expanded ? 'rotate-180' : ''"></i>
+                        </button>
+                        {% endif %}
+                    </div>
                     
                     <div class="space-y-1.5 sm:space-y-2 text-xs opacity-75 pt-2 border-t border-amber-900/10">
                         <p class="truncate"><i class="fa-solid fa-clock text-luxuryGold-500 mr-2 shrink-0"></i>Hours: {{ venue.timings }}</p>
