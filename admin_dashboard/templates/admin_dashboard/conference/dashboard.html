@@ -40,8 +40,8 @@
         {% for venue in venues %}
         <div class="custom-card rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between">
             <div class="h-48 w-full bg-neutral-200 dark:bg-neutral-800 relative">
-                {% if venue.image %}
-                <img src="{{ venue.image.url }}" alt="{{ venue.name }}" class="h-full w-full object-cover">
+                {% if venue.display_image_url %}
+                <img src="{{ venue.display_image_url }}" alt="{{ venue.name }}" class="h-full w-full object-cover">
                 {% else %}
                 <div class="h-full w-full flex items-center justify-center text-neutral-500">No Image Uploaded</div>
                 {% endif %}

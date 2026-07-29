@@ -24,9 +24,9 @@
              }">
             <!-- Cover Image (Clickable Link) -->
             <a href="{% url 'dining:dining_detail' venue.slug %}" class="relative h-52 sm:h-64 overflow-hidden block">
-                <img src="{% if venue.image %}{{ venue.image.url }}{% else %}https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=600{% endif %}" 
+                <img src="{% if venue.display_image_url %}{{ venue.display_image_url }}{% else %}https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=600{% endif %}" 
                      alt="{{ venue.name }}" class="w-full h-full object-cover group-hover:scale-105 duration-700">
-                <span class="absolute top-4 right-4 px-3 sm:px-4 py-1 text-[11px] sm:text-xs font-semibold bg-black/75 text-luxuryGold-300 rounded-full backdrop-blur-sm">
+                <span class="absolute top-4 right-4 z-10 px-3 sm:px-4 py-1 text-[11px] sm:text-xs font-semibold bg-black/75 text-luxuryGold-300 rounded-full backdrop-blur-sm">
                     {{ venue.get_category_display }}
                 </span>
             </a>

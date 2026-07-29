@@ -67,7 +67,7 @@ class VenueListView(ListView):
 
     def get_queryset(self):
         selected_currency = self.request.COOKIES.get('currency', 'USD')
-        qs = EventVenue.objects.filter(is_active=True).prefetch_related('base_prices__currency')
+        qs = EventVenue.objects.filter(is_active=True).prefetch_related('base_prices__currency', 'images')
         venues = list(qs)
         for v in venues:
             v.set_active_currency(selected_currency)
@@ -80,7 +80,7 @@ class VenueDetailView(DetailView):
     slug_url_kwarg = 'slug'
 
     def get_queryset(self):
-        return EventVenue.objects.filter(is_active=True).prefetch_related('base_prices__currency')
+        return EventVenue.objects.filter(is_active=True).prefetch_related('base_prices__currency', 'images')
 
     def get_object(self, queryset=None):
         venue = super().get_object(queryset)

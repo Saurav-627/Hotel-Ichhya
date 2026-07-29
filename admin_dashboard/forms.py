@@ -15,7 +15,9 @@ from booking.models.booking import Booking
 from booking.models.coupon import Coupon
 from dining.models.venue import DiningVenue
 from dining.models.reservation import DiningReservation
+from dining.models.venue_image import DiningVenueImage
 from recreation.models.activity import RecreationActivity
+from recreation.models.activity_image import RecreationActivityImage
 from gallery.models.category import GalleryCategory
 from gallery.models.item import GalleryItem
 from conference.models.venue import EventVenue
@@ -204,6 +206,20 @@ class DiningVenueForm(TailwindFormMixin, forms.ModelForm):
         model = DiningVenue
         fields = '__all__'
 
+class DiningVenueImageForm(TailwindFormMixin, forms.ModelForm):
+    class Meta:
+        model = DiningVenueImage
+        fields = ('image', 'is_primary', 'alt_text')
+
+DiningImageFormSet = forms.inlineformset_factory(
+    DiningVenue,
+    DiningVenueImage,
+    form=DiningVenueImageForm,
+    fields=('image',),
+    extra=3,
+    can_delete=True
+)
+
 class DiningReservationForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
         model = DiningReservation
@@ -213,6 +229,20 @@ class RecreationActivityForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
         model = RecreationActivity
         fields = '__all__'
+
+class RecreationActivityImageForm(TailwindFormMixin, forms.ModelForm):
+    class Meta:
+        model = RecreationActivityImage
+        fields = ('image', 'is_primary', 'alt_text')
+
+RecreationImageFormSet = forms.inlineformset_factory(
+    RecreationActivity,
+    RecreationActivityImage,
+    form=RecreationActivityImageForm,
+    fields=('image',),
+    extra=3,
+    can_delete=True
+)
 
 class GalleryCategoryForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
@@ -225,6 +255,7 @@ class GalleryItemForm(TailwindFormMixin, forms.ModelForm):
         fields = '__all__'
 
 from conference.models.venue_base_price import VenueBasePrice
+from conference.models.venue_image import EventVenueImage
 
 class VenueBasePriceForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
@@ -239,6 +270,20 @@ VenueBasePriceFormSet = forms.inlineformset_factory(
     can_delete=True,
     min_num=1,
     validate_min=True
+)
+
+class EventVenueImageForm(TailwindFormMixin, forms.ModelForm):
+    class Meta:
+        model = EventVenueImage
+        fields = ('image', 'is_primary', 'alt_text')
+
+EventVenueImageFormSet = forms.inlineformset_factory(
+    EventVenue,
+    EventVenueImage,
+    form=EventVenueImageForm,
+    fields=('image',),
+    extra=3,
+    can_delete=True
 )
 
 class EventVenueForm(TailwindFormMixin, forms.ModelForm):

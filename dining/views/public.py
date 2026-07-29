@@ -7,7 +7,7 @@ class DiningListView(ListView):
     context_object_name = 'venues'
 
     def get_queryset(self):
-        return DiningVenue.objects.filter(is_published=True)
+        return DiningVenue.objects.filter(is_published=True).prefetch_related('images')
 
 class DiningDetailView(DetailView):
     model = DiningVenue
@@ -16,4 +16,4 @@ class DiningDetailView(DetailView):
     slug_url_kwarg = 'slug'
 
     def get_queryset(self):
-        return DiningVenue.objects.filter(is_published=True)
+        return DiningVenue.objects.filter(is_published=True).prefetch_related('images')

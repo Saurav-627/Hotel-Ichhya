@@ -231,8 +231,8 @@
                 <!-- Room Image cover -->
                 <div class="relative h-52 sm:h-64 overflow-hidden">
                     <img src="{% if room.images.first and room.images.first.image %}{{ room.images.first.image.url }}{% else %}https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=600{% endif %}" 
-                          alt="{{ room.title }}" class="w-full h-full object-cover group-hover:scale-105 duration-700">
-                    <span class="absolute top-4 right-4 px-3 sm:px-4 py-1 text-[11px] sm:text-xs font-semibold bg-black/70 text-luxuryGold-300 rounded-full">
+                         alt="{{ room.title }}" class="w-full h-full object-cover group-hover:scale-105 duration-700">
+                    <span class="absolute top-4 right-4 z-10 px-3 sm:px-4 py-1 text-[11px] sm:text-xs font-semibold bg-black/70 text-luxuryGold-300 rounded-full backdrop-blur-sm">
                         {{ room.get_category_display }}
                     </span>
                 </div>
@@ -367,15 +367,62 @@
                     <a href="{% url 'dining:dining_list' %}" 
                        class="inline-block px-6 sm:px-8 py-3 sm:py-3.5 text-xs font-semibold uppercase tracking-wider rounded-full border border-luxuryGold-400 text-center"
                        :class="{ 'bg-amber-800 text-white': currentTheme === 'light', 'hover:bg-luxuryGold-500 hover:text-black': currentTheme !== 'light' }">
-                        Explore Venues
+                        Explore More
                     </a>
                 </div>
             </div>
 
-            <!-- Media Carousel -->
-            <div class="relative overflow-hidden rounded-2xl h-[260px] sm:h-[380px] lg:h-[450px]" data-animate="fadeInRight">
-                <img src="https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?q=80&w=800" 
-                     alt="Dining layout" class="w-full h-full object-cover">
+            <!-- Media Carousel (Dynamic Featured Dining Slider) -->
+            <div x-data="{
+                activeSlide: 0,
+                slides: [
+                    {% for venue in featured_dining %}
+                        {% if venue.display_image_url %}'{{ venue.display_image_url }}',{% endif %}
+                        {% for img in venue.images.all %}
+                            {% if img.image %}'{{ img.image.url }}',{% endif %}
+                        {% endfor %}
+                    {% empty %}
+                        'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?q=80&w=800'
+                    {% endfor %}
+                ],
+                next() { this.activeSlide = (this.activeSlide + 1) % this.slides.length }
+            }"
+            x-init="if (slides.length > 1) setInterval(() => next(), 5000)"
+            class="relative overflow-hidden rounded-2xl h-[260px] sm:h-[380px] lg:h-[450px] bg-neutral-900 border border-amber-900/10" data-animate="fadeInRight">
+                
+                <template x-for="(slide, index) in slides" :key="index">
+                    <div x-show="activeSlide === index"
+                         x-transition:enter="transition ease-out duration-700"
+                         x-transition:enter-start="opacity-0 scale-102"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         class="absolute inset-0 w-full h-full bg-cover bg-center"
+                         :style="'background-image: url(' + slide + ')'"></div>
+                </template>
+
+                <!-- Navigation arrows -->
+                <template x-if="slides.length > 1">
+                    <div>
+                        <button @click="activeSlide = (activeSlide - 1 + slides.length) % slides.length"
+                                class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-2.5 rounded-full bg-black/75 text-white hover:bg-black/90 hover:scale-110 transition-all shadow-lg flex items-center justify-center cursor-pointer">
+                            <i class="fa-solid fa-chevron-left text-xs"></i>
+                        </button>
+                        <button @click="activeSlide = (activeSlide + 1) % slides.length"
+                                class="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-2.5 rounded-full bg-black/75 text-white hover:bg-black/90 hover:scale-110 transition-all shadow-xl flex items-center justify-center cursor-pointer">
+                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                    </div>
+                </template>
+
+                <!-- Dots indicator -->
+                <template x-if="slides.length > 1">
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+                        <template x-for="(slide, index) in slides" :key="index">
+                            <button @click="activeSlide = index"
+                                    class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-colors cursor-pointer"
+                                    :class="activeSlide === index ? 'bg-luxuryGold-500 w-5' : 'bg-white/60'"></button>
+                        </template>
+                    </div>
+                </template>
             </div>
 
         </div>
@@ -473,7 +520,7 @@
                  :class="{ 'bg-white border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
                 <div class="relative h-48 sm:h-56 overflow-hidden">
                     <img src="{% if item.image %}{{ item.image.url }}{% else %}https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=600{% endif %}" alt="{{ item.name }}" class="w-full h-full object-cover group-hover:scale-105 duration-700">
-                    <span class="absolute top-4 left-4 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider bg-black/70 text-luxuryGold-300 rounded-full">
+                    <span class="absolute top-4 left-4 z-10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider bg-black/70 text-luxuryGold-300 rounded-full backdrop-blur-sm">
                         {{ item.get_category_display }}
                     </span>
                 </div>

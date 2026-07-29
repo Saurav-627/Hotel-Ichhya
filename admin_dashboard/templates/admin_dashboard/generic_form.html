@@ -110,6 +110,45 @@
             </div>
             {% endif %}
 
+            {% if image_formset %}
+            <!-- Image Gallery Formset -->
+            <div class="p-6 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-950/20 mt-6 space-y-4">
+                <h3 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif pb-2 border-b border-neutral-200 dark:border-neutral-800">
+                    <i class="fa-solid fa-images text-luxuryGold-500 mr-2"></i>Image Gallery
+                </h3>
+                <p class="text-xs text-neutral-500 mb-4">Upload multiple gallery images. These will display as an auto-sliding carousel on the public page.</p>
+
+                {{ image_formset.management_form }}
+                <div class="space-y-3">
+                    {% for img_form in image_formset %}
+                    <div class="flex items-center justify-between gap-4 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+                        {{ img_form.id }}
+
+                        <div class="flex-1">
+                            {{ img_form.image }}
+                            {% if img_form.image.errors %}
+                            <div class="text-rose-500 text-xs mt-1 font-medium">{{ img_form.image.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        {% if img_form.instance.pk and img_form.instance.image %}
+                        <div class="h-16 w-16 shrink-0 rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-neutral-100">
+                            <img src="{{ img_form.instance.image.url }}" alt="Gallery Image" class="h-full w-full object-cover">
+                        </div>
+                        {% endif %}
+
+                        {% if image_formset.can_delete %}
+                        <div class="flex items-center gap-2 text-xs font-semibold text-rose-500 shrink-0">
+                            {{ img_form.DELETE }}
+                            <span>Delete</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Action buttons -->
             <div class="flex items-center justify-end gap-3 pt-6 border-t border-neutral-200 dark:border-neutral-800">
                 <button type="submit" 

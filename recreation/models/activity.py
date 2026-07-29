@@ -40,3 +40,25 @@ class RecreationActivity(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.get_category_display()})"
+
+    @property
+    def display_image_url(self):
+        if self.image:
+            return self.image.url
+        gallery_images = getattr(self, '_prefetched_objects_cache', {}).get('images', None)
+        if gallery_images is not None:
+            valid_imgs = [img for img in gallery_images if img.image]
+            if valid_imgs:
+                primary_imgs = [img for img in valid_imgs if getattr(img, 'is_primary', False)]
+                if primary_imgs:
+                    return primary_imgs[0].image.url
+                return valid_imgs[0].image.url
+        else:
+            primary_img = self.images.filter(is_primary=True, image__isnull=False).exclude(image='').first()
+            if primary_img and primary_img.image:
+                return primary_img.image.url
+            first_img = self.images.filter(image__isnull=False).exclude(image='').first()
+            if first_img and first_img.image:
+                return first_img.image.url
+        return None
+

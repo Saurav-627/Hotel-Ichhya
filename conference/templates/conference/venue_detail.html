@@ -6,9 +6,83 @@
         
         <!-- VENUE INFO & GALLERY (2 COLS) -->
         <div class="lg:col-span-2 space-y-6 sm:space-y-8">
-            <div class="overflow-hidden rounded-2xl border border-amber-900/10 h-[260px] sm:h-[380px] lg:h-[480px]">
-                <img src="{% if venue.image %}{{ venue.image.url }}{% else %}https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=1200{% endif %}" 
-                     alt="{{ venue.name }}" class="w-full h-full object-cover">
+            <!-- Gallery Slider (Alpine.js) -->
+            <!-- Gallery Slider with Lightbox (Alpine.js) -->
+            <div x-data="{
+                activeSlide: 0,
+                slides: [
+                    {% for img in venue.images.all %}
+                        {% if img.image %}'{{ img.image.url }}',{% endif %}
+                    {% empty %}
+                        {% if venue.image %}'{{ venue.image.url }}'{% else %}'https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=1200'{% endif %}
+                    {% endfor %}
+                ],
+                lightboxOpen: false,
+                next() { this.activeSlide = (this.activeSlide + 1) % this.slides.length }
+            }"
+            x-init="if (slides.length > 1) setInterval(() => next(), 5000)"
+            class="relative h-[260px] sm:h-[380px] lg:h-[480px] overflow-hidden rounded-2xl border border-amber-900/10 bg-neutral-950 flex items-center justify-center">
+                
+                <!-- Slide List (Zero-Crop object-contain) -->
+                <template x-for="(slide, index) in slides" :key="index">
+                    <div x-show="activeSlide === index"
+                         x-transition:enter="transition ease-out duration-500"
+                         x-transition:enter-start="opacity-0 scale-102"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         @click="lightboxOpen = true"
+                         class="absolute inset-0 w-full h-full bg-neutral-950 flex items-center justify-center cursor-zoom-in">
+                        <img :src="slide" alt="{{ venue.name }}" class="max-h-full max-w-full w-auto h-auto object-contain">
+                    </div>
+                </template>
+
+                <!-- Click to Zoom Hint Badge -->
+                <div class="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 pointer-events-none">
+                    <span class="px-2.5 py-1 text-[10px] font-medium bg-black/60 text-white/80 rounded-full backdrop-blur-sm">
+                        <i class="fa-solid fa-expand mr-1 text-luxuryGold-400"></i>Click to Zoom
+                    </span>
+                </div>
+
+                <!-- Navigation arrows (hidden when only 1 image) -->
+                <template x-if="slides.length > 1">
+                    <div>
+                        <button @click.stop="activeSlide = (activeSlide - 1 + slides.length) % slides.length"
+                                class="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-30 p-2.5 sm:p-3 rounded-full bg-black/75 text-white hover:bg-black/90 hover:scale-110 transition-all shadow-xl flex items-center justify-center cursor-pointer">
+                            <i class="fa-solid fa-chevron-left text-xs sm:text-sm"></i>
+                        </button>
+                        <button @click.stop="activeSlide = (activeSlide + 1) % slides.length"
+                                class="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-30 p-2.5 sm:p-3 rounded-full bg-black/75 text-white hover:bg-black/90 hover:scale-110 transition-all shadow-xl flex items-center justify-center cursor-pointer">
+                            <i class="fa-solid fa-chevron-right text-xs sm:text-sm"></i>
+                        </button>
+                    </div>
+                </template>
+
+                <!-- Dots indicator -->
+                <template x-if="slides.length > 1">
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex gap-2">
+                        <template x-for="(slide, index) in slides" :key="index">
+                            <button @click.stop="activeSlide = index"
+                                    class="w-2.5 h-2.5 rounded-full transition-colors cursor-pointer"
+                                    :class="activeSlide === index ? 'bg-luxuryGold-500 w-5' : 'bg-white/60'"></button>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- LIGHTBOX MODAL -->
+                <template x-teleport="body">
+                    <div x-show="lightboxOpen" 
+                         x-effect="document.body.style.overflow = lightboxOpen ? 'hidden' : ''"
+                         @keydown.escape.window="lightboxOpen = false"
+                         class="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 bg-black/95 backdrop-blur-md" 
+                         style="display: none;">
+                        <button @click="lightboxOpen = false" class="absolute top-4 right-4 sm:top-6 sm:right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white text-xl transition-colors shrink-0 z-50 cursor-pointer">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                        <div class="max-w-5xl w-full flex flex-col items-center justify-center gap-3 animate__animated animate__zoomIn my-auto">
+                            <img :src="slides[activeSlide]" class="max-h-[85vh] max-w-full w-auto h-auto rounded-xl object-contain shadow-2xl border border-white/10">
+                            <p class="text-white/80 text-xs sm:text-sm font-medium tracking-wide text-center">{{ venue.name }}</p>
+                        </div>
+                    </div>
+                </template>
             </div>
 
             <div class="space-y-3 sm:space-y-4">

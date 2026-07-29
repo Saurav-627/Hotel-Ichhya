@@ -24,9 +24,9 @@
              }">
             <!-- Cover Image -->
             <div class="relative h-52 sm:h-64 overflow-hidden">
-                <img src="{% if act.image %}{{ act.image.url }}{% else %}https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=600{% endif %}" 
+                <img src="{% if act.display_image_url %}{{ act.display_image_url }}{% else %}https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=600{% endif %}" 
                      alt="{{ act.name }}" class="w-full h-full object-cover group-hover:scale-105 duration-700">
-                <span class="absolute top-4 right-4 px-3 sm:px-4 py-1 text-[11px] sm:text-xs font-semibold bg-black/75 text-luxuryGold-300 rounded-full backdrop-blur-sm">
+                <span class="absolute top-4 right-4 z-10 px-3 sm:px-4 py-1 text-[11px] sm:text-xs font-semibold bg-black/75 text-luxuryGold-300 rounded-full backdrop-blur-sm">
                     {{ act.get_category_display }}
                 </span>
             </div>
@@ -34,7 +34,9 @@
             <!-- Details -->
             <div class="p-5 sm:p-6 flex-grow flex flex-col justify-between">
                 <div class="space-y-3 sm:space-y-4">
-                    <h3 class="font-luxury-title text-lg sm:text-xl font-bold tracking-wide">{{ act.name }}</h3>
+                    <h3 class="font-luxury-title text-lg sm:text-xl font-bold tracking-wide">
+                        <a href="{% url 'recreation:recreation_detail' act.slug %}" class="hover:text-luxuryGold-500 transition-colors">{{ act.name }}</a>
+                    </h3>
                     
                     <div class="space-y-1.5">
                         <p class="text-xs sm:text-sm opacity-85 leading-relaxed transition-all duration-300"
@@ -62,12 +64,15 @@
                 </div>
 
                 <!-- Footer CTAs -->
-                <div class="pt-4 sm:pt-6 mt-4 sm:mt-6 border-t border-amber-900/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                    <span class="text-xs uppercase opacity-75 font-semibold text-center sm:text-left py-1">Elite Wellness</span>
-                    <a href="{% url 'contact:contact_page' %}" 
-                       class="px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-center border transition-colors shadow-sm"
+                <div class="pt-4 sm:pt-6 mt-4 sm:mt-6 border-t border-amber-900/10 flex flex-col sm:flex-row items-stretch gap-3">
+                    <a href="{% url 'recreation:recreation_detail' act.slug %}"
+                       class="flex-1 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-center transition-colors shadow-sm bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950">
+                        <i class="fa-solid fa-arrow-right mr-1.5"></i>View Details
+                    </a>
+                    <a href="{% url 'contact:contact_page' %}"
+                       class="flex-1 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-center border transition-colors shadow-sm"
                        :class="{ 'border-amber-800 text-amber-800 hover:bg-amber-800/10': currentTheme === 'light', 'border-luxuryGold-500 text-luxuryGold-500 hover:bg-luxuryGold-500/10': currentTheme !== 'light' }">
-                        Book Appointment
+                        <i class="fa-solid fa-calendar-check mr-1.5"></i>Book Now
                     </a>
                 </div>
             </div>
