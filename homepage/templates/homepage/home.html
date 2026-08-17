@@ -22,28 +22,31 @@
          style="background-image: url('{% if slide.background_image %}{{ slide.background_image.url }}{% else %}https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1920{% endif %}'); display: none;">
         
         <!-- Overlay -->
-        <div class="absolute inset-0 bg-black" style="opacity: {{ slide.overlay_opacity|default:0.50 }};"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30" style="opacity: {{ slide.overlay_opacity|default:0.60 }};"></div>
         
         <!-- Hero Caption -->
-        <div class="absolute inset-0 flex items-center justify-center text-center p-4">
+        <div class="absolute inset-0 flex items-center justify-center text-center p-4 z-10">
             <div class="max-w-4xl space-y-4 sm:space-y-6">
-                <span class="animate__animated animate__fadeInDown text-xs sm:text-sm font-semibold uppercase tracking-widest text-luxuryGold-300">
-                    {{ slide.subtitle }}
-                </span>
-                <h1 class="animate__animated animate__fadeInUp font-luxury-title text-3xl sm:text-6xl lg:text-7xl font-bold text-white leading-tight">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-black/60 border border-luxuryGold-500/40 backdrop-blur-md">
+                    <span class="w-1.5 h-1.5 rounded-full bg-luxuryGold-400 animate-pulse"></span>
+                    <span class="text-xs sm:text-sm font-semibold uppercase tracking-widest text-luxuryGold-300 whitespace-nowrap">
+                        {{ slide.subtitle }}
+                    </span>
+                </div>
+                <h1 class="animate__animated animate__fadeInUp font-luxury-title text-3xl sm:text-6xl lg:text-7xl font-bold text-white leading-tight drop-shadow-2xl">
                     {{ slide.title }}
                 </h1>
                 
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-4 sm:pt-6 animate__animated animate__zoomIn">
                     {% if slide.cta_text %}
                     <a href="{{ slide.cta_url }}" 
-                       class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 text-xs font-semibold uppercase tracking-wider rounded-full border border-luxuryGold-400 bg-luxuryGold-500 text-black hover:bg-luxuryGold-400 transition-all duration-300 shadow-lg gold-glow text-center">
+                       class="w-full sm:w-auto px-7 sm:px-9 py-3 sm:py-3.5 text-xs font-bold uppercase tracking-widest rounded-full border border-luxuryGold-400 bg-luxuryGold-500 text-black hover:bg-luxuryGold-400 transition-all duration-300 shadow-xl gold-glow text-center whitespace-nowrap">
                         {{ slide.cta_text }}
                     </a>
                     {% endif %}
                     {% if slide.cta2_text %}
                     <a href="{{ slide.cta2_url }}" 
-                       class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 text-xs font-semibold uppercase tracking-wider rounded-full border border-white text-white hover:bg-white hover:text-black transition-all duration-300 text-center">
+                       class="w-full sm:w-auto px-7 sm:px-9 py-3 sm:py-3.5 text-xs font-bold uppercase tracking-widest rounded-full border border-white/80 text-white hover:bg-white hover:text-black transition-all duration-300 text-center whitespace-nowrap backdrop-blur-sm">
                         {{ slide.cta2_text }}
                     </a>
                     {% endif %}
@@ -55,13 +58,13 @@
     <!-- Default Fallback Slide if no database record exists -->
     <div class="absolute inset-0 w-full h-full bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1920');">
         <div class="absolute inset-0 bg-black/60"></div>
-        <div class="absolute inset-0 flex items-center justify-center text-center p-4">
+        <div class="absolute inset-0 flex items-center justify-center text-center p-4 z-10">
             <div class="max-w-4xl space-y-4 sm:space-y-6">
-                <span class="text-xs sm:text-sm font-semibold uppercase tracking-widest text-luxuryGold-300">Welcome to Paradise</span>
+                <span class="text-xs sm:text-sm font-semibold uppercase tracking-widest text-luxuryGold-300 whitespace-nowrap">Welcome to Paradise</span>
                 <h1 class="font-luxury-title text-3xl sm:text-6xl lg:text-7xl font-bold text-white">Experience Elite Sanctuary</h1>
                 <p class="text-xs sm:text-base text-white/80 max-w-xl mx-auto">Unparalleled luxury and state-of-the-art service in Bara, Nepal.</p>
                 <div class="pt-4 sm:pt-6">
-                    <a href="{% url 'rooms:room_list' %}" class="inline-block px-8 py-3.5 text-xs font-semibold uppercase tracking-wider rounded-full bg-luxuryGold-500 text-black hover:bg-luxuryGold-400 gold-glow transition-all">Explore Rooms</a>
+                    <a href="{% url 'rooms:room_list' %}" class="inline-block px-8 py-3.5 text-xs font-bold uppercase tracking-widest rounded-full bg-luxuryGold-500 text-black hover:bg-luxuryGold-400 gold-glow transition-all whitespace-nowrap">Explore Rooms</a>
                 </div>
             </div>
         </div>
@@ -70,10 +73,10 @@
 
     <!-- Carousel Controls -->
     {% if hero_slides %}
-    <button @click="prev()" class="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 rounded-full border border-white/20 hover:bg-white/10 text-white transition-all">
+    <button @click="prev()" class="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 p-2.5 sm:p-3.5 rounded-full border border-white/30 bg-black/50 hover:bg-black/80 text-white transition-all backdrop-blur-md cursor-pointer">
         <i class="fa-solid fa-chevron-left text-xs sm:text-base"></i>
     </button>
-    <button @click="next()" class="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 rounded-full border border-white/20 hover:bg-white/10 text-white transition-all">
+    <button @click="next()" class="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 p-2.5 sm:p-3.5 rounded-full border border-white/30 bg-black/50 hover:bg-black/80 text-white transition-all backdrop-blur-md cursor-pointer">
         <i class="fa-solid fa-chevron-right text-xs sm:text-base"></i>
     </button>
     {% endif %}
@@ -83,32 +86,32 @@
 <section class="relative hidden md:block max-w-6xl mx-auto px-4 -mt-10 sm:-mt-16 z-30 animate__animated animate__fadeInUp">
     <div class="rounded-2xl p-4 sm:p-8 border shadow-2xl backdrop-blur-xl"
          :class="{
-             'bg-white border-gray-200': currentTheme === 'light',
-             'bg-[#161412] border-amber-900/30 text-amber-100': currentTheme !== 'light'
+             'bg-white/95 border-gray-200': currentTheme === 'light',
+             'bg-[#161412]/95 border-amber-900/40 text-amber-100': currentTheme !== 'light'
          }">
         <form action="{% url 'rooms:room_list' %}" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 items-end">
             <!-- Check In -->
             <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 opacity-80">Arrival Date</label>
+                <label class="block text-xs font-bold uppercase tracking-wider mb-1.5 opacity-80 whitespace-nowrap">Arrival Date</label>
                 <div class="relative">
                     <i class="fa-regular fa-calendar absolute left-3 top-1/2 -translate-y-1/2 opacity-60 text-xs pointer-events-none"></i>
-                    <input type="text" name="check_in" id="home_check_in" required autocomplete="off" readonly inputmode="none" placeholder="Select arrival date" class="w-full pl-9 pr-3 py-2.5 sm:py-3 rounded-lg border bg-transparent text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400 cursor-pointer"
+                    <input type="text" name="check_in" id="home_check_in" required autocomplete="off" readonly inputmode="none" placeholder="Select arrival date" class="w-full pl-9 pr-3 py-2.5 sm:py-3 rounded-xl border bg-transparent text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400 cursor-pointer whitespace-nowrap"
                            :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
                 </div>
             </div>
             <!-- Check Out -->
             <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 opacity-80">Departure Date</label>
+                <label class="block text-xs font-bold uppercase tracking-wider mb-1.5 opacity-80 whitespace-nowrap">Departure Date</label>
                 <div class="relative">
                     <i class="fa-regular fa-calendar absolute left-3 top-1/2 -translate-y-1/2 opacity-60 text-xs pointer-events-none"></i>
-                    <input type="text" name="check_out" id="home_check_out" required autocomplete="off" readonly inputmode="none" placeholder="Select departure date" class="w-full pl-9 pr-3 py-2.5 sm:py-3 rounded-lg border bg-transparent text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400 cursor-pointer"
+                    <input type="text" name="check_out" id="home_check_out" required autocomplete="off" readonly inputmode="none" placeholder="Select departure date" class="w-full pl-9 pr-3 py-2.5 sm:py-3 rounded-xl border bg-transparent text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400 cursor-pointer whitespace-nowrap"
                            :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
                 </div>
             </div>
             <!-- Adults -->
             <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 opacity-80">Adults</label>
-                <select name="adults" class="w-full px-3 py-2.5 sm:py-3 rounded-lg border bg-transparent text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
+                <label class="block text-xs font-bold uppercase tracking-wider mb-1.5 opacity-80 whitespace-nowrap">Adults</label>
+                <select name="adults" class="w-full px-3 py-2.5 sm:py-3 rounded-xl border bg-transparent text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400 cursor-pointer whitespace-nowrap"
                         :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
                     <option value="1">1 Adult</option>
                     <option value="2" selected>2 Adults</option>
@@ -118,8 +121,8 @@
             </div>
             <!-- Children -->
             <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 opacity-80">Children</label>
-                <select name="children" class="w-full px-3 py-2.5 sm:py-3 rounded-lg border bg-transparent text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400"
+                <label class="block text-xs font-bold uppercase tracking-wider mb-1.5 opacity-80 whitespace-nowrap">Children</label>
+                <select name="children" class="w-full px-3 py-2.5 sm:py-3 rounded-xl border bg-transparent text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-luxuryGold-400 cursor-pointer whitespace-nowrap"
                         :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
                     <option value="0" selected>0 Children</option>
                     <option value="1">1 Child</option>
@@ -128,7 +131,7 @@
             </div>
             <!-- Submit Search -->
             <div class="sm:col-span-2 lg:col-span-1">
-                <button type="submit" class="w-full py-3 sm:py-3.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:scale-[1.02] duration-300 cursor-pointer text-center"
+                <button type="submit" class="w-full py-3 sm:py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:scale-[1.02] duration-300 cursor-pointer text-center whitespace-nowrap shadow-lg"
                         :class="{
                             'bg-amber-800 text-white hover:bg-amber-900': currentTheme === 'light',
                             'bg-luxuryGold-500 text-black hover:bg-luxuryGold-400 gold-glow': currentTheme !== 'light'
@@ -160,7 +163,7 @@
                 </video>
             </div>
             {% else %}
-            <div class="overflow-hidden rounded-2xl border border-amber-900/10">
+            <div class="overflow-hidden rounded-2xl border border-amber-900/10 shadow-xl">
                 <img src="{% if about_preview.image %}{{ about_preview.image.url }}{% else %}https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=800{% endif %}" 
                      alt="About hotel" class="w-full h-[260px] sm:h-[380px] lg:h-[450px] object-cover hover:scale-105 duration-700">
             </div>
@@ -175,7 +178,7 @@
 
         <!-- Text Details Column -->
         <div class="space-y-4 sm:space-y-6" data-animate="fadeInRight">
-            <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">
+            <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500 whitespace-nowrap">
                 {{ about_preview.subtitle }}
             </span>
             <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold leading-tight">
@@ -188,20 +191,20 @@
             <!-- Statistics Counters -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 pt-4 sm:pt-6 border-t border-amber-900/10">
                 <div class="text-center hover:scale-105 duration-300">
-                    <h4 class="font-luxury-title text-2xl sm:text-3xl font-bold text-luxuryGold-400">{{ about_preview.stat1_value }}</h4>
-                    <p class="text-[10px] sm:text-xs uppercase tracking-wider opacity-75 mt-1">{{ about_preview.stat1_label }}</p>
+                    <h4 class="font-luxury-title text-2xl sm:text-3xl font-bold text-luxuryGold-400 whitespace-nowrap">{{ about_preview.stat1_value }}</h4>
+                    <p class="text-[10px] sm:text-xs uppercase tracking-wider opacity-75 mt-1 whitespace-nowrap">{{ about_preview.stat1_label }}</p>
                 </div>
                 <div class="text-center hover:scale-105 duration-300">
-                    <h4 class="font-luxury-title text-2xl sm:text-3xl font-bold text-luxuryGold-400">{{ about_preview.stat2_value }}</h4>
-                    <p class="text-[10px] sm:text-xs uppercase tracking-wider opacity-75 mt-1">{{ about_preview.stat2_label }}</p>
+                    <h4 class="font-luxury-title text-2xl sm:text-3xl font-bold text-luxuryGold-400 whitespace-nowrap">{{ about_preview.stat2_value }}</h4>
+                    <p class="text-[10px] sm:text-xs uppercase tracking-wider opacity-75 mt-1 whitespace-nowrap">{{ about_preview.stat2_label }}</p>
                 </div>
                 <div class="text-center hover:scale-105 duration-300">
-                    <h4 class="font-luxury-title text-2xl sm:text-3xl font-bold text-luxuryGold-400">{{ about_preview.stat3_value }}</h4>
-                    <p class="text-[10px] sm:text-xs uppercase tracking-wider opacity-75 mt-1">{{ about_preview.stat3_label }}</p>
+                    <h4 class="font-luxury-title text-2xl sm:text-3xl font-bold text-luxuryGold-400 whitespace-nowrap">{{ about_preview.stat3_value }}</h4>
+                    <p class="text-[10px] sm:text-xs uppercase tracking-wider opacity-75 mt-1 whitespace-nowrap">{{ about_preview.stat3_label }}</p>
                 </div>
                 <div class="text-center hover:scale-105 duration-300">
-                    <h4 class="font-luxury-title text-2xl sm:text-3xl font-bold text-luxuryGold-400">{{ about_preview.stat4_value }}</h4>
-                    <p class="text-[10px] sm:text-xs uppercase tracking-wider opacity-75 mt-1">{{ about_preview.stat4_label }}</p>
+                    <h4 class="font-luxury-title text-2xl sm:text-3xl font-bold text-luxuryGold-400 whitespace-nowrap">{{ about_preview.stat4_value }}</h4>
+                    <p class="text-[10px] sm:text-xs uppercase tracking-wider opacity-75 mt-1 whitespace-nowrap">{{ about_preview.stat4_label }}</p>
                 </div>
             </div>
         </div>
@@ -215,14 +218,14 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="text-center max-w-2xl mx-auto space-y-3 sm:space-y-4 mb-8 sm:mb-16" data-animate="fadeInUp">
-            <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">Premium Sanctuary</span>
+            <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500 whitespace-nowrap">Premium Sanctuary</span>
             <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold">Rooms &amp; Suites</h2>
             <p class="text-xs sm:text-sm opacity-80">Explore our signature guest chambers designed for ultimate relaxation and comfort.</p>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {% for room in featured_rooms %}
-            <div class="rounded-2xl overflow-hidden border shadow-lg group hover:translate-y-[-4px] duration-500 flex flex-col"
+            <div class="rounded-2xl overflow-hidden border shadow-lg group hover:translate-y-[-4px] duration-500 flex flex-col justify-between"
                  data-animate="fadeInUp"
                  :class="{
                      'bg-white border-gray-200': currentTheme === 'light',
@@ -232,7 +235,7 @@
                 <div class="relative h-52 sm:h-64 overflow-hidden">
                     <img src="{% if room.images.first and room.images.first.image %}{{ room.images.first.image.url }}{% else %}https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=600{% endif %}" 
                          alt="{{ room.title }}" class="w-full h-full object-cover group-hover:scale-105 duration-700">
-                    <span class="absolute top-4 right-4 z-10 px-3 sm:px-4 py-1 text-[11px] sm:text-xs font-semibold bg-black/70 text-luxuryGold-300 rounded-full backdrop-blur-sm">
+                    <span class="absolute top-4 right-4 z-10 px-3 sm:px-4 py-1 text-[11px] sm:text-xs font-semibold bg-black/75 text-luxuryGold-300 rounded-full backdrop-blur-sm whitespace-nowrap shadow-md">
                         {{ room.get_category_display }}
                     </span>
                 </div>
@@ -243,29 +246,29 @@
                         <div class="flex items-start justify-between gap-3 sm:gap-4">
                             <h3 class="font-luxury-title text-lg sm:text-xl font-bold tracking-wide">{{ room.title }}</h3>
                             <div class="text-right flex-shrink-0 whitespace-nowrap">
-                                <span class="text-[10px] sm:text-xs uppercase opacity-75 font-semibold text-gray-500">From</span>
+                                <span class="text-[10px] sm:text-xs uppercase opacity-75 font-semibold text-gray-500 block">From</span>
                                 <p class="text-xl sm:text-2xl font-extrabold text-luxuryGold-800 font-luxury-title whitespace-nowrap">{{ room.currency.iso_code }} {{ room.current_price }}</p>
                                 {% if room.active_seasonal %}
-                                <span class="text-[10px] text-green-600 font-semibold uppercase tracking-wide block">🏷 {{ room.active_seasonal.name }}</span>
+                                <span class="text-[10px] text-green-600 font-semibold uppercase tracking-wide block whitespace-nowrap">🏷 {{ room.active_seasonal.name }}</span>
                                 {% endif %}
                             </div>
                         </div>
                         <p class="text-xs sm:text-sm opacity-85 line-clamp-3 leading-relaxed">{{ room.description }}</p>
                         
                         <!-- Specs -->
-                        <div class="flex items-center gap-4 sm:gap-6 text-xs opacity-75 pt-1 sm:pt-2">
+                        <div class="flex items-center gap-4 sm:gap-6 text-xs opacity-75 pt-1 sm:pt-2 whitespace-nowrap">
                             <span><i class="fa-solid fa-maximize text-luxuryGold-400 mr-1.5"></i>{{ room.room_size }} sq.ft.</span>
                             <span><i class="fa-solid fa-user-group text-luxuryGold-400 mr-1.5"></i>Max {{ room.max_adults }} Guest(s)</span>
                         </div>
                     </div>
 
-                    <div class="pt-4 sm:pt-6 mt-4 sm:mt-6 border-t border-amber-900/10 flex items-center justify-between gap-3">
-                        <a href="{% url 'rooms:room_detail' room.slug %}" class="text-xs font-semibold uppercase tracking-wider hover:text-luxuryGold-400 transition-colors">Details &amp; Specs</a>
+                    <div class="pt-4 sm:pt-6 mt-4 sm:mt-6 border-t border-amber-900/10 flex items-center justify-between gap-3 whitespace-nowrap">
+                        <a href="{% url 'rooms:room_detail' room.slug %}" class="text-xs font-semibold uppercase tracking-wider hover:text-luxuryGold-400 transition-colors whitespace-nowrap">Details &amp; Specs</a>
                         <a href="{% url 'rooms:room_detail' room.slug %}" 
-                           class="px-4 sm:px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors border"
+                           class="px-4 sm:px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl transition-colors border whitespace-nowrap cursor-pointer shadow-sm"
                            :class="{
-                               'bg-amber-800 text-white border-amber-800': currentTheme === 'light',
-                               'bg-luxuryGold-500 border-luxuryGold-500 text-black': currentTheme !== 'light'
+                               'bg-amber-800 text-white border-amber-800 hover:bg-amber-900': currentTheme === 'light',
+                               'bg-luxuryGold-500 border-luxuryGold-500 text-black hover:bg-luxuryGold-400 gold-glow': currentTheme !== 'light'
                            }">
                             Reserve Chamber
                         </a>
@@ -284,56 +287,50 @@
 <!-- SIGNATURE HOTEL FACILITIES SECTION -->
 <section class="py-12 sm:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center max-w-2xl mx-auto space-y-3 sm:space-y-4 mb-8 sm:mb-16" data-animate="fadeInUp">
-        <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">Elite Hospitality</span>
+        <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500 whitespace-nowrap">Elite Hospitality</span>
         <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold">Resort Services &amp; Facilities</h2>
         <p class="text-xs sm:text-sm opacity-80">Indulge in our carefully curated amenities, designed to elevate your stay to a world-class level.</p>
     </div>
 
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6 lg:gap-8">
         {% for fac in facilities %}
-        <div class="p-4 sm:p-6 rounded-2xl border text-center space-y-2 sm:space-y-3 hover:translate-y-[-4px] duration-300"
+        <div class="p-4 sm:p-6 rounded-2xl border text-center space-y-2 sm:space-y-3 hover:translate-y-[-4px] hover:shadow-xl duration-300 transition-all cursor-default"
              data-animate="fadeInUp"
              :class="{
                  'bg-white border-gray-200': currentTheme === 'light',
                  'bg-[#161412] border-amber-900/20': currentTheme !== 'light'
              }">
             <div class="text-2xl sm:text-3xl text-luxuryGold-500">
-                {% if fac.icon_class %}
-                    <i class="{{ fac.icon_class }}"></i>
-                {% else %}
-                    <i class="fa-solid fa-bell-concierge"></i>
-                {% endif %}
+                <i class="{{ fac.icon_class|default:'fa-solid fa-star' }}"></i>
             </div>
-            <h4 class="font-semibold text-xs sm:text-sm tracking-wide">{{ fac.name }}</h4>
-            {% if fac.description %}
-            <p class="text-[11px] sm:text-xs opacity-75 leading-relaxed line-clamp-2">{{ fac.description }}</p>
-            {% endif %}
+            <h4 class="font-semibold text-xs sm:text-sm whitespace-nowrap">{{ fac.name }}</h4>
         </div>
         {% empty %}
-        <!-- Defaults fallback -->
-        <div class="p-4 sm:p-6 rounded-2xl border text-center space-y-2 sm:space-y-3">
+        <!-- Default Fallback Facilities -->
+        <div class="p-4 sm:p-6 rounded-2xl border text-center space-y-2 sm:space-y-3 hover:translate-y-[-4px] duration-300"
+             :class="{ 'bg-white border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
             <div class="text-2xl sm:text-3xl text-luxuryGold-500"><i class="fa-solid fa-wifi"></i></div>
-            <h4 class="font-semibold text-xs sm:text-sm">Ultra High-Speed Wifi</h4>
+            <h4 class="font-semibold text-xs sm:text-sm whitespace-nowrap">High-Speed Wi-Fi</h4>
         </div>
-        <div class="p-4 sm:p-6 rounded-2xl border text-center space-y-2 sm:space-y-3">
-            <div class="text-2xl sm:text-3xl text-luxuryGold-500"><i class="fa-solid fa-bell-concierge"></i></div>
-            <h4 class="font-semibold text-xs sm:text-sm">24/7 Concierge</h4>
-        </div>
-        <div class="p-4 sm:p-6 rounded-2xl border text-center space-y-2 sm:space-y-3">
+        <div class="p-4 sm:p-6 rounded-2xl border text-center space-y-2 sm:space-y-3 hover:translate-y-[-4px] duration-300"
+             :class="{ 'bg-white border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
             <div class="text-2xl sm:text-3xl text-luxuryGold-500"><i class="fa-solid fa-spa"></i></div>
-            <h4 class="font-semibold text-xs sm:text-sm">Luxury Wellness Spa</h4>
+            <h4 class="font-semibold text-xs sm:text-sm whitespace-nowrap">Luxury Spa</h4>
         </div>
-        <div class="p-4 sm:p-6 rounded-2xl border text-center space-y-2 sm:space-y-3">
+        <div class="p-4 sm:p-6 rounded-2xl border text-center space-y-2 sm:space-y-3 hover:translate-y-[-4px] duration-300"
+             :class="{ 'bg-white border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
             <div class="text-2xl sm:text-3xl text-luxuryGold-500"><i class="fa-solid fa-square-parking"></i></div>
-            <h4 class="font-semibold text-xs sm:text-sm">Valet Parking</h4>
+            <h4 class="font-semibold text-xs sm:text-sm whitespace-nowrap">Valet Parking</h4>
         </div>
-        <div class="p-4 sm:p-6 rounded-2xl border text-center space-y-2 sm:space-y-3">
+        <div class="p-4 sm:p-6 rounded-2xl border text-center space-y-2 sm:space-y-3 hover:translate-y-[-4px] duration-300"
+             :class="{ 'bg-white border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
             <div class="text-2xl sm:text-3xl text-luxuryGold-500"><i class="fa-solid fa-swimming-pool"></i></div>
-            <h4 class="font-semibold text-xs sm:text-sm">Infinity Pool</h4>
+            <h4 class="font-semibold text-xs sm:text-sm whitespace-nowrap">Infinity Pool</h4>
         </div>
-        <div class="p-4 sm:p-6 rounded-2xl border text-center space-y-2 sm:space-y-3">
+        <div class="p-4 sm:p-6 rounded-2xl border text-center space-y-2 sm:space-y-3 hover:translate-y-[-4px] duration-300"
+             :class="{ 'bg-white border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
             <div class="text-2xl sm:text-3xl text-luxuryGold-500"><i class="fa-solid fa-utensils"></i></div>
-            <h4 class="font-semibold text-xs sm:text-sm">Elite Restaurant</h4>
+            <h4 class="font-semibold text-xs sm:text-sm whitespace-nowrap">Elite Restaurant</h4>
         </div>
         {% endfor %}
     </div>
@@ -347,7 +344,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             
             <div class="space-y-4 sm:space-y-6" data-animate="fadeInLeft">
-                <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">Fine Culinary</span>
+                <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500 whitespace-nowrap">Fine Culinary</span>
                 <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold">Gastronomy &amp; Lounge</h2>
                 <p class="text-xs sm:text-sm opacity-80 leading-relaxed">
                     Savor international delicacies, authentic Nepalese cuisine, and masterfully mixed cocktails curated by globally acclaimed chefs.
@@ -357,7 +354,7 @@
                     <div class="flex items-start gap-3 sm:gap-4">
                         <span class="w-2.5 h-2.5 rounded-full bg-luxuryGold-500 mt-1.5 shrink-0"></span>
                         <div>
-                            <h4 class="font-semibold text-sm sm:text-base">{{ venue.name }}</h4>
+                            <h4 class="font-semibold text-sm sm:text-base whitespace-nowrap">{{ venue.name }}</h4>
                             <p class="text-[11px] sm:text-xs opacity-75">Hours: {{ venue.timings }} | Capacity: {{ venue.capacity }} seats</p>
                         </div>
                     </div>
@@ -365,8 +362,8 @@
                 </div>
                 <div class="pt-4 sm:pt-6">
                     <a href="{% url 'dining:dining_list' %}" 
-                       class="inline-block px-6 sm:px-8 py-3 sm:py-3.5 text-xs font-semibold uppercase tracking-wider rounded-full border border-luxuryGold-400 text-center"
-                       :class="{ 'bg-amber-800 text-white': currentTheme === 'light', 'hover:bg-luxuryGold-500 hover:text-black': currentTheme !== 'light' }">
+                       class="inline-block px-7 sm:px-9 py-3 sm:py-3.5 text-xs font-bold uppercase tracking-widest rounded-full border border-luxuryGold-400 text-center whitespace-nowrap transition-all duration-300 shadow-md cursor-pointer"
+                       :class="{ 'bg-amber-800 text-white hover:bg-amber-900': currentTheme === 'light', 'hover:bg-luxuryGold-500 hover:text-black gold-glow': currentTheme !== 'light' }">
                         Explore More
                     </a>
                 </div>
@@ -388,7 +385,7 @@
                 next() { this.activeSlide = (this.activeSlide + 1) % this.slides.length }
             }"
             x-init="if (slides.length > 1) setInterval(() => next(), 5000)"
-            class="relative overflow-hidden rounded-2xl h-[260px] sm:h-[380px] lg:h-[450px] bg-neutral-900 border border-amber-900/10" data-animate="fadeInRight">
+            class="relative overflow-hidden rounded-2xl h-[260px] sm:h-[380px] lg:h-[450px] bg-neutral-900 border border-amber-900/10 shadow-2xl" data-animate="fadeInRight">
                 
                 <template x-for="(slide, index) in slides" :key="index">
                     <div x-show="activeSlide === index"
@@ -403,11 +400,11 @@
                 <template x-if="slides.length > 1">
                     <div>
                         <button @click="activeSlide = (activeSlide - 1 + slides.length) % slides.length"
-                                class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-2.5 rounded-full bg-black/75 text-white hover:bg-black/90 hover:scale-110 transition-all shadow-lg flex items-center justify-center cursor-pointer">
+                                class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 z-20 p-2.5 sm:p-3 rounded-full bg-black/75 text-white hover:bg-black/90 hover:scale-110 transition-all shadow-lg flex items-center justify-center cursor-pointer">
                             <i class="fa-solid fa-chevron-left text-xs"></i>
                         </button>
                         <button @click="activeSlide = (activeSlide + 1) % slides.length"
-                                class="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-2.5 rounded-full bg-black/75 text-white hover:bg-black/90 hover:scale-110 transition-all shadow-xl flex items-center justify-center cursor-pointer">
+                                class="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-20 p-2.5 sm:p-3 rounded-full bg-black/75 text-white hover:bg-black/90 hover:scale-110 transition-all shadow-xl flex items-center justify-center cursor-pointer">
                             <i class="fa-solid fa-chevron-right text-xs"></i>
                         </button>
                     </div>
@@ -438,17 +435,19 @@
     prev() { this.activeIndex = (this.activeIndex - 1 + this.itemsCount) % this.itemsCount }
 }" x-init="if (itemsCount > 1) setInterval(() => next(), 6000)">
     <div class="text-center max-w-2xl mx-auto space-y-3 sm:space-y-4 mb-8 sm:mb-16" data-animate="fadeInUp">
-        <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">Guest Memoirs</span>
+        <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500 whitespace-nowrap">Guest Memoirs</span>
         <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold">What Our Guests Say</h2>
     </div>
 
-    <!-- Review Slides -->
-    <div class="relative min-h-[220px] sm:h-[300px] flex items-center justify-center max-w-4xl mx-auto" data-animate="zoomIn">
+    <div class="relative min-h-[180px] sm:min-h-[220px] max-w-4xl mx-auto flex items-center justify-center">
         {% for test in testimonials %}
-        <div x-show="activeIndex === {{ forloop.counter0 }}" 
-             x-transition:enter="transition ease-out duration-500"
-             x-transition:enter-start="opacity-0 scale-95"
-             x-transition:enter-end="opacity-100 scale-100"
+        <div x-show="activeIndex === {{ forloop.counter0 }}"
+             x-transition:enter="transition ease-out duration-700"
+             x-transition:enter-start="opacity-0 translate-y-4"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-300"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 -translate-y-4"
              class="text-center space-y-4 sm:space-y-6"
              style="display: none;">
             
@@ -464,11 +463,11 @@
             
             <div class="flex items-center justify-center gap-3 sm:gap-4 pt-2 sm:pt-4">
                 {% if test.guest_image %}
-                <img src="{{ test.guest_image.url }}" alt="{{ test.guest_name }}" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover">
+                <img src="{{ test.guest_image.url }}" alt="{{ test.guest_name }}" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover shadow-md">
                 {% endif %}
                 <div class="text-left">
-                    <h4 class="font-semibold text-xs sm:text-sm tracking-wide">{{ test.guest_name }}</h4>
-                    <p class="text-[11px] sm:text-xs opacity-75">{{ test.country }} | Source: {{ test.get_source_display }}</p>
+                    <h4 class="font-semibold text-xs sm:text-sm tracking-wide whitespace-nowrap">{{ test.guest_name }}</h4>
+                    <p class="text-[11px] sm:text-xs opacity-75 whitespace-nowrap">{{ test.country }} | Source: {{ test.get_source_display }}</p>
                 </div>
             </div>
         </div>
@@ -485,7 +484,7 @@
             <blockquote class="font-luxury-title text-base sm:text-xl leading-relaxed italic opacity-95 px-4">
                 "An absolute sanctuary in Nepal. The service was top-tier, dining was immaculate, and the rooms were a dream of luxury."
             </blockquote>
-            <h4 class="font-semibold text-xs sm:text-sm">Lord Alistair Sterling (United Kingdom)</h4>
+            <h4 class="font-semibold text-xs sm:text-sm whitespace-nowrap">Lord Alistair Sterling (United Kingdom)</h4>
         </div>
         {% endfor %}
     </div>
@@ -495,7 +494,7 @@
     <div class="flex items-center justify-center gap-2.5 sm:gap-3 pt-6 sm:pt-12">
         {% for t in testimonials %}
         <button @click="activeIndex = {{ forloop.counter0 }}" 
-                class="w-2.5 h-2.5 rounded-full transition-all duration-300"
+                class="w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer"
                 :class="activeIndex === {{ forloop.counter0 }} ? 'bg-luxuryGold-500 w-6' : 'bg-gray-600'"></button>
         {% endfor %}
     </div>
@@ -509,7 +508,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="text-center max-w-2xl mx-auto space-y-3 sm:space-y-4 mb-8 sm:mb-16" data-animate="fadeInUp">
-            <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">Explore Nearby</span>
+            <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500 whitespace-nowrap">Explore Nearby</span>
             <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold">Local Sights &amp; Attractions</h2>
         </div>
 
@@ -520,7 +519,7 @@
                  :class="{ 'bg-white border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
                 <div class="relative h-48 sm:h-56 overflow-hidden">
                     <img src="{% if item.image %}{{ item.image.url }}{% else %}https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=600{% endif %}" alt="{{ item.name }}" class="w-full h-full object-cover group-hover:scale-105 duration-700">
-                    <span class="absolute top-4 left-4 z-10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider bg-black/70 text-luxuryGold-300 rounded-full backdrop-blur-sm">
+                    <span class="absolute top-4 left-4 z-10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider bg-black/70 text-luxuryGold-300 rounded-full backdrop-blur-sm whitespace-nowrap">
                         {{ item.get_category_display }}
                     </span>
                 </div>
@@ -528,14 +527,14 @@
                     <div class="space-y-2 sm:space-y-3">
                         <div class="flex items-center justify-between">
                             <h3 class="font-semibold text-base sm:text-lg truncate">{{ item.name }}</h3>
-                            <span class="text-xs opacity-75 font-mono shrink-0 ml-2"><i class="fa-solid fa-car text-luxuryGold-500 mr-1"></i>{{ item.distance }}</span>
+                            <span class="text-xs opacity-75 font-mono shrink-0 ml-2 whitespace-nowrap"><i class="fa-solid fa-car text-luxuryGold-500 mr-1"></i>{{ item.distance }}</span>
                         </div>
                         <p class="text-xs opacity-80 leading-relaxed line-clamp-3">{{ item.description }}</p>
                     </div>
-                    <div class="flex items-center justify-between pt-2 border-t border-amber-900/10">
-                        <span class="text-[11px] opacity-75"><i class="fa-regular fa-clock mr-1.5"></i>{{ item.travel_time }}</span>
+                    <div class="flex items-center justify-between pt-2 border-t border-amber-900/10 whitespace-nowrap">
+                        <span class="text-[11px] opacity-75 whitespace-nowrap"><i class="fa-regular fa-clock mr-1.5"></i>{{ item.travel_time }}</span>
                         {% if item.maps_url %}
-                        <a href="{{ item.maps_url }}" target="_blank" class="text-xs text-luxuryGold-500 hover:underline">Get Directions <i class="fa-solid fa-arrow-up-right-from-square ml-1"></i></a>
+                        <a href="{{ item.maps_url }}" target="_blank" class="text-xs text-luxuryGold-500 hover:underline whitespace-nowrap">Get Directions <i class="fa-solid fa-arrow-up-right-from-square ml-1"></i></a>
                         {% endif %}
                     </div>
                 </div>
@@ -552,7 +551,7 @@
     <!-- Overlay -->
     <div class="absolute inset-0 bg-black/85"></div>
     <div class="relative max-w-4xl mx-auto px-4 space-y-4 sm:space-y-6 z-10 text-white" data-animate="fadeInUp">
-        <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-300">Newsletter Subscription</span>
+        <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-300 whitespace-nowrap">Newsletter Subscription</span>
         <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold text-white">Join The Elite Guild</h2>
         <p class="text-xs sm:text-sm text-white/80 max-w-xl mx-auto leading-relaxed">
             Subscribe to receive exclusive offers, luxury travel logs, seasonal booking discounts, and resort news.
@@ -562,10 +561,39 @@
             <input type="email" placeholder="Your Email Address" required
                    class="flex-grow px-4 py-3 sm:py-3.5 rounded-full border border-white/20 bg-black/40 text-xs sm:text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxuryGold-400">
             <button type="submit" 
-                    class="px-8 py-3 sm:py-3.5 rounded-full text-xs font-bold uppercase tracking-widest bg-luxuryGold-500 text-black hover:bg-luxuryGold-400 gold-glow transition-all">
+                    class="px-8 py-3 sm:py-3.5 rounded-full text-xs font-bold uppercase tracking-widest bg-luxuryGold-500 text-black hover:bg-luxuryGold-400 gold-glow transition-all whitespace-nowrap shrink-0 cursor-pointer">
                 Subscribe
             </button>
         </form>
     </div>
 </section>
+{% block extra_body_js %}
+<script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.5.0/air-datepicker.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        new AirDatepicker('#home_check_in', {
+            ...window.defaultAirDatepickerConfig,
+            minDate: today,
+            onSelect({ date }) {
+                if (date) {
+                    const nextDay = new Date(date);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    if (window.homeCheckOutPicker) {
+                        window.homeCheckOutPicker.setMinDate(nextDay);
+                    }
+                }
+            }
+        });
+
+        window.homeCheckOutPicker = new AirDatepicker('#home_check_out', {
+            ...window.defaultAirDatepickerConfig,
+            minDate: tomorrow
+        });
+    });
+</script>
+{% endblock %}
 {% endblock %}

@@ -35,7 +35,6 @@
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
-
             <div class="mt-4 px-4 space-y-3">
                 <a href="{% url 'homepage:home' %}" data-nav-mobile class="block py-2 text-base font-medium border-b border-transparent hover:text-luxuryGold-400">Home</a>
                 
@@ -60,6 +59,24 @@
                         Book A Stay
                     </a>
                 </div>
+
+                <!-- Mobile Drawer Quick Info Footer -->
+                <div class="mt-6 pt-6 border-t space-y-3 text-xs opacity-90" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/20': currentTheme !== 'light' }">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-luxuryGold-400 block">Resort Contact Info</span>
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-location-dot text-luxuryGold-400 shrink-0"></i>
+                        <span>{{ hotel_settings.address|default:"Simara, Bara, Nepal" }}</span>
+                    </div>
+                    <a href="tel:{{ hotel_settings.phone|default:'+977 51-590650' }}" class="flex items-center gap-2.5 hover:text-luxuryGold-400 transition-colors">
+                        <i class="fa-solid fa-phone text-luxuryGold-400 shrink-0"></i>
+                        <span>{{ hotel_settings.phone|default:"+977 51-590650" }}</span>
+                    </a>
+                    <a href="mailto:{{ hotel_settings.email|default:'info@hotelichhya.com' }}" class="flex items-center gap-2.5 hover:text-luxuryGold-400 transition-colors">
+                        <i class="fa-regular fa-envelope text-luxuryGold-400 shrink-0"></i>
+                        <span class="truncate">{{ hotel_settings.email|default:"info@hotelichhya.com" }}</span>
+                    </a>
+                </div>
+            </div>
             </div>
         </div>
     </div>
