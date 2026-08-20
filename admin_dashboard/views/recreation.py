@@ -18,10 +18,15 @@ RecreationImageFormSet = inlineformset_factory(
 
 class RecreationDashboardView(StaffRequiredMixin, View):
     def get(self, request):
+        from django.core.paginator import Paginator
         # pyrefly: ignore [missing-attribute]
-        activities = RecreationActivity.objects.all()
+        activities_qs = RecreationActivity.objects.all()
+        page_number = request.GET.get('page', 1)
+        paginator = Paginator(activities_qs, 10)
+        activities_page = paginator.get_page(page_number)
+
         return render(request, 'admin_dashboard/recreation/dashboard.html', {
-            'activities': activities
+            'activities': activities_page
         })
 
 

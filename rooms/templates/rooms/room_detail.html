@@ -164,223 +164,339 @@
         </div>
 
         <!-- RIGHT RESERVATION SIDEBAR (1 COL) -->
-        <div class="space-y-8 lg:col-span-1" x-data="{
-            checkIn: new URLSearchParams(window.location.search).get('check_in') || new Date(new Date().getTime() + 24*60*60*1000).toISOString().split('T')[0],
-            checkOut: new URLSearchParams(window.location.search).get('check_out') || new Date(new Date().getTime() + 2*24*60*60*1000).toISOString().split('T')[0],
-            adults: parseInt(new URLSearchParams(window.location.search).get('adults')) || 2,
-            children: parseInt(new URLSearchParams(window.location.search).get('children')) || 0,
-            numRooms: 1,
-            maxRooms: {{ room.total_rooms }},
-            showModal: false,
-            basePrice: {{ room.current_price|default:0 }},
-            roomCurrency: '{{ room.currency.iso_code|default:"USD" }}',
-            taxPercentage: {{ room.tax_percentage|default:0 }},
-            checkingAvailability: false,
-            isAvailable: true,
-            errorMessage: '',
-            guestName: '',
-            guestEmail: '',
-            guestPhone: '',
-            promoCode: '',
-            specialRequests: '',
-            guestErrors: { name: '', email: '', phone: '' },
-            validateGuestName() {
-                const trimmed = (this.guestName || '').trim();
-                if (!trimmed) return 'Full name is required.';
-                if (trimmed.length < 2) return 'Full name must be at least 2 characters.';
-                if (!/^[a-zA-Z\s'.-]+$/.test(trimmed)) return 'Full name should contain valid letters and spaces.';
-                return '';
-            },
-            validateGuestEmail() {
-                const trimmed = (this.guestEmail || '').trim();
-                if (!trimmed) return 'Email address is required.';
-                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!re.test(trimmed)) return 'Please enter a valid email address.';
-                return '';
-            },
-            validateGuestPhone() {
-                const trimmed = (this.guestPhone || '').trim();
-                if (!trimmed) return 'Contact phone number is required.';
-                const digits = trimmed.replace(/\D/g, '');
-                if (digits.length < 10) return 'Phone number must contain at least 10 digits.';
-                if (digits.length > 10) return 'Phone number cannot exceed 10 digits.';
-                if (!/^[\d\s().-]+$/.test(trimmed)) return 'Please enter a valid phone number.';
-                return '';
-            },
-            validateGuestForm(e) {
-                this.guestErrors = {
-                    name: this.validateGuestName(),
-                    email: this.validateGuestEmail(),
-                    phone: this.validateGuestPhone()
-                };
-                if (this.guestErrors.name || this.guestErrors.email || this.guestErrors.phone) {
-                    if (e) e.preventDefault();
-                    return false;
+        <script id="room-config-data" type="application/json">
+        {
+            "checkIn": "{{ default_checkin|default:''|escapejs }}",
+            "checkOut": "{{ default_checkout|default:''|escapejs }}",
+            "adults": {{ request.GET.adults|default:2 }},
+            "children": {{ request.GET.children|default:0 }},
+            "maxRooms": {{ room.total_rooms|default:1 }},
+            "basePrice": {{ room.current_price|default:0 }},
+            "roomCurrency": "{{ room.currency.iso_code|default:'USD'|escapejs }}",
+            "taxPercentage": {{ room.tax_percentage|default:0 }},
+            "roomId": {{ room.id|default:0 }}
+        }
+        </script>
+        <script id="room-addons-data" type="application/json">
+        [
+            {% for addon in addons %}
+            {
+                "id": {{ addon.id }},
+                "name": "{{ addon.name|escapejs }}",
+                "price_type": "{{ addon.price_type }}",
+                "price": {{ addon.current_price|default:0 }},
+                "icon": "{{ addon.icon|default:'fa-concierge-bell'|escapejs }}",
+                "description": "{{ addon.description|default:''|escapejs }}"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]
+        </script>
+        <script>
+        function roomBookingData() {
+            let config = {};
+            try {
+                const el = document.getElementById('room-config-data');
+                if (el && el.textContent) {
+                    config = JSON.parse(el.textContent);
                 }
-                return true;
-            },
-            async updateMaxRooms() {
-                if (!this.checkIn || !this.checkOut) {
-                    this.maxRooms = {{ room.total_rooms }};
-                    return;
-                }
-                try {
-                    const res = await fetch(`/rooms/api/{{ room.id }}/check-availability/?check_in=${this.checkIn}&check_out=${this.checkOut}&num_rooms=1`);
-                    if (res.ok) {
-                        const data = await res.json();
-                        this.maxRooms = data.available_rooms;
-                        if (this.numRooms > this.maxRooms) {
-                            this.numRooms = Math.max(1, this.maxRooms);
-                        }
-                    }
-                } catch(e) {
-                    console.error('Error updating max rooms:', e);
-                }
-            },
-            
-            get nights() {
-                if (!this.checkIn || !this.checkOut) return 0;
-                const start = new Date(this.checkIn);
-                const end = new Date(this.checkOut);
-                const diffTime = end - start;
-                if (diffTime <= 0) return 0;
-                return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            },
-            get subtotal() {
-                return this.basePrice * this.nights * this.numRooms;
-            },
-            get tax() {
-                return this.taxPercentage > 0 ? this.subtotal * (this.taxPercentage / 100) : 0;
-            },
-            get total() {
-                return this.subtotal + this.tax;
-            },
-            validateDates() {
-                this.errorMessage = '';
-                if (!this.checkIn) {
-                    this.errorMessage = 'Please select an arrival date.';
-                    return false;
-                }
-                if (!this.checkOut) {
-                    this.errorMessage = 'Please select a departure date.';
-                    return false;
-                }
-                const start = new Date(this.checkIn);
-                const end = new Date(this.checkOut);
-                const today = new Date();
-                today.setHours(0,0,0,0);
-                
-                if (isNaN(start.getTime())) {
-                    this.errorMessage = 'Please select a valid arrival date.';
-                    return false;
-                }
-                if (isNaN(end.getTime())) {
-                    this.errorMessage = 'Please select a valid departure date.';
-                    return false;
-                }
-                if (start < today) {
-                    this.errorMessage = 'Arrival date cannot be in the past.';
-                    return false;
-                }
-                if (end <= start) {
-                    this.errorMessage = 'Departure date must be at least one day after arrival date.';
-                    return false;
-                }
-                return true;
-            },
-            async submitReservation() {
-                if (!this.validateDates()) return;
-                this.checkingAvailability = true;
-                this.errorMessage = '';
-                try {
-                    const res = await fetch(`/rooms/api/{{ room.id }}/check-availability/?check_in=${this.checkIn}&check_out=${this.checkOut}&num_rooms=${this.numRooms}`);
-                    if (!res.ok) {
-                        throw new Error('Error checking availability');
-                    }
-                    const data = await res.json();
-                    this.isAvailable = data.available;
-                    if (data.available) {
-                        this.showModal = true;
-                    } else if (data.available_rooms > 0) {
-                        this.errorMessage = `Only ${data.available_rooms} room${data.available_rooms === 1 ? '' : 's'} available for the selected dates.`;
-                    } else {
-                        this.errorMessage = 'This room is not available for the selected dates. Please adjust your dates.';
-                    }
-                } catch (e) {
-                    console.error(e);
-                    // Fallback to open modal in case of connection/server issue
-                    this.showModal = true;
-                } finally {
-                    this.checkingAvailability = false;
-                }
-            },
-            init() {
-                this.$watch('checkIn', () => this.updateMaxRooms());
-                this.$watch('checkOut', () => this.updateMaxRooms());
-                this.updateMaxRooms();
+            } catch (e) {
+                console.error('Error parsing room config data:', e);
+            }
 
-                const initPickers = () => {
-                    if (typeof AirDatepicker === 'undefined') {
-                        setTimeout(initPickers, 50);
+            let addonsList = [];
+            try {
+                const el = document.getElementById('room-addons-data');
+                if (el && el.textContent) {
+                    addonsList = JSON.parse(el.textContent);
+                }
+            } catch (e) {
+                console.error('Error parsing room addons data:', e);
+            }
+
+            const roomId = parseInt(config.roomId) || 0;
+            const initialMaxRooms = parseInt(config.maxRooms) || 1;
+
+            return {
+                checkIn: new URLSearchParams(window.location.search).get('check_in') || '',
+                checkOut: new URLSearchParams(window.location.search).get('check_out') || '',
+
+                adults: parseInt(new URLSearchParams(window.location.search).get('adults')) || parseInt(config.adults) || 2,
+                children: parseInt(new URLSearchParams(window.location.search).get('children')) || parseInt(config.children) || 0,
+                numRooms: 1,
+                maxRooms: initialMaxRooms,
+                showModal: false,
+                basePrice: parseFloat(config.basePrice) || 0,
+                roomCurrency: config.roomCurrency || 'USD',
+                taxPercentage: parseFloat(config.taxPercentage) || 0,
+
+                checkingAvailability: false,
+                isAvailable: true,
+                errorMessage: '',
+                guestName: '',
+                guestEmail: '',
+                guestPhone: '',
+                promoCode: '',
+                specialRequests: '',
+                guestErrors: { name: '', email: '', phone: '' },
+                selectedAddons: [],
+                availableAddons: addonsList,
+                isAddonSelected(id) {
+                    const numId = Number(id);
+                    return this.selectedAddons.some(aId => Number(aId) === numId);
+                },
+                toggleAddon(id) {
+                    const numId = Number(id);
+                    if (this.isAddonSelected(numId)) {
+                        this.selectedAddons = this.selectedAddons.filter(aId => Number(aId) !== numId);
+                    } else {
+                        this.selectedAddons.push(numId);
+                    }
+                },
+                getAddonCalculatedPrice(addonId) {
+                    const addon = this.availableAddons.find(a => Number(a.id) === Number(addonId));
+                    if (!addon) return '0.00';
+                    let total = addon.price || 0;
+                    if (addon.price_type === 'per_night') {
+                        total = addon.price * (this.nights || 1) * (this.numRooms || 1);
+                    } else if (addon.price_type === 'per_person') {
+                        const totalGuests = (parseInt(this.adults) || 1) + (parseInt(this.children) || 0);
+                        total = addon.price * totalGuests;
+                    } else if (addon.price_type === 'per_person_per_night') {
+                        const totalGuests = (parseInt(this.adults) || 1) + (parseInt(this.children) || 0);
+                        total = addon.price * totalGuests * (this.nights || 1);
+                    }
+                    return total.toFixed(2);
+                },
+                validateGuestName() {
+                    const trimmed = (this.guestName || '').trim();
+                    if (!trimmed) return 'Full name is required.';
+                    if (trimmed.length < 2) return 'Full name must be at least 2 characters.';
+                    if (!/^[a-zA-Z\s'.-]+$/.test(trimmed)) return 'Full name should contain valid letters and spaces.';
+                    return '';
+                },
+                validateGuestEmail() {
+                    const trimmed = (this.guestEmail || '').trim();
+                    if (!trimmed) return 'Email address is required.';
+                    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!re.test(trimmed)) return 'Please enter a valid email address.';
+                    return '';
+                },
+                validateGuestPhone() {
+                    const trimmed = (this.guestPhone || '').trim();
+                    if (!trimmed) return 'Contact phone number is required.';
+                    const digits = trimmed.replace(/\D/g, '');
+                    if (digits.length < 10) return 'Phone number must contain at least 10 digits.';
+                    if (digits.length > 10) return 'Phone number cannot exceed 10 digits.';
+                    if (!/^[\d\s().-]+$/.test(trimmed)) return 'Please enter a valid phone number.';
+                    return '';
+                },
+                validateGuestForm(e) {
+                    this.guestErrors = {
+                        name: this.validateGuestName(),
+                        email: this.validateGuestEmail(),
+                        phone: this.validateGuestPhone()
+                    };
+                    if (this.guestErrors.name || this.guestErrors.email || this.guestErrors.phone) {
+                        if (e) e.preventDefault();
+                        return false;
+                    }
+                    return true;
+                },
+                async updateMaxRooms() {
+                    if (!this.checkIn || !this.checkOut) {
+                        this.maxRooms = initialMaxRooms;
                         return;
                     }
+                    try {
+                        const res = await fetch('/rooms/api/' + roomId + '/check-availability/?check_in=' + this.checkIn + '&check_out=' + this.checkOut + '&num_rooms=1');
+                        if (res.ok) {
+                            const data = await res.json();
+                            this.maxRooms = data.available_rooms;
+                            if (this.numRooms > this.maxRooms) {
+                                this.numRooms = Math.max(1, this.maxRooms);
+                            }
+                        }
+                    } catch(e) {
+                        console.error('Error updating max rooms:', e);
+                    }
+                },
+                get nights() {
+                    if (!this.checkIn || !this.checkOut) return 0;
+                    const start = new Date(this.checkIn);
+                    const end = new Date(this.checkOut);
+                    const diffTime = end - start;
+                    if (diffTime <= 0) return 0;
+                    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                },
+                get addonsTotal() {
+                    let total = 0;
+                    this.selectedAddons.forEach(id => {
+                        const addon = this.availableAddons.find(a => Number(a.id) === Number(id));
+                        if (addon) {
+                            if (addon.price_type === 'per_night') {
+                                total += addon.price * (this.nights || 1) * (this.numRooms || 1);
+                            } else if (addon.price_type === 'per_person') {
+                                const totalGuests = (parseInt(this.adults) || 1) + (parseInt(this.children) || 0);
+                                total += addon.price * totalGuests;
+                            } else if (addon.price_type === 'per_person_per_night') {
+                                const totalGuests = (parseInt(this.adults) || 1) + (parseInt(this.children) || 0);
+                                total += addon.price * totalGuests * (this.nights || 1);
+                            } else {
+                                total += addon.price;
+                            }
+                        }
+                    });
+                    return total;
+                },
+                get roomSubtotal() {
+                    return this.basePrice * (this.nights || 1) * (this.numRooms || 1);
+                },
+                get subtotal() {
+                    return (this.nights > 0 ? this.roomSubtotal : 0) + (this.selectedAddons.length > 0 ? this.addonsTotal : 0);
+                },
+                get tax() {
+                    return this.taxPercentage > 0 ? this.subtotal * (this.taxPercentage / 100) : 0;
+                },
+                get total() {
+                    return this.subtotal + this.tax;
+                },
+                validateDates() {
+                    this.errorMessage = '';
+                    if (!this.checkIn) {
+                        this.errorMessage = 'Please select an arrival date.';
+                        return false;
+                    }
+                    if (!this.checkOut) {
+                        this.errorMessage = 'Please select a departure date.';
+                        return false;
+                    }
+                    const start = new Date(this.checkIn);
+                    const end = new Date(this.checkOut);
+                    const today = new Date();
+                    today.setHours(0,0,0,0);
                     
-                    const formatDate = (d) => {
-                        const year = d.getFullYear();
-                        const month = String(d.getMonth() + 1).padStart(2, '0');
-                        const day = String(d.getDate()).padStart(2, '0');
-                        return `${year}-${month}-${day}`;
+                    if (isNaN(start.getTime())) {
+                        this.errorMessage = 'Please select a valid arrival date.';
+                        return false;
+                    }
+                    if (isNaN(end.getTime())) {
+                        this.errorMessage = 'Please select a valid departure date.';
+                        return false;
+                    }
+                    if (start < today) {
+                        this.errorMessage = 'Arrival date cannot be in the past.';
+                        return false;
+                    }
+                    if (end <= start) {
+                        this.errorMessage = 'Departure date must be at least one day after arrival date.';
+                        return false;
+                    }
+                    return true;
+                },
+                async submitReservation() {
+                    if (!this.validateDates()) return;
+                    this.checkingAvailability = true;
+                    this.errorMessage = '';
+                    try {
+                        const res = await fetch('/rooms/api/' + roomId + '/check-availability/?check_in=' + this.checkIn + '&check_out=' + this.checkOut + '&num_rooms=' + this.numRooms);
+                        if (!res.ok) {
+                            throw new Error('Error checking availability');
+                        }
+                        const data = await res.json();
+                        this.isAvailable = data.available;
+                        if (data.available) {
+                            this.showModal = true;
+                        } else if (data.available_rooms > 0) {
+                            this.errorMessage = 'Only ' + data.available_rooms + ' room' + (data.available_rooms === 1 ? '' : 's') + ' available for the selected dates.';
+                        } else {
+                            this.errorMessage = 'This room is not available for the selected dates. Please adjust your dates.';
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        this.showModal = true;
+                    } finally {
+                        this.checkingAvailability = false;
+                    }
+                },
+                init() {
+                    this.$watch('checkIn', () => this.updateMaxRooms());
+                    this.$watch('checkOut', () => this.updateMaxRooms());
+                    this.updateMaxRooms();
+
+                    const initPickers = () => {
+                        if (typeof AirDatepicker === 'undefined') {
+                            setTimeout(initPickers, 50);
+                            return;
+                        }
+                        
+                        const formatDate = (d) => {
+                            const year = d.getFullYear();
+                            const month = String(d.getMonth() + 1).padStart(2, '0');
+                            const day = String(d.getDate()).padStart(2, '0');
+                            return `${year}-${month}-${day}`;
+                        };
+                        
+                        const parseLocalDate = (str) => {
+                            if (!str) return undefined;
+                            const parts = str.split('-');
+                            if (parts.length === 3) {
+                                return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                            }
+                            return new Date(str);
+                        };
+
+                        fetch('/rooms/api/' + roomId + '/booked-dates/')
+                            .then(r => r.json())
+                            .then(data => {
+                                const booked = data.booked_dates || [];
+                                
+                                const checkInPicker = new AirDatepicker('#room_check_in', {
+                                    ...window.defaultAirDatepickerConfig,
+                                    minDate: new Date(),
+                                    selectedDates: this.checkIn ? [parseLocalDate(this.checkIn)] : undefined,
+                                    onRenderCell: ({date, cellType}) => {
+                                        if (cellType === 'day') {
+                                            const formatted = formatDate(date);
+                                            if (booked.includes(formatted)) {
+                                                return { disabled: true };
+                                            }
+                                        }
+                                    },
+                                    onSelect: ({date, formattedDate}) => {
+                                        this.checkIn = formattedDate || '';
+                                        if (checkOutPicker && date) {
+                                            checkOutPicker.update({
+                                                minDate: date
+                                            });
+                                        }
+                                    }
+                                });
+                                
+                                const checkOutPicker = new AirDatepicker('#room_check_out', {
+                                    ...window.defaultAirDatepickerConfig,
+                                    minDate: this.checkIn ? parseLocalDate(this.checkIn) : new Date(),
+                                    selectedDates: this.checkOut ? [parseLocalDate(this.checkOut)] : undefined,
+                                    onRenderCell: ({date, cellType}) => {
+                                        if (cellType === 'day') {
+                                            const formatted = formatDate(date);
+                                            if (booked.includes(formatted)) {
+                                                return { disabled: true };
+                                            }
+                                        }
+                                    },
+                                    onSelect: ({date, formattedDate}) => {
+                                        this.checkOut = formattedDate || '';
+                                    }
+                                });
+                            })
+                            .catch(err => console.error('Error loading booked dates:', err));
                     };
-                    
-                    fetch(`/rooms/api/{{ room.id }}/booked-dates/`)
-                        .then(r => r.json())
-                        .then(data => {
-                            const booked = data.booked_dates || [];
-                            
-                            const checkInPicker = new AirDatepicker('#room_check_in', {
-                                ...window.defaultAirDatepickerConfig,
-                                minDate: new Date(),
-                                selectedDates: this.checkIn ? [new Date(this.checkIn)] : undefined,
-                                onRenderCell: ({date, cellType}) => {
-                                    if (cellType === 'day') {
-                                        const formatted = formatDate(date);
-                                        if (booked.includes(formatted)) {
-                                            return { disabled: true };
-                                        }
-                                    }
-                                },
-                                onSelect: ({date, formattedDate}) => {
-                                    this.checkIn = formattedDate || '';
-                                    if (checkOutPicker && date) {
-                                        checkOutPicker.update({
-                                            minDate: date
-                                        });
-                                    }
-                                }
-                            });
-                            
-                            const checkOutPicker = new AirDatepicker('#room_check_out', {
-                                ...window.defaultAirDatepickerConfig,
-                                minDate: this.checkIn ? new Date(this.checkIn) : new Date(),
-                                selectedDates: this.checkOut ? [new Date(this.checkOut)] : undefined,
-                                onRenderCell: ({date, cellType}) => {
-                                    if (cellType === 'day') {
-                                        const formatted = formatDate(date);
-                                        if (booked.includes(formatted)) {
-                                            return { disabled: true };
-                                        }
-                                    }
-                                },
-                                onSelect: ({date, formattedDate}) => {
-                                    this.checkOut = formattedDate || '';
-                                }
-                            });
-                        })
-                        .catch(err => console.error('Error loading booked dates:', err));
-                };
-                initPickers();
-            }
-        }">
+                    initPickers();
+                }
+            };
+        }
+        </script>
+        <aside class="space-y-8 lg:col-span-1" x-data="roomBookingData()">
             <div class="rounded-2xl p-5 sm:p-6 border shadow-xl sticky top-20 lg:top-28"
                  :class="{
                      'bg-white border-gray-200': currentTheme === 'light',
@@ -390,47 +506,71 @@
                     <span class="text-xs uppercase opacity-75 font-semibold text-gray-500">Starting from</span>
                     <h3 class="font-luxury-title text-2xl font-extrabold mt-1" :class="{ 'text-luxuryGold-800': currentTheme === 'light', 'text-amber-250': currentTheme !== 'light' }">
                         <span>{{ room.currency.iso_code }} {{ room.current_price }}</span>
-                        {% if room.base_price != room.current_price %}
-                        <span class="line-through text-sm opacity-40 ml-1">{{ room.currency.iso_code }} {{ room.base_price }}</span>
+                        {% if room.base_price > room.current_price %}
+                        <span class="line-through text-sm opacity-40 ml-1.5">{{ room.currency.iso_code }} {{ room.base_price }}</span>
                         {% endif %}
                         <span class="text-sm font-normal opacity-75">/night</span>
                     </h3>
-                    {% if room.discount_price %}
-                    <p class="text-xs line-through opacity-50 mt-1">Was <span>{{ room.currency.iso_code }} {{ room.discount_price }}</span></p>
-                    {% endif %}
                     {% if room.active_seasonal %}
-                    <div class="mt-3 px-3 py-2 rounded-lg bg-green-500/10 border border-green-500/20 text-xs">
-                        <p class="font-bold text-green-600">🏷 {{ room.active_seasonal.name }}</p>
-                        <p class="opacity-70 mt-0.5">{{ room.active_seasonal.start_date|date:'M d' }} – {{ room.active_seasonal.end_date|date:'M d, Y' }}</p>
+                    <div class="mt-3 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs">
+                        <p class="font-bold text-amber-500">🏷️ Seasonal Offer: {{ room.active_seasonal.name }}</p>
+                        <p class="opacity-70 mt-0.5">{{ room.active_seasonal.start_date|date:'M d' }} – {{ room.active_seasonal.end_date|date:'M d, Y' }} ({{ room.currency.iso_code }} {{ room.active_seasonal.price_override }}/night)</p>
+                    </div>
+                    {% elif room.discount_price and room.base_price > room.discount_price %}
+                    <div class="mt-3 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs">
+                        <p class="font-bold text-emerald-400">🏷️ Special Discounted Rate Applied</p>
                     </div>
                     {% endif %}
+
                     {% if room.tax_percentage %}
                     <p class="text-[10px] opacity-75 mt-2">Prices include {{ room.tax_percentage }}% Local Taxes &amp; VAT</p>
                     {% endif %}
 
                     <!-- Live Price Summary Widget in Sidebar -->
-                    <div class="mt-4 pt-4 border-t border-gray-200/50" :style="{ borderColor: currentTheme !== 'light' ? '#92400e22' : '#e5e7eb' }" x-show="nights > 0">
+                    <div class="mt-4 pt-4 border-t border-gray-200/50 space-y-1.5" :style="{ borderColor: currentTheme !== 'light' ? '#92400e22' : '#e5e7eb' }" x-show="nights > 0">
                         <div class="flex justify-between text-xs opacity-75">
                             <span>Stay Duration:</span>
                             <span class="font-semibold" x-text="nights + (nights === 1 ? ' night' : ' nights')"></span>
                         </div>
-                        <div class="flex justify-between text-xs opacity-75 mt-1.5">
+                        <div class="flex justify-between text-xs opacity-75">
                              <span>Rooms:</span>
                              <span class="font-semibold" x-text="numRooms + (numRooms === 1 ? ' room' : ' rooms')"></span>
                         </div>
-                        <div class="flex justify-between text-xs opacity-75 mt-1.5">
+                        <div class="flex justify-between text-xs opacity-75">
+                             <span>Room Lodging:</span>
+                             <span class="font-semibold tabular-nums" x-text="roomCurrency + ' ' + roomSubtotal.toFixed(2)"></span>
+                        </div>
+
+                        <!-- Itemized Extras Breakdown -->
+                        <template x-if="selectedAddons.length > 0">
+                            <div class="pt-1.5 pb-1 space-y-1 border-t border-b border-dashed" :style="{ borderColor: currentTheme !== 'light' ? '#92400e22' : '#e5e7eb' }">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-luxuryGold-500 block">Add-on Extras:</span>
+                                <template x-for="id in selectedAddons" :key="'sidebar-widget-' + id">
+                                    <template x-if="availableAddons.find(a => Number(a.id) === Number(id))">
+                                        <div class="flex items-center justify-between text-[11px] opacity-90 pl-2 border-l-2 border-luxuryGold-400/60 gap-2">
+                                            <span class="truncate flex-1 min-w-0 font-medium" x-text="availableAddons.find(a => Number(a.id) === Number(id)).name"></span>
+                                            <span class="font-bold tabular-nums text-luxuryGold-500 shrink-0 ml-1" x-text="'+ ' + roomCurrency + ' ' + getAddonCalculatedPrice(id)"></span>
+                                        </div>
+
+
+                                    </template>
+                                </template>
+                            </div>
+                        </template>
+
+                        <div class="flex justify-between text-xs font-semibold pt-1">
                              <span>Subtotal:</span>
-                             <span class="font-semibold tabular-nums" x-text="roomCurrency + ' ' + subtotal.toFixed(2)"></span>
+                             <span class="tabular-nums" x-text="roomCurrency + ' ' + subtotal.toFixed(2)"></span>
                         </div>
                         <template x-if="taxPercentage > 0">
-                            <div class="flex justify-between text-xs opacity-75 mt-1.5">
+                            <div class="flex justify-between text-xs opacity-75">
                                  <span>Tax (<span x-text="taxPercentage"></span>%)</span>
                                  <span class="font-semibold tabular-nums" x-text="roomCurrency + ' ' + tax.toFixed(2)"></span>
                             </div>
                         </template>
-                        <div class="flex justify-between text-sm font-bold text-luxuryGold-500 mt-3 pt-2.5 border-t border-dashed" :style="{ borderColor: currentTheme !== 'light' ? '#92400e22' : '#e5e7eb' }">
+                        <div class="flex justify-between text-sm font-bold text-luxuryGold-500 mt-2 pt-2 border-t border-dashed" :style="{ borderColor: currentTheme !== 'light' ? '#92400e22' : '#e5e7eb' }">
                              <span>Est. Total{% if room.tax_percentage %} (incl. tax){% endif %}:</span>
-                             <span class="tabular-nums" x-text="roomCurrency + ' ' + total.toFixed(2)"></span>
+                             <span class="tabular-nums font-luxury-title text-base" x-text="roomCurrency + ' ' + total.toFixed(2)"></span>
                         </div>
                     </div>
                 </div>
@@ -490,6 +630,42 @@
                         </div>
                     </div>
 
+                    <!-- Add-ons Selector Section with Toggle Switch Controls -->
+                    <template x-if="availableAddons.length > 0">
+                        <div class="space-y-2 pt-3 border-t border-gray-200/50" :style="{ borderColor: currentTheme !== 'light' ? '#92400e22' : '#e5e7eb' }">
+                            <label class="block text-[10px] font-semibold uppercase tracking-wider opacity-80 mb-1 flex items-center justify-between">
+                                <span class="flex items-center gap-1"><i class="fa-solid fa-concierge-bell text-luxuryGold-500"></i> Add-on Services</span>
+                                <span class="text-[9px] opacity-60">Optional Extras</span>
+                            </label>
+                            <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                                <template x-for="addon in availableAddons" :key="addon.id">
+                                    <div class="flex items-center justify-between p-3 rounded-xl border transition-all duration-200 cursor-pointer text-xs gap-3 select-none"
+                                         :class="isAddonSelected(addon.id) ? (currentTheme === 'light' ? 'bg-luxuryGold-50/80 border-luxuryGold-500 shadow-sm' : 'bg-luxuryGold-500/20 border-luxuryGold-400 shadow-sm') : (currentTheme === 'light' ? 'bg-neutral-50 border-neutral-200 hover:bg-neutral-100/80' : 'bg-neutral-900/40 border-neutral-800 hover:bg-neutral-800/40')"
+                                         @click="toggleAddon(addon.id)">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-start justify-between gap-2">
+                                                <span x-text="addon.name" class="font-bold text-neutral-900 dark:text-neutral-100 text-xs break-words leading-snug"></span>
+                                                <span class="text-luxuryGold-600 dark:text-luxuryGold-400 shrink-0 ml-1 font-extrabold text-xs tabular-nums" x-text="roomCurrency + ' ' + addon.price.toFixed(2)"></span>
+                                            </div>
+                                            <p x-show="addon.description" x-text="addon.description" class="text-[10px] text-neutral-500 dark:text-neutral-400 break-words leading-normal mt-0.5"></p>
+                                            <p class="text-[9px] text-neutral-400 font-semibold uppercase tracking-wider mt-1" x-text="addon.price_type === 'per_night' ? 'Per Room / Per Night' : (addon.price_type === 'per_person' ? 'Per Guest' : (addon.price_type === 'per_person_per_night' ? 'Per Guest / Per Night' : 'Per Room Booking'))"></p>
+                                        </div>
+
+                                        <!-- Smooth Animated Toggle Switch -->
+                                        <div class="relative inline-flex items-center cursor-pointer shrink-0 p-0.5 w-11 h-6 rounded-full transition-colors duration-300 ease-in-out shadow-inner"
+                                             :class="isAddonSelected(addon.id) ? 'bg-luxuryGold-500' : (currentTheme === 'light' ? 'bg-neutral-300' : 'bg-neutral-700')">
+                                            <div class="w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-300 ease-in-out"
+                                                 :style="{ transform: isAddonSelected(addon.id) ? 'translateX(22px)' : 'translateX(2px)' }">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </template>
+
+                            </div>
+                        </div>
+                    </template>
+
                     <div x-show="errorMessage" class="p-3 rounded-lg border border-red-500/20 bg-red-500/10 text-red-500 text-xs mt-2" style="display: none;">
                         <p x-text="errorMessage"></p>
                     </div>
@@ -533,7 +709,6 @@
                                     <h4 class="font-luxury-title text-sm sm:text-base font-semibold border-b pb-2 mb-2"
                                         :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/20': currentTheme !== 'light' }">Booking Summary</h4>
 
-                                    <!-- Room name (truncated if long) -->
                                     <div class="flex items-start justify-between gap-2">
                                         <span class="opacity-70 shrink-0">Room</span>
                                         <span class="font-semibold text-right truncate max-w-[150px] sm:max-w-[180px]" title="{{ room.title }}">{{ room.title }}</span>
@@ -555,8 +730,8 @@
                                          :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
                                         <span class="opacity-70 shrink-0">Guests</span>
                                         <span class="font-semibold tabular-nums">
-                                            <span x-text="adults"></span>A
-                                            <span x-show="children > 0">, <span x-text="children"></span>C</span>
+                                            <span x-text="adults"></span>Adult(s)
+                                            <span x-show="children > 0">, <span x-text="children"></span>Child(ren)</span>
                                         </span>
                                     </div>
                                     <div class="flex items-center justify-between gap-2">
@@ -565,12 +740,27 @@
                                     </div>
 
                                     <div class="flex items-center justify-between gap-2">
-                                        <span class="opacity-70 shrink-0">Rate/night</span>
-                                        <span class="tabular-nums" x-text="roomCurrency + ' ' + basePrice.toFixed(2) + ' / room'"></span>
+                                        <span class="opacity-70 shrink-0">Room Lodging</span>
+                                        <span class="tabular-nums font-semibold" x-text="roomCurrency + ' ' + roomSubtotal.toFixed(2)"></span>
                                     </div>
+
+                                    <template x-if="selectedAddons.length > 0">
+                                        <div class="pt-1.5 pb-1 space-y-1 border-t border-b border-dashed" :style="{ borderColor: currentTheme !== 'light' ? '#92400e22' : '#e5e7eb' }">
+                                            <span class="text-[10px] font-bold uppercase tracking-wider text-luxuryGold-500 block">Selected Extras:</span>
+                                            <template x-for="id in selectedAddons" :key="'modal-widget-' + id">
+                                                <template x-if="availableAddons.find(a => Number(a.id) === Number(id))">
+                                                    <div class="flex items-center justify-between text-[11px] opacity-90 pl-2 border-l-2 border-luxuryGold-400/60 gap-2">
+                                                        <span class="flex-1 min-w-0 font-medium break-words" x-text="availableAddons.find(a => Number(a.id) === Number(id)).name"></span>
+                                                        <span class="font-bold tabular-nums text-luxuryGold-500 shrink-0 ml-1" x-text="'+ ' + roomCurrency + ' ' + getAddonCalculatedPrice(id)"></span>
+                                                    </div>
+                                                </template>
+                                            </template>
+                                        </div>
+                                    </template>
+
                                     <div class="flex items-center justify-between gap-2">
                                         <span class="opacity-70 shrink-0">Subtotal</span>
-                                        <span class="tabular-nums" x-text="roomCurrency + ' ' + subtotal.toFixed(2)"></span>
+                                        <span class="tabular-nums font-semibold" x-text="roomCurrency + ' ' + subtotal.toFixed(2)"></span>
                                     </div>
                                     <template x-if="taxPercentage > 0">
                                         <div class="flex items-center justify-between gap-2">
@@ -594,13 +784,51 @@
                                     </div>
                                     <form method="POST" action="{% url 'booking:create_booking' room.id %}" @submit="validateGuestForm($event)" class="space-y-4 sm:space-y-6" novalidate>
                                         {% csrf_token %}
-                                        <!-- Hidden stay inputs -->
+                                        <!-- Hidden stay & addon inputs -->
                                         <input type="hidden" name="check_in" :value="checkIn">
                                         <input type="hidden" name="check_out" :value="checkOut">
                                         <input type="hidden" name="adults" :value="adults">
                                         <input type="hidden" name="children" :value="children">
                                         <input type="hidden" name="num_rooms" :value="numRooms">
-                                        
+                                        <template x-for="id in selectedAddons" :key="'modal-hidden-' + id">
+                                            <input type="hidden" name="selected_addons" :value="id">
+                                        </template>
+
+                                        <!-- Add-on Services Selection inside Modal -->
+                                        <template x-if="availableAddons.length > 0">
+                                            <div class="space-y-2 p-3 sm:p-4 rounded-xl border" :class="{ 'bg-luxuryGold-50/50 border-luxuryGold-200': currentTheme === 'light', 'bg-black/20 border-brand-primary/30': currentTheme !== 'light' }">
+                                                <label class="block text-xs font-semibold uppercase tracking-wider opacity-90 flex items-center justify-between">
+                                                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-concierge-bell text-luxuryGold-500"></i> Add-on Extras &amp; Services</span>
+                                                    <span class="text-[10px] opacity-60">Toggle Enhancements</span>
+                                                </label>
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
+                                                    <template x-for="addon in availableAddons" :key="'modal-list-' + addon.id">
+                                                        <div class="flex items-center justify-between p-3 rounded-xl border transition-all duration-200 cursor-pointer text-xs gap-3 select-none"
+                                                             :class="isAddonSelected(addon.id) ? (currentTheme === 'light' ? 'bg-luxuryGold-50/80 border-luxuryGold-500 shadow-sm' : 'bg-luxuryGold-500/20 border-luxuryGold-400 shadow-sm') : (currentTheme === 'light' ? 'bg-white border-neutral-200 hover:bg-neutral-50' : 'bg-black/30 border-neutral-800 hover:bg-black/40')"
+                                                             @click="toggleAddon(addon.id)">
+                                                            <div class="flex-1 min-w-0">
+                                                                <div class="flex items-center justify-between gap-2">
+                                                                    <span x-text="addon.name" class="truncate font-bold text-neutral-900 dark:text-neutral-100 text-xs"></span>
+                                                                    <span class="text-luxuryGold-600 dark:text-luxuryGold-400 shrink-0 ml-1 font-extrabold text-xs tabular-nums" x-text="roomCurrency + ' ' + addon.price.toFixed(2)"></span>
+                                                                </div>
+                                                                <p class="text-[9px] text-neutral-400 font-semibold uppercase tracking-wider mt-0.5" x-text="addon.price_type === 'per_night' ? 'Per Room / Per Night' : (addon.price_type === 'per_person' ? 'Per Guest' : 'Per Room Booking')"></p>
+                                                            </div>
+
+                                                            <!-- Smooth Animated Toggle Switch -->
+                                                            <div class="relative inline-flex items-center cursor-pointer shrink-0 p-0.5 w-11 h-6 rounded-full transition-colors duration-300 ease-in-out shadow-inner"
+                                                                 :class="isAddonSelected(addon.id) ? 'bg-luxuryGold-500' : (currentTheme === 'light' ? 'bg-neutral-300' : 'bg-neutral-700')">
+                                                                <div class="w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-300 ease-in-out"
+                                                                     :style="{ transform: isAddonSelected(addon.id) ? 'translateX(22px)' : 'translateX(2px)' }">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </template>
+
+                                                </div>
+                                            </div>
+                                        </template>
+
                                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                                             <div>
                                                 <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 opacity-80">Full Name *</label>
@@ -688,6 +916,8 @@
                     </div>
                 </template>
 
+        </aside>
     </div>
 </section>
 {% endblock %}
+

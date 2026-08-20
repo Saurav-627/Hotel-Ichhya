@@ -37,7 +37,7 @@ def submit_inquiry_ajax(request):
             )
 
     # Save inquiry to database
-    ContactInquiry.objects.create(
+    inquiry = ContactInquiry.objects.create(
         name=name,
         email=email,
         phone=phone,
@@ -45,6 +45,20 @@ def submit_inquiry_ajax(request):
         message=message,
         category=category
     )
+
+    try:
+        from admin_dashboard.models.notification import create_admin_notification
+        from django.urls import reverse
+        from ..utils import send_inquiry_notification_email
+        create_admin_notification(
+            notification_type='inquiry_received',
+            title=f"New Contact Inquiry from {name}",
+            message=f"{subject}: {message[:100]}...",
+            link_url=reverse('admin_dashboard:contact_inquiry_detail', kwargs={'pk': inquiry.pk})
+        )
+        send_inquiry_notification_email('contact', inquiry)
+    except Exception:
+        pass
 
     import json
     response_html = (

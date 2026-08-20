@@ -52,6 +52,7 @@ class HotelSettings(models.Model):
     # Contact Info
     contact_phone = models.CharField(max_length=20, default="+977-1-4XXXXXX")
     contact_email = models.EmailField(default="info@hotelichchha.com")
+    inquiry_notification_email = models.EmailField(default="info@hotelichchha.com", help_text="Email address to receive instant notifications for new guest inquiries and contact queries")
     address = models.CharField(max_length=255, default="Bara, Nepal")
     google_maps_iframe = models.TextField(blank=True, null=True, help_text="Google Maps HTML embed iframe")
 

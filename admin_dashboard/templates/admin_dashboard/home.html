@@ -22,7 +22,7 @@
                 {% endfor %}
             {% else %}
                 <p class="text-2xl font-bold text-neutral-900 dark:text-neutral-100 font-serif mt-2">
-                    NPR 0.00
+                    {{ active_currency.symbol|default:"NPR" }} 0.00
                 </p>
             {% endif %}
         </div>
@@ -114,16 +114,16 @@
         </div>
     </div>
 
-    <!-- Event inquiries -->
-    <div class="custom-card rounded-2xl p-5 flex items-center justify-between">
+    <!-- Event/Contact inquiries -->
+    <a href="{% url 'admin_dashboard:contact_dashboard' %}?tab=inquiries" class="custom-card rounded-2xl p-5 flex items-center justify-between hover:border-luxuryGold-500/40 transition group">
         <div>
-            <p class="text-xs text-neutral-400 uppercase font-semibold">Pending Event Inquiries</p>
-            <p class="text-xl font-bold text-neutral-900 dark:text-neutral-100 mt-1">{{ pending_event_inquiries_count }}</p>
+            <p class="text-xs text-neutral-400 uppercase font-semibold">New Unread Inquiries</p>
+            <p class="text-xl font-bold text-neutral-900 dark:text-neutral-100 mt-1">{{ unread_inquiries_count }}</p>
         </div>
-        <div class="h-10 w-10 bg-purple-500/10 text-purple-500 rounded-lg flex items-center justify-center">
+        <div class="h-10 w-10 bg-purple-500/10 text-purple-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition">
             <i class="fa-solid fa-envelope-open-text"></i>
         </div>
-    </div>
+    </a>
 </div>
 
 <!-- Main body grid split -->
@@ -231,6 +231,231 @@
             </div>
             {% else %}
             <p class="text-sm text-neutral-500 py-4 text-center">No guests checking in today.</p>
+            {% endif %}
+        </div>
+
+        <!-- CARD 1: Contact Us Queries -->
+        <div class="custom-card rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-neutral-200 dark:border-neutral-800">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-envelope"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-semibold text-neutral-900 dark:text-neutral-100 font-serif">Contact Us Queries</h3>
+                        <p class="text-xs text-neutral-500">General website &amp; room contact submissions</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    {% if unread_contact_count > 0 %}
+                    <span class="px-2.5 py-1 text-[11px] font-bold rounded-full bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                        {{ unread_contact_count }} Unread
+                    </span>
+                    {% endif %}
+                    <a href="{% url 'admin_dashboard:contact_dashboard' %}?tab=inquiries" class="text-xs font-bold text-luxuryGold-500 hover:underline">
+                        View All &rarr;
+                    </a>
+                </div>
+            </div>
+
+            {% if recent_contact_inquiries %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-xs uppercase text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 pb-2">
+                            <th class="py-2.5 font-semibold">Guest</th>
+                            <th class="py-2.5 font-semibold">Category</th>
+                            <th class="py-2.5 font-semibold">Subject &amp; Message</th>
+                            <th class="py-2.5 font-semibold">Status</th>
+                            <th class="py-2.5 font-semibold text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-neutral-200 dark:divide-neutral-800 text-sm">
+                        {% for inq in recent_contact_inquiries %}
+                        <tr class="hover:bg-neutral-50/50 dark:hover:bg-neutral-900/30 transition">
+                            <td class="py-3">
+                                <p class="font-semibold text-neutral-900 dark:text-neutral-200 text-xs">{{ inq.name }}</p>
+                                <p class="text-[11px] text-neutral-400">{{ inq.email }}</p>
+                            </td>
+                            <td class="py-3 whitespace-nowrap">
+                                <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                                    {{ inq.get_category_display }}
+                                </span>
+                            </td>
+                            <td class="py-3">
+                                <p class="font-semibold text-neutral-800 dark:text-neutral-200 text-xs line-clamp-1">{{ inq.subject }}</p>
+                                <p class="text-[11px] text-neutral-400 line-clamp-1 mt-0.5">{{ inq.message }}</p>
+                            </td>
+                            <td class="py-3 whitespace-nowrap">
+                                {% if not inq.is_read %}
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-500">● Unread</span>
+                                {% else %}
+                                <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-neutral-500/10 text-neutral-400">Read</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 text-right whitespace-nowrap">
+                                <a href="{% url 'admin_dashboard:contact_inquiry_detail' inq.id %}" 
+                                   class="px-3 py-1.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-lg text-xs transition-colors shadow-sm inline-block">
+                                    Details
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-xs text-neutral-500 py-4 text-center">No contact inquiries received yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- CARD 2: Event & Banquets Inquiries -->
+        <div class="custom-card rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-neutral-200 dark:border-neutral-800">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-champagne-glasses"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-semibold text-neutral-900 dark:text-neutral-100 font-serif">Event &amp; Banquets Inquiries</h3>
+                        <p class="text-xs text-neutral-500">Hall reservations, weddings, &amp; conference requests</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    {% if unread_event_count > 0 %}
+                    <span class="px-2.5 py-1 text-[11px] font-bold rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                        {{ unread_event_count }} Pending
+                    </span>
+                    {% endif %}
+                    <a href="{% url 'admin_dashboard:conference_dashboard' %}?tab=inquiries" class="text-xs font-bold text-luxuryGold-500 hover:underline">
+                        View All &rarr;
+                    </a>
+                </div>
+            </div>
+
+            {% if recent_event_inquiries %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-xs uppercase text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 pb-2">
+                            <th class="py-2.5 font-semibold">Organizer</th>
+                            <th class="py-2.5 font-semibold">Target Venue</th>
+                            <th class="py-2.5 font-semibold">Event Date &amp; Guests</th>
+                            <th class="py-2.5 font-semibold">Status</th>
+                            <th class="py-2.5 font-semibold text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-neutral-200 dark:divide-neutral-800 text-sm">
+                        {% for inq in recent_event_inquiries %}
+                        <tr class="hover:bg-neutral-50/50 dark:hover:bg-neutral-900/30 transition">
+                            <td class="py-3">
+                                <p class="font-semibold text-neutral-900 dark:text-neutral-200 text-xs">{{ inq.name }}</p>
+                                <p class="text-[11px] text-neutral-400">{{ inq.phone|default:inq.email }}</p>
+                            </td>
+                            <td class="py-3 whitespace-nowrap">
+                                <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-500/10 text-purple-500 border border-purple-500/20">
+                                    {{ inq.venue.name }}
+                                </span>
+                            </td>
+                            <td class="py-3 text-xs text-neutral-700 dark:text-neutral-300">
+                                <span class="font-semibold">{{ inq.event_date|date:"M d, Y" }}</span>
+                                <span class="text-[11px] text-neutral-400 block">👥 {{ inq.guest_count }} Guests</span>
+                            </td>
+                            <td class="py-3 whitespace-nowrap">
+                                {% if inq.status == 'pending' %}
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-500">Pending</span>
+                                {% else %}
+                                <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-500">{{ inq.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 text-right whitespace-nowrap">
+                                <a href="{% url 'admin_dashboard:conference_dashboard' %}?tab=inquiries" 
+                                   class="px-3 py-1.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-lg text-xs transition-colors shadow-sm inline-block">
+                                    Manage
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-xs text-neutral-500 py-4 text-center">No event inquiries received yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- CARD 3: Dining & Table Reservations -->
+        <div class="custom-card rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-neutral-200 dark:border-neutral-800">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-pink-500/10 text-pink-500 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-utensils"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-semibold text-neutral-900 dark:text-neutral-100 font-serif">Dining &amp; Table Reservations</h3>
+                        <p class="text-xs text-neutral-500">Restaurant table bookings &amp; dining requests</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    {% if unread_dining_count > 0 %}
+                    <span class="px-2.5 py-1 text-[11px] font-bold rounded-full bg-pink-500/10 text-pink-500 border border-pink-500/20">
+                        {{ unread_dining_count }} Pending
+                    </span>
+                    {% endif %}
+                    <a href="{% url 'admin_dashboard:dining_dashboard' %}?tab=reservations" class="text-xs font-bold text-luxuryGold-500 hover:underline">
+                        View All &rarr;
+                    </a>
+                </div>
+            </div>
+
+            {% if recent_dining_reservations %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-xs uppercase text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 pb-2">
+                            <th class="py-2.5 font-semibold">Guest Name</th>
+                            <th class="py-2.5 font-semibold">Dining Venue</th>
+                            <th class="py-2.5 font-semibold">Date &amp; Time</th>
+                            <th class="py-2.5 font-semibold">Status</th>
+                            <th class="py-2.5 font-semibold text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-neutral-200 dark:divide-neutral-800 text-sm">
+                        {% for res in recent_dining_reservations %}
+                        <tr class="hover:bg-neutral-50/50 dark:hover:bg-neutral-900/30 transition">
+                            <td class="py-3">
+                                <p class="font-semibold text-neutral-900 dark:text-neutral-200 text-xs">{{ res.name }}</p>
+                                <p class="text-[11px] text-neutral-400">{{ res.phone|default:res.email }}</p>
+                            </td>
+                            <td class="py-3 whitespace-nowrap">
+                                <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-pink-500/10 text-pink-500 border border-purple-500/20">
+                                    {{ res.venue.name }}
+                                </span>
+                            </td>
+                            <td class="py-3 text-xs text-neutral-700 dark:text-neutral-300">
+                                <span class="font-semibold">{{ res.date|date:"M d, Y" }} @ {{ res.time|time:"g:i A" }}</span>
+                                <span class="text-[11px] text-neutral-400 block">👥 {{ res.guests }} Guests</span>
+                            </td>
+                            <td class="py-3 whitespace-nowrap">
+                                {% if res.status == 'pending' %}
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-500">Pending</span>
+                                {% else %}
+                                <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-500">{{ res.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 text-right whitespace-nowrap">
+                                <a href="{% url 'admin_dashboard:dining_dashboard' %}?tab=reservations" 
+                                   class="px-3 py-1.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-lg text-xs transition-colors shadow-sm inline-block">
+                                    Manage
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-xs text-neutral-500 py-4 text-center">No table reservations received yet.</p>
             {% endif %}
         </div>
 

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subject }} — {{ hotel_settings.site_name|default:"Hotel Ichchha" }}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F6F4EF; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #44403C;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F6F4EF; padding: 40px 0;">
+        <tr>
+            <td align="center">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #FFFFFF; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); border: 1px solid #E6DFD3;">
+                    <!-- Header -->
+                    <tr>
+                        <td align="center" style="background: linear-gradient(135deg, #1C1917 0%, #292524 100%); padding: 36px 30px; text-align: center;">
+                            {% if logo_url %}
+                            <img src="{{ logo_url }}" alt="Logo" style="max-height: 75px; width: auto; max-width: 240px; display: block; margin: 0 auto 14px auto; object-fit: contain;">
+                            {% endif %}
+                            <h1 style="color: #FFFFFF; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 1px; text-transform: uppercase;">
+                                {{ hotel_settings.site_name|default:"Hotel Ichchha" }}
+                            </h1>
+                            <p style="color: #D3AA5E; font-size: 11px; font-weight: 600; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 2px;">
+                                Official Announcement
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 36px 36px 28px 36px;">
+                            <h2 style="color: #9A6419; font-size: 20px; font-weight: 800; margin: 0 0 16px 0;">
+                                {{ subject }}
+                            </h2>
+                            <div style="color: #44403C; font-size: 15px; line-height: 1.7; margin-bottom: 28px;">
+                                {{ message|linebreaks }}
+                            </div>
+                            <div style="text-align: center; margin: 28px 0 20px 0;">
+                                <a href="{{ site_url }}" target="_blank" style="background: linear-gradient(135deg, #C59B27 0%, #9A6419 100%); color: #FFFFFF; text-decoration: none; padding: 14px 32px; border-radius: 50px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; display: inline-block; box-shadow: 0 6px 18px rgba(154, 100, 25, 0.25);">
+                                    Visit Hotel Ichchha
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #FAF8F5; padding: 24px 30px; border-top: 1px solid #E7E5E4; text-align: center;">
+                            <p style="color: #78716C; font-size: 12px; margin: 0;">
+                                &copy; {% now "Y" %} {{ hotel_settings.site_name|default:"Hotel Ichchha" }} · All Rights Reserved.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

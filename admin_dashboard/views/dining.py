@@ -19,15 +19,23 @@ DiningImageFormSet = inlineformset_factory(
 
 class DiningDashboardView(StaffRequiredMixin, View):
     def get(self, request):
+        from django.core.paginator import Paginator
         # pyrefly: ignore [missing-attribute]
-        venues = DiningVenue.objects.all()
+        venues_qs = DiningVenue.objects.all().order_by('id')
         # pyrefly: ignore [missing-attribute]
-        reservations = DiningReservation.objects.all().select_related('venue')
+        reservations_qs = DiningReservation.objects.all().select_related('venue').order_by('-date', '-time')
         active_tab = request.GET.get('tab', 'venues')
+        page_number = request.GET.get('page', 1)
+
+        venues_paginator = Paginator(venues_qs, 10)
+        venues_page = venues_paginator.get_page(page_number if active_tab == 'venues' else 1)
+
+        reservations_paginator = Paginator(reservations_qs, 10)
+        reservations_page = reservations_paginator.get_page(page_number if active_tab == 'reservations' else 1)
 
         return render(request, 'admin_dashboard/dining/dashboard.html', {
-            'venues': venues,
-            'reservations': reservations,
+            'venues': venues_page,
+            'reservations': reservations_page,
             'active_tab': active_tab,
         })
 
@@ -111,4 +119,21 @@ class DiningReservationUpdateStatusView(StaffRequiredMixin, View):
             messages.success(request, f"Dining reservation updated to {status.capitalize()}.")
         else:
             messages.error(request, "Invalid status choice.")
+        return redirect(reverse_lazy('admin_dashboard:dining_dashboard') + "?tab=reservations")
+
+
+class DiningReservationDeleteView(StaffRequiredMixin, DeleteView):
+    model = DiningReservation
+    template_name = 'admin_dashboard/confirm_delete.html'
+
+    def get_success_url(self):
+        messages.success(self.request, "Dining reservation cleared successfully.")
+        return reverse_lazy('admin_dashboard:dining_dashboard') + "?tab=reservations"
+
+
+class ClearAllDiningReservationsView(StaffRequiredMixin, View):
+    def post(self, request):
+        count = DiningReservation.objects.count()
+        DiningReservation.objects.all().delete()
+        messages.success(request, f"Cleared all {count} dining reservation record(s).")
         return redirect(reverse_lazy('admin_dashboard:dining_dashboard') + "?tab=reservations")

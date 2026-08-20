@@ -1,0 +1,12 @@
+{
+  "name": "hotel-ichchha",
+  "version": "1.0.0",
+  "description": "Hotel Ichchha Platform",
+  "scripts": {
+    "build:css": "npx tailwindcss -i static/css/input.css -o static/css/main.bundle.css --minify",
+    "watch:css": "npx tailwindcss -i static/css/input.css -o static/css/main.bundle.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

@@ -192,6 +192,16 @@ class DashboardHomeView(StaffRequiredMixin, TemplateView):
         # Sort activities by time desc
         activities = sorted(activities, key=lambda x: x['time'], reverse=True)[:8]
 
+        # 3 Separate Inquiry Lists & Counts
+        recent_contact_inquiries = ContactInquiry.objects.all()[:5]
+        recent_event_inquiries = EventInquiry.objects.all().select_related('venue')[:5]
+        recent_dining_reservations = DiningReservation.objects.all().select_related('venue')[:5]
+
+        unread_contact_count = ContactInquiry.objects.filter(is_read=False).count()
+        unread_event_count = EventInquiry.objects.filter(status='pending').count()
+        unread_dining_count = DiningReservation.objects.filter(status='pending').count()
+        unread_inquiries_count = unread_contact_count + unread_event_count + unread_dining_count
+
         # Put everything into context
         context.update({
             'today_checkins_count': today_checkins.count(),
@@ -217,6 +227,16 @@ class DashboardHomeView(StaffRequiredMixin, TemplateView):
             
             'pending_event_inquiries_count': pending_event_inquiries.count(),
             'contact_messages_today_count': contact_messages_today.count(),
+            'unread_inquiries_count': unread_inquiries_count,
+            'unread_contact_count': unread_contact_count,
+            'unread_event_count': unread_event_count,
+            'unread_dining_count': unread_dining_count,
+            
+            # 3 Separate Inquiry Datasets
+            'recent_contact_inquiries': recent_contact_inquiries,
+            'recent_event_inquiries': recent_event_inquiries,
+            'recent_dining_reservations': recent_dining_reservations,
+
             'coupon_usage_count': coupon_usage_count,
             
             # Chart Data

@@ -76,8 +76,15 @@
                         {{ settings_form.contact_phone }}
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Contact Email</label>
+                        <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Public Contact Email</label>
                         {{ settings_form.contact_email }}
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
+                            Inquiry &amp; Admin Notification Email 
+                            <span class="text-[10px] text-luxuryGold-500 font-normal tracking-normal block mt-0.5">(Instant email alerts for contact queries &amp; event inquiries will be delivered to this address)</span>
+                        </label>
+                        {{ settings_form.inquiry_notification_email }}
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Physical Location Address</label>

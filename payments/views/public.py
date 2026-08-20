@@ -27,17 +27,9 @@ def process_payment(request, booking_uid, gateway):
     # Fetch payment processor metadata
     processor_meta = PaymentProcessor.objects.filter(code=gateway, is_published=True).first()
 
-    taxable_amount = booking.subtotal - booking.discount
-    tax_amount = Decimal('0.00')
-    if processor_meta and processor_meta.apply_tax:
-        tax_pct = Decimal(str(booking.room.tax_percentage or 0))
-        tax_amount = taxable_amount * (tax_pct / Decimal('100.00'))
-        booking.tax = tax_amount
-        booking.total = taxable_amount + tax_amount
-    else:
-        booking.tax = Decimal('0.00')
-        booking.total = taxable_amount
-    booking.save(update_fields=['tax', 'total'])
+    should_apply_tax = bool(processor_meta and processor_meta.apply_tax)
+    booking.calculate_and_update_totals(apply_tax=should_apply_tax)
+    tax_amount = booking.tax
 
     # Determine currency
     currency_obj = None
@@ -160,6 +152,13 @@ def payment_callback(request, payment_id):
             booking.status = 'confirmed'
             booking.save(update_fields=['status'])
 
+            # Send Invoice & Receipt Email upon payment success
+            try:
+                from core.services.email_service import send_booking_invoice_email
+                send_booking_invoice_email(booking, payment=payment, request=request)
+            except Exception as e:
+                logger.error(f"Failed to send invoice email after Stripe payment: {e}")
+
         message = f"Payment of {booking.currency_code} {payment.amount} successful via Stripe!"
         return render(request, 'payments/success.html', {'booking': booking, 'payment': payment, 'message': message})
 
@@ -205,8 +204,16 @@ def payment_callback(request, payment_id):
                 booking.status = 'confirmed'
                 booking.save(update_fields=['status'])
 
+            # Send Invoice & Receipt Email upon payment success
+            try:
+                from core.services.email_service import send_booking_invoice_email
+                send_booking_invoice_email(booking, payment=payment, request=request)
+            except Exception as e:
+                logger.error(f"Failed to send invoice email after {gateway} payment: {e}")
+
             message = f"Payment of {booking.currency_code} {payment.amount} successful via {gateway.upper()}!"
             return render(request, 'payments/success.html', {'booking': booking, 'payment': payment, 'message': message})
+
 
         elif validation_result.status == PaymentValidationResult.Status.PENDING:
             payment.status = 'pending'

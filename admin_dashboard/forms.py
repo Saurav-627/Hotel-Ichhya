@@ -12,7 +12,7 @@ from rooms.models.room_facility import RoomFacility
 from rooms.models.room_policy import RoomPolicy
 from rooms.models.room_seasonal_price import RoomSeasonalPrice
 from booking.models.booking import Booking
-from booking.models.coupon import Coupon
+from booking.models.coupon import Coupon, CouponMinSpend
 from dining.models.venue import DiningVenue
 from dining.models.reservation import DiningReservation
 from dining.models.venue_image import DiningVenueImage
@@ -123,7 +123,8 @@ class RoomBasePriceForm(TailwindFormMixin, forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['currency'].required = False
         self.fields['base_price'].required = False
-        self.fields['currency'].queryset = Currency.objects.filter(is_published=True)
+        self.fields['currency'].queryset = Currency.objects.filter(is_published=True).order_by('sequence', 'id')
+        self.fields['currency'].empty_label = "— Select Currency —"
 
     def clean(self):
         cleaned_data = super().clean()
@@ -166,17 +167,8 @@ class RoomPolicyForm(TailwindFormMixin, forms.ModelForm):
         model = RoomPolicy
         fields = '__all__'
 
-class CurrencyChoiceField(forms.ModelChoiceField):
-    def label_from_instance(self, obj):
-        return f"{obj.iso_code} — {obj.name}"
 
 class RoomPriceForm(TailwindFormMixin, forms.ModelForm):
-    currency = CurrencyChoiceField(
-        queryset=Currency.objects.all().order_by('sequence', 'name'),
-        required=False,
-        empty_label="— All Currencies (wildcard) —",
-        help_text="Select a specific currency this override applies to, or leave blank to apply to all.",
-    )
     start_date = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date'}),
         help_text="Season start date",
@@ -190,6 +182,12 @@ class RoomPriceForm(TailwindFormMixin, forms.ModelForm):
         model = RoomSeasonalPrice
         fields = '__all__'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['currency'].queryset = Currency.objects.filter(is_published=True).order_by('sequence', 'id')
+        self.fields['currency'].empty_label = "— All Currencies (wildcard) —"
+        self.fields['currency'].required = False
+
 
 class BookingForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
@@ -197,9 +195,30 @@ class BookingForm(TailwindFormMixin, forms.ModelForm):
         fields = '__all__'
 
 class CouponForm(TailwindFormMixin, forms.ModelForm):
+    valid_from = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'air-datepicker-from'}),
+        help_text="Start date & time for this promotional code"
+    )
+    valid_to = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'air-datepicker-to'}),
+        help_text="Expiry date & time for this promotional code"
+    )
+
     class Meta:
         model = Coupon
         fields = '__all__'
+
+
+class CouponMinSpendForm(TailwindFormMixin, forms.ModelForm):
+    class Meta:
+        model = CouponMinSpend
+        fields = ('currency', 'min_spend')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['currency'].queryset = Currency.objects.filter(is_published=True).order_by('sequence', 'id')
+        self.fields['currency'].empty_label = "— Select Currency —"
+
 
 class DiningVenueForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
@@ -261,6 +280,11 @@ class VenueBasePriceForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
         model = VenueBasePrice
         fields = ('currency', 'base_price')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['currency'].queryset = Currency.objects.filter(is_published=True).order_by('sequence', 'id')
+        self.fields['currency'].empty_label = "— Select Currency —"
 
 VenueBasePriceFormSet = forms.inlineformset_factory(
     EventVenue,
@@ -338,7 +362,7 @@ class UserForm(TailwindFormMixin, forms.ModelForm):
 
 class PaymentProcessorForm(TailwindFormMixin, forms.ModelForm):
     payment_currencies = forms.ModelMultipleChoiceField(
-        queryset=Currency.objects.filter(is_published=True),
+        queryset=Currency.objects.none(),
         widget=forms.CheckboxSelectMultiple(),
         required=False,
         label="Supported Currencies"
@@ -350,6 +374,7 @@ class PaymentProcessorForm(TailwindFormMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['payment_currencies'].queryset = Currency.objects.all().order_by('sequence', 'id')
         if self.instance and self.instance.pk:
             self.fields['payment_currencies'].initial = self.instance.payment_currencies.all()
 
@@ -375,3 +400,68 @@ class PaymentProcessorForm(TailwindFormMixin, forms.ModelForm):
                 payment_processor=processor,
                 currency=currency
             )
+
+
+class BroadcastNewsletterForm(TailwindFormMixin, forms.Form):
+    subject = forms.CharField(max_length=200, label="Email Subject Header", help_text="e.g. Secret Suite Rates & Exclusive Resort News")
+    message = forms.CharField(widget=forms.Textarea(attrs={'rows': 8}), label="Campaign Message Content", help_text="HTML line breaks will be preserved.")
+
+
+from booking.models.addon import Addon, AddonPrice
+
+
+class AddonForm(TailwindFormMixin, forms.ModelForm):
+    class Meta:
+        model = Addon
+        fields = ('name', 'description', 'icon', 'applies_to', 'price_type', 'is_active', 'order')
+
+
+class AddonPriceForm(TailwindFormMixin, forms.ModelForm):
+    class Meta:
+        model = AddonPrice
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['currency'].required = False
+        self.fields['price'].required = False
+        self.fields['price'].label = "Price"
+        self.fields['currency'].queryset = Currency.objects.filter(is_published=True).order_by('sequence', 'id')
+        self.fields['currency'].empty_label = "— Select Currency —"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        currency = cleaned_data.get('currency')
+        price = cleaned_data.get('price')
+
+        if currency and price is None:
+            self.add_error('price', 'Price is required when currency is selected.')
+        elif price is not None and not currency:
+            self.add_error('currency', 'Currency is required when price is entered.')
+
+        return cleaned_data
+
+    def has_changed(self):
+        prefix = self.prefix
+        curr_key = f"{prefix}-currency" if prefix else "currency"
+        price_key = f"{prefix}-price" if prefix else "price"
+
+        curr_val = self.data.get(curr_key)
+        price_val = self.data.get(price_key)
+
+        if not curr_val and not price_val:
+            return False
+        return super().has_changed()
+
+
+AddonPriceFormSet = forms.inlineformset_factory(
+    Addon,
+    AddonPrice,
+    form=AddonPriceForm,
+    extra=2,
+    can_delete=True,
+    min_num=1,
+    validate_min=True
+)
+
+

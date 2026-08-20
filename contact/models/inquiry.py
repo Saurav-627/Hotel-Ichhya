@@ -14,6 +14,7 @@ class ContactInquiry(models.Model):
     subject = models.CharField(max_length=200)
     message = models.TextField()
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='general')
+    is_read = models.BooleanField(default=False, help_text="Designates whether this inquiry has been viewed by admin")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

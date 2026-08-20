@@ -25,3 +25,7 @@ media/
 
 # Generated staticfiles (collected static assets)
 staticfiles/
+
+#node_modules
+node_modules/
+

@@ -106,6 +106,21 @@ class VenueDetailView(DetailView):
 
             inquiry.venue = self.object
             inquiry.save()
+
+            try:
+                from admin_dashboard.models.notification import create_admin_notification
+                from contact.utils import send_inquiry_notification_email
+                from django.urls import reverse
+                create_admin_notification(
+                    notification_type='inquiry_received',
+                    title=f"New Event Inquiry from {inquiry.name}",
+                    message=f"Venue: {self.object.name} on {inquiry.event_date} ({inquiry.guest_count} guests)",
+                    link_url=reverse('admin_dashboard:conference_dashboard')
+                )
+                send_inquiry_notification_email('event', inquiry)
+            except Exception:
+                pass
+
             messages.success(request, "Thank you! Your event inquiry has been submitted. Our events coordinator will contact you shortly.")
             return redirect('conference:venue_detail', slug=self.object.slug)
         

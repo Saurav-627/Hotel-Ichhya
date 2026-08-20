@@ -88,12 +88,14 @@ class Room(models.Model):
 
     @property
     def current_price(self):
-        """Return today's effective price: seasonal override or base_price."""
-        sp = self.active_seasonal
-        return sp.price_override if sp else self.base_price
+        """Return today's effective price: seasonal override, discount_price, or base_price."""
+        return self.final_price
 
     @property
     def final_price(self):
+        sp = self.active_seasonal
+        if sp:
+            return sp.price_override
         if self.discount_price:
             return self.discount_price
         return self.base_price

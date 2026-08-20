@@ -46,6 +46,7 @@ class RoomListView(ListView):
         # Filtering parameters
         category = self.request.GET.get('category')
         adults = self.request.GET.get('adults')
+        children = self.request.GET.get('children')
         price_min = self.request.GET.get('price_min')
         price_max = self.request.GET.get('price_max')
 
@@ -54,6 +55,11 @@ class RoomListView(ListView):
         if adults:
             try:
                 queryset = queryset.filter(max_adults__gte=int(adults))
+            except ValueError:
+                pass
+        if children:
+            try:
+                queryset = queryset.filter(max_children__gte=int(children))
             except ValueError:
                 pass
         if price_min:
@@ -67,6 +73,40 @@ class RoomListView(ListView):
             except ValueError:
                 pass
                 
+        # Date & Real-time Room Availability filtering
+        check_in_str = self.request.GET.get('check_in')
+        check_out_str = self.request.GET.get('check_out')
+        num_rooms_str = self.request.GET.get('num_rooms', '1')
+
+        if check_in_str and check_out_str:
+            try:
+                check_in = datetime.datetime.strptime(check_in_str, "%Y-%m-%d").date()
+                check_out = datetime.datetime.strptime(check_out_str, "%Y-%m-%d").date()
+                num_rooms = int(num_rooms_str) if str(num_rooms_str).isdigit() else 1
+
+                if check_out > check_in:
+                    available_room_ids = []
+                    for room in queryset:
+                        room_is_available = True
+                        check_date = check_in
+                        while check_date < check_out:
+                            booked_count = RoomAvailability.objects.filter(
+                                room__category=room.category,
+                                date=check_date
+                            ).aggregate(total=Sum('rooms_booked'))['total'] or 0
+                            remaining = room.total_rooms - booked_count
+                            if remaining < num_rooms:
+                                room_is_available = False
+                                break
+                            check_date += datetime.timedelta(days=1)
+                        
+                        if room_is_available:
+                            available_room_ids.append(room.id)
+                    
+                    queryset = queryset.filter(id__in=available_room_ids)
+            except (ValueError, TypeError):
+                pass
+
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -124,8 +164,17 @@ class RoomDetailView(DetailView):
             context['selected_currency_symbol'] = currency_obj.symbol if currency_obj else '$'
         except Exception:
             context['selected_currency_symbol'] = '$'
-            
+
+        # Fetch Active Add-ons
+        from booking.models.addon import Addon
+        from django.db.models import Q
+        addons = list(Addon.objects.filter(is_active=True).filter(Q(applies_to='room') | Q(applies_to='both')).prefetch_related('prices__currency'))
+        for a in addons:
+            a.set_active_currency(selected_currency)
+        context['addons'] = addons
+
         return context
+
 
 @require_GET
 def check_room_availability(request, room_id):

@@ -42,18 +42,26 @@ RoomBasePriceFormSet = inlineformset_factory(
 
 class RoomDashboardView(StaffRequiredMixin, View):
     def get(self, request):
-        # pyrefly: ignore [missing-attribute]
-        rooms = Room.objects.all().select_related('category').prefetch_related('base_prices__currency')
-        # pyrefly: ignore [missing-attribute]
-        categories = RoomCategory.objects.all()
-        # pyrefly: ignore [missing-attribute]
-        facilities = RoomFacility.objects.all()
+        from django.core.paginator import Paginator
+        rooms_qs = Room.objects.all().select_related('category').prefetch_related('base_prices__currency')
+        categories_qs = RoomCategory.objects.all()
+        facilities_qs = RoomFacility.objects.all()
         active_tab = request.GET.get('tab', 'rooms')
-        
+        page_number = request.GET.get('page', 1)
+
+        rooms_paginator = Paginator(rooms_qs, 10)
+        rooms_page = rooms_paginator.get_page(page_number if active_tab == 'rooms' else 1)
+
+        categories_paginator = Paginator(categories_qs, 10)
+        categories_page = categories_paginator.get_page(page_number if active_tab == 'categories' else 1)
+
+        facilities_paginator = Paginator(facilities_qs, 15)
+        facilities_page = facilities_paginator.get_page(page_number if active_tab == 'facilities' else 1)
+
         return render(request, 'admin_dashboard/rooms/dashboard.html', {
-            'rooms': rooms,
-            'categories': categories,
-            'facilities': facilities,
+            'rooms': rooms_page,
+            'categories': categories_page,
+            'facilities': facilities_page,
             'active_tab': active_tab,
         })
 

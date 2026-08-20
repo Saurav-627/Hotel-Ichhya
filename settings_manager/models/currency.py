@@ -16,7 +16,7 @@ class Currency(BaseModel):
     )
 
     def __str__(self) -> str:
-        return self.display_name
+        return f"{self.iso_code} ({self.symbol}) — {self.name}"
     
     class Meta:
         ordering = ["sequence", "id"]

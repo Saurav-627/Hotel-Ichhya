@@ -10,3 +10,5 @@ from . import conference  # noqa: F401
 from . import contact  # noqa: F401
 from . import cms  # noqa: F401
 from . import users  # noqa: F401
+from . import coupons  # noqa: F401
+from . import notifications  # noqa: F401

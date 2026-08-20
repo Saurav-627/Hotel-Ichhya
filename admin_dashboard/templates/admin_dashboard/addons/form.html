@@ -1,0 +1,192 @@
+{% extends 'admin_dashboard/base.html' %}
+
+{% block page_title %}
+<span class="flex items-center gap-3">
+    <i class="fa-solid fa-concierge-bell text-luxuryGold-500"></i> {{ title }}
+</span>
+{% endblock %}
+
+{% block page_subtitle %}Configure service parameters, billing frequency, and multi-currency pricing.{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'admin_dashboard:addon_dashboard' %}" class="px-4 py-2 rounded-xl text-xs font-bold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 transition">
+    <i class="fa-solid fa-arrow-left mr-1.5"></i> Back to Services List
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-8 animate__animated animate__fadeIn">
+    <form method="POST" class="space-y-8">
+        {% csrf_token %}
+
+        <!-- Service Main Info Card -->
+        <div class="custom-card rounded-2xl p-6 sm:p-8 bg-white/50 dark:bg-neutral-900/50 shadow-xl space-y-6">
+            <h3 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif border-b border-neutral-200 dark:border-neutral-800 pb-3 flex items-center gap-2">
+                <i class="fa-solid fa-circle-info text-luxuryGold-500"></i> Add-on Service Details
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Name -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-700 dark:text-neutral-300 mb-2">
+                        Service Title / Add-on Name <span class="text-rose-500">*</span>
+                    </label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                    <p class="text-xs text-rose-500 mt-1">{{ form.name.errors.0 }}</p>
+                    {% endif %}
+                    <p class="text-[11px] text-neutral-400 mt-1">e.g. "Full Board Gourmet Breakfast", "Airport VIP Transfer Shuttle", "Spa &amp; Massage Package"</p>
+                </div>
+
+                <!-- Applies To -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-700 dark:text-neutral-300 mb-2">
+                        Applicability <span class="text-rose-500">*</span>
+                    </label>
+                    {{ form.applies_to }}
+                    {% if form.applies_to.errors %}
+                    <p class="text-xs text-rose-500 mt-1">{{ form.applies_to.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Price Type / Billing Frequency -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-700 dark:text-neutral-300 mb-2">
+                        Billing Frequency / Rate Type <span class="text-rose-500">*</span>
+                    </label>
+                    {{ form.price_type }}
+                    {% if form.price_type.errors %}
+                    <p class="text-xs text-rose-500 mt-1">{{ form.price_type.errors.0 }}</p>
+                    {% endif %}
+                    <div class="mt-2.5 p-3 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 border border-neutral-200 dark:border-neutral-700/80 text-[11px] text-neutral-600 dark:text-neutral-300 space-y-1.5 shadow-sm">
+                        <p class="font-bold text-luxuryGold-500 uppercase tracking-wider text-[10px] flex items-center gap-1.5">
+                            <i class="fa-solid fa-calculator text-xs"></i> Rate Calculation Rules:
+                        </p>
+                        <ul class="space-y-1 pl-1">
+                            <li class="flex items-start gap-1.5">
+                                <span class="text-luxuryGold-500 font-bold">•</span>
+                                <span><strong>Per Room / Per Night:</strong> Rate × Stay Nights × Rooms count.</span>
+                            </li>
+                            <li class="flex items-start gap-1.5">
+                                <span class="text-luxuryGold-500 font-bold">•</span>
+                                <span><strong>Per Guest:</strong> Rate × Total Guests count.</span>
+                            </li>
+                            <li class="flex items-start gap-1.5">
+                                <span class="text-luxuryGold-500 font-bold">•</span>
+                                <span><strong>Per Room Booking:</strong> One-time fee per reservation.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- FontAwesome Icon Class -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-700 dark:text-neutral-300 mb-2">
+                        Icon Class (FontAwesome)
+                    </label>
+                    {{ form.icon }}
+                    {% if form.icon.errors %}
+                    <p class="text-xs text-rose-500 mt-1">{{ form.icon.errors.0 }}</p>
+                    {% endif %}
+                    <p class="text-[11px] text-neutral-400 mt-1">e.g. `fa-utensils`, `fa-spa`, `fa-car`, `fa-bed`, `fa-wine-glass`</p>
+                </div>
+
+                <!-- Display Order -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-700 dark:text-neutral-300 mb-2">
+                        Display Order Sequence
+                    </label>
+                    {{ form.order }}
+                    {% if form.order.errors %}
+                    <p class="text-xs text-rose-500 mt-1">{{ form.order.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Description -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-700 dark:text-neutral-300 mb-2">
+                        Description / Guest Summary
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                    <p class="text-xs text-rose-500 mt-1">{{ form.description.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Is Active -->
+                <div class="md:col-span-2 flex items-center justify-between p-4 rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700">
+                    <div>
+                        <span class="text-xs font-semibold text-neutral-700 dark:text-neutral-300 block uppercase tracking-wider">
+                            Active Service Status
+                        </span>
+                        <span class="text-[11px] text-neutral-400">Enable this Add-on Service for guest bookings</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer select-none">
+                        {{ form.is_active }}
+                        <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 peer-checked:bg-luxuryGold-500 rounded-full relative transition-all duration-200 peer-focus:ring-2 peer-focus:ring-luxuryGold-500/40 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Multi-Currency Prices Card -->
+        <div class="custom-card rounded-2xl p-6 sm:p-8 bg-white/50 dark:bg-neutral-900/50 shadow-xl space-y-6">
+            <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-3">
+                <h3 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif flex items-center gap-2">
+                    <i class="fa-solid fa-coins text-luxuryGold-500"></i> Multi-Currency Add-on Rates
+                </h3>
+                <span class="text-xs text-neutral-400">Set specific rates per available currency</span>
+            </div>
+
+            {{ currency_price_formset.management_form }}
+            {% if currency_price_formset.non_form_errors %}
+            <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs">
+                {{ currency_price_formset.non_form_errors }}
+            </div>
+            {% endif %}
+
+            <div class="space-y-4">
+                {% for price_form in currency_price_formset %}
+                <div class="p-4 rounded-xl bg-neutral-50 dark:bg-neutral-900/80 border border-neutral-200 dark:border-neutral-800 grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                    {{ price_form.id }}
+
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wider text-neutral-500 mb-1">Currency</label>
+                        {{ price_form.currency }}
+                        {% if price_form.currency.errors %}
+                        <p class="text-xs text-rose-500 mt-1">{{ price_form.currency.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wider text-neutral-500 mb-1">Add-on Price</label>
+                        {{ price_form.price }}
+                        {% if price_form.price.errors %}
+                        <p class="text-xs text-rose-500 mt-1">{{ price_form.price.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex items-center justify-end md:pt-4">
+                        {% if currency_price_formset.can_delete and price_form.instance.pk %}
+                        <label class="flex items-center gap-2 text-xs text-rose-500 cursor-pointer">
+                            {{ price_form.DELETE }} Remove Rate
+                        </label>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Submit Controls -->
+        <div class="flex items-center justify-end gap-4 pt-4 border-t border-neutral-200 dark:border-neutral-800">
+            <a href="{% url 'admin_dashboard:addon_dashboard' %}" class="px-6 py-3 rounded-xl text-xs font-bold text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">
+                Cancel
+            </a>
+            <button type="submit" class="px-8 py-3 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg cursor-pointer">
+                Save Add-on Service
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

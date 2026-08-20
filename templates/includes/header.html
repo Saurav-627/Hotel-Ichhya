@@ -1,74 +1,61 @@
 {% load static %}
-<!-- GLOBAL STICKY HEADER & TOP INFO BAR -->
-<header x-data="{ 
-    isScrolled: false, 
-    init() { 
-        window.addEventListener('scroll', () => { 
-            this.isScrolled = window.scrollY > 30; 
-        }); 
-    } 
-}" class="sticky top-0 z-40 transition-colors duration-300 {% if selected_theme == 'light' %}bg-white/95 border-b border-gray-200 text-gray-800 shadow-sm backdrop-blur-md{% elif selected_theme == 'dark' %}bg-[#121212]/95 border-b border-[#2D2D2D] text-gray-200 shadow-sm backdrop-blur-md{% else %}bg-[#0A0908]/95 border-b border-amber-900/20 text-amber-100 shadow-sm backdrop-blur-md{% endif %}">
 
-    <!-- TOP LUXURY INFO BAR (Desktop & Mobile with Smooth Scroll Disappear) -->
-    <div class="transition-all duration-300 overflow-hidden border-b max-h-14 opacity-100 py-2 translate-y-0 {% if selected_theme == 'light' %}bg-gray-100/95 border-gray-200 text-gray-700{% else %}bg-[#0A0908]/95 border-amber-900/20 text-amber-100/90{% endif %}"
-         :class="{ '!max-h-0 !opacity-0 !py-0 !border-none !-translate-y-2': isScrolled }">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 text-[11px] font-medium">
-            
-            <!-- Mobile Compact Info (Location & Call CTA) -->
-            <div class="flex md:hidden items-center justify-between w-full gap-2 whitespace-nowrap">
-                <span class="flex items-center gap-1.5 opacity-90 truncate">
-                    <i class="fa-solid fa-location-dot text-luxuryGold-400 shrink-0"></i>
-                    <span class="truncate">{{ hotel_settings.address|default:"Simara, Bara, Nepal" }}</span>
-                </span>
-                <a href="tel:{{ hotel_settings.phone|default:'+977 51-590650' }}" class="flex items-center gap-1.5 text-luxuryGold-400 font-bold shrink-0 hover:underline">
-                    <i class="fa-solid fa-phone"></i>
-                    <span>Call Us</span>
-                </a>
-            </div>
+<!-- TOP LUXURY INFO BAR (Normal Flow) -->
+<div class="border-b transition-colors duration-300 {% if selected_theme == 'light' %}bg-gray-100/95 border-gray-200 text-gray-700{% else %}bg-[#0A0908] border-amber-900/20 text-amber-100/90{% endif %}">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 text-[11px] font-medium py-2">
+        
+        <!-- Mobile Compact Info (Location & Call CTA) -->
+        <div class="flex md:hidden items-center justify-between w-full gap-2 whitespace-nowrap">
+            <span class="flex items-center gap-1.5 opacity-90 truncate">
+                <i class="fa-solid fa-location-dot text-luxuryGold-400 shrink-0"></i>
+                <span class="truncate">{{ hotel_settings.address|default:"Simara, Bara, Nepal" }}</span>
+            </span>
+            <a href="tel:{{ hotel_settings.contact_phone }}" class="flex items-center gap-1.5 text-luxuryGold-400 font-bold shrink-0 hover:underline">
+                <i class="fa-solid fa-phone"></i>
+                <span>Call Us</span>
+            </a>
+        </div>
 
-            <!-- Desktop Full Info -->
-            <div class="hidden md:flex items-center gap-6 whitespace-nowrap">
-                <span class="flex items-center gap-1.5 opacity-90">
-                    <i class="fa-solid fa-location-dot text-luxuryGold-400"></i>
-                    <span>{{ hotel_settings.address|default:"Simara, Bara, Nepal" }}</span>
-                </span>
-                <a href="tel:{{ hotel_settings.phone|default:'+977 51-590650' }}" class="flex items-center gap-1.5 opacity-90 hover:text-luxuryGold-400 transition-colors">
-                    <i class="fa-solid fa-phone text-luxuryGold-400"></i>
-                    <span>{{ hotel_settings.phone|default:"+977 51-590650" }}</span>
-                </a>
-                <a href="mailto:{{ hotel_settings.email|default:'info@hotelichhya.com' }}" class="flex items-center gap-1.5 opacity-90 hover:text-luxuryGold-400 transition-colors">
-                    <i class="fa-regular fa-envelope text-luxuryGold-400"></i>
-                    <span>{{ hotel_settings.email|default:"info@hotelichhya.com" }}</span>
-                </a>
-            </div>
+        <!-- Desktop Full Info -->
+        <div class="hidden md:flex items-center gap-6 whitespace-nowrap">
+            <span class="flex items-center gap-1.5 opacity-90">
+                <i class="fa-solid fa-location-dot text-luxuryGold-400"></i>
+                <span>{{ hotel_settings.address|default:"Simara, Bara, Nepal" }}</span>
+            </span>
+            <a href="tel:{{ hotel_settings.contact_phone }}" class="flex items-center gap-1.5 opacity-90 hover:text-luxuryGold-400 transition-colors">
+                <i class="fa-solid fa-phone text-luxuryGold-400"></i>
+                <span>{{ hotel_settings.contact_phone }}</span>
+            </a>
+            <a href="mailto:{{ hotel_settings.contact_email }}" class="flex items-center gap-1.5 opacity-90 hover:text-luxuryGold-400 transition-colors">
+                <i class="fa-regular fa-envelope text-luxuryGold-400"></i>
+                <span>{{ hotel_settings.contact_email }}</span>
+            </a>
+        </div>
 
-            <!-- Desktop Right Quick Links & Social -->
-            <div class="hidden md:flex items-center gap-5 whitespace-nowrap">
-                <span class="text-luxuryGold-400 font-semibold uppercase tracking-wider text-[10px] bg-luxuryGold-500/10 px-2.5 py-0.5 rounded-full border border-luxuryGold-500/30">
-                    ⭐ 5-Star Luxury Resort
-                </span>
-                <div class="flex items-center gap-3 opacity-80">
-                    {% if hotel_settings.facebook %}
-                    <a href="{{ hotel_settings.facebook }}" target="_blank" class="hover:text-luxuryGold-400 transition-colors"><i class="fa-brands fa-facebook-f"></i></a>
-                    {% else %}
-                    <a href="#" class="hover:text-luxuryGold-400 transition-colors"><i class="fa-brands fa-facebook-f"></i></a>
-                    {% endif %}
-                    
-                    {% if hotel_settings.instagram %}
-                    <a href="{{ hotel_settings.instagram }}" target="_blank" class="hover:text-luxuryGold-400 transition-colors"><i class="fa-brands fa-instagram"></i></a>
-                    {% else %}
-                    <a href="#" class="hover:text-luxuryGold-400 transition-colors"><i class="fa-brands fa-instagram"></i></a>
-                    {% endif %}
+        <!-- Desktop Right Quick Links & Social -->
+        <div class="hidden md:flex items-center gap-5 whitespace-nowrap">
+            <span class="text-luxuryGold-400 font-semibold uppercase tracking-wider text-[10px] bg-luxuryGold-500/10 px-2.5 py-0.5 rounded-full border border-luxuryGold-500/30">
+                ⭐ 5-Star Luxury Resort
+            </span>
+            <div class="flex items-center gap-3 opacity-80">
+                {% if hotel_settings.facebook_url %}
+                <a href="{{ hotel_settings.facebook_url }}" target="_blank" class="hover:text-luxuryGold-400 transition-colors"><i class="fa-brands fa-facebook-f"></i></a>
+                {% endif %}
+                
+                {% if hotel_settings.instagram_url %}
+                <a href="{{ hotel_settings.instagram_url }}" target="_blank" class="hover:text-luxuryGold-400 transition-colors"><i class="fa-brands fa-instagram"></i></a>
+                {% endif %}
 
-                    {% if hotel_settings.tripadvisor %}
-                    <a href="{{ hotel_settings.tripadvisor }}" target="_blank" class="hover:text-luxuryGold-400 transition-colors"><i class="fa-brands fa-tripadvisor"></i></a>
-                    {% else %}
-                    <a href="#" class="hover:text-luxuryGold-400 transition-colors"><i class="fa-brands fa-tripadvisor"></i></a>
-                    {% endif %}
-                </div>
+                {% if hotel_settings.tripadvisor_url %}
+                <a href="{{ hotel_settings.tripadvisor_url }}" target="_blank" class="hover:text-luxuryGold-400 transition-colors"><i class="fa-brands fa-tripadvisor"></i></a>
+                {% endif %}
             </div>
         </div>
     </div>
+</div>
+
+<!-- GLOBAL STICKY NAVBAR -->
+<header class="sticky top-0 z-40 transition-colors duration-300 {% if selected_theme == 'light' %}bg-white/95 border-b border-gray-200 text-gray-800 shadow-sm backdrop-blur-md{% elif selected_theme == 'dark' %}bg-[#121212]/95 border-b border-[#2D2D2D] text-gray-200 shadow-sm backdrop-blur-md{% else %}bg-[#0A0908]/95 border-b border-amber-900/20 text-amber-100 shadow-sm backdrop-blur-md{% endif %}">
 
     <!-- MAIN NAVBAR ROW -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -161,6 +148,14 @@
             <div class="hidden md:flex items-center gap-3 lg:gap-5 shrink-0 whitespace-nowrap">
 
                 <!-- Currency Switcher Dropdown -->
+                {% if is_checkout_page or request.resolver_match.url_name == 'checkout_page' %}
+                <div class="px-3 py-1.5 rounded-full border border-amber-900/30 bg-luxuryGold-500/10 text-luxuryGold-400 text-xs font-semibold flex items-center gap-1.5 select-none"
+                     title="Currency is locked for this reservation checkout">
+                    <i class="fa-solid fa-lock text-xs text-luxuryGold-500"></i>
+                    <span>{{ booking.currency_code|default:selected_currency }}</span>
+                    <span class="text-[9px] opacity-70 uppercase font-normal">(Locked)</span>
+                </div>
+                {% else %}
                 <div class="relative" x-data="{ open: false }" @click.away="open = false">
                     <button @click="open = !open" 
                             class="px-2.5 py-1.5 rounded-full border border-transparent hover:border-amber-900/20 focus:outline-none transition-colors flex items-center gap-1.5 text-xs font-semibold whitespace-nowrap cursor-pointer {% if selected_theme == 'light' %}hover:bg-gray-100 text-gray-800{% else %}hover:bg-luxuryGold-900/20 text-inherit{% endif %}"
@@ -201,6 +196,7 @@
                         {% endfor %}
                     </div>
                 </div>
+                {% endif %}
 
                 <!-- Search Button -->
                 <button @click="searchOpen = true" 
@@ -219,6 +215,13 @@
             <!-- Mobile Right Controls (Currency Switcher & Hamburger Menu) -->
             <div class="md:hidden flex items-center gap-2">
                 <!-- Mobile Currency Dropdown -->
+                {% if is_checkout_page or request.resolver_match.url_name == 'checkout_page' %}
+                <div class="px-2.5 py-1.5 rounded-lg text-xs font-bold border border-amber-900/30 bg-luxuryGold-500/10 text-luxuryGold-400 flex items-center gap-1 select-none"
+                     title="Currency is locked for this reservation checkout">
+                    <i class="fa-solid fa-lock text-[10px] text-luxuryGold-500"></i>
+                    <span>{{ booking.currency_code|default:selected_currency }}</span>
+                </div>
+                {% else %}
                 <div class="relative" x-data="{ open: false }" @click.away="open = false">
                     <button @click="open = !open" 
                             class="px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors flex items-center gap-1 cursor-pointer {% if selected_theme == 'light' %}border-gray-300 bg-gray-50 text-gray-800{% else %}border-amber-900/30 bg-[#161412] text-luxuryGold-300{% endif %}"
@@ -259,6 +262,8 @@
                         {% endfor %}
                     </div>
                 </div>
+                {% endif %}
+
 
                 <!-- Hamburger Button -->
                 <button @click="mobileMenuOpen = true" class="p-2 rounded-lg hover:bg-luxuryGold-900/10 focus:outline-none transition-colors cursor-pointer" aria-label="Open Navigation Menu">

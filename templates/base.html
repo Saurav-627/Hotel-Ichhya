@@ -48,39 +48,12 @@
     <!-- Animate.css -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
-    <!-- Air Datepicker CSS -->
+    <!-- Air Datepicker CSS & JS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.5.0/air-datepicker.css">
+    <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.5.0/air-datepicker.js"></script>
 
-    <!-- Tailwind CSS v4 Browser Compiler -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Outfit', 'sans-serif'],
-                        serif: ['Playfair Display', 'serif'],
-                    },
-                    colors: {
-                        luxuryGold: {
-                            50: '#FAF5E9',
-                            100: '#F3E7CA',
-                            200: '#E5CC94',
-                            300: '#D3AA5E',
-                            400: '#C48E37',
-                            500: '#B47825', // Main luxury gold
-                            600: '#99601D',
-                            700: '#784817',
-                            800: '#5D3713',
-                            900: '#4D2E11',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Production Compiled Tailwind CSS -->
+    <link rel="stylesheet" href="{% static 'css/main.bundle.css' %}">
 
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
@@ -201,6 +174,8 @@
 
         /* Premium Custom Air Datepicker Theme styling */
         .air-datepicker {
+            z-index: 99999 !important;
+            max-width: calc(100vw - 24px) !important;
             --ad-background-color: var(--card-bg) !important;
             --ad-text-color: var(--text-color) !important;
             --ad-border-color: var(--border-color) !important;
@@ -290,11 +265,16 @@
     searchOpen: false,
     currentCurrency: '{{ selected_currency }}',
     setCurrency(currency) {
+        if (window.location.pathname.includes('/booking/checkout/') || window.isCheckoutPage) {
+            alert('Currency is locked for this active reservation and cannot be modified during checkout.');
+            return;
+        }
         this.currentCurrency = currency;
         localStorage.setItem('currency', currency);
         document.cookie = 'currency=' + currency + '; path=/; max-age=' + (365*24*60*60);
         window.location.reload();
     }
+
 }" class="theme-light min-h-screen flex flex-col">
 
     <!-- Toast Notification Container (Django Messages & HTMX Events) -->
@@ -439,6 +419,42 @@
             autoClose: true,
             buttons: ['today', 'clear'],
             dateFormat: 'yyyy-MM-dd',
+            container: document.body,
+            position({$datepicker, $target}) {
+                if (!$target || !$datepicker) return;
+                const rect = $target.getBoundingClientRect();
+                const pickerWidth = $datepicker.offsetWidth || 280;
+                const pickerHeight = $datepicker.offsetHeight || 310;
+                const windowWidth = document.documentElement.clientWidth || window.innerWidth;
+                const windowHeight = window.innerHeight;
+
+                const spaceBelow = windowHeight - rect.bottom;
+                const spaceAbove = rect.top;
+                const spaceRight = windowWidth - rect.left;
+                const spaceLeft = rect.right;
+
+                $datepicker.style.position = 'absolute';
+
+                // Vertical positioning (Above vs Below)
+                let top;
+                if (spaceBelow < pickerHeight && spaceAbove > spaceBelow) {
+                    top = rect.top + window.scrollY - pickerHeight - 6;
+                } else {
+                    top = rect.bottom + window.scrollY + 6;
+                }
+
+                // Horizontal positioning (Left vs Right space tracking & viewport boundary clamping)
+                let left = rect.left + window.scrollX;
+                if (spaceRight < pickerWidth && spaceLeft >= pickerWidth) {
+                    left = rect.right + window.scrollX - pickerWidth;
+                } else if (left + pickerWidth > windowWidth + window.scrollX - 12) {
+                    left = windowWidth + window.scrollX - pickerWidth - 12;
+                }
+                left = Math.max(12 + window.scrollX, left);
+
+                $datepicker.style.left = `${left}px`;
+                $datepicker.style.top = `${top}px`;
+            }
         };
 
         document.addEventListener('DOMContentLoaded', () => {

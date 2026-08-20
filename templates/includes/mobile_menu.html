@@ -67,13 +67,13 @@
                         <i class="fa-solid fa-location-dot text-luxuryGold-400 shrink-0"></i>
                         <span>{{ hotel_settings.address|default:"Simara, Bara, Nepal" }}</span>
                     </div>
-                    <a href="tel:{{ hotel_settings.phone|default:'+977 51-590650' }}" class="flex items-center gap-2.5 hover:text-luxuryGold-400 transition-colors">
+                    <a href="tel:{{ hotel_settings.contact_phone }}" class="flex items-center gap-2.5 hover:text-luxuryGold-400 transition-colors">
                         <i class="fa-solid fa-phone text-luxuryGold-400 shrink-0"></i>
-                        <span>{{ hotel_settings.phone|default:"+977 51-590650" }}</span>
+                        <span>{{ hotel_settings.contact_phone }}</span>
                     </a>
-                    <a href="mailto:{{ hotel_settings.email|default:'info@hotelichhya.com' }}" class="flex items-center gap-2.5 hover:text-luxuryGold-400 transition-colors">
+                    <a href="mailto:{{ hotel_settings.contact_email }}" class="flex items-center gap-2.5 hover:text-luxuryGold-400 transition-colors">
                         <i class="fa-regular fa-envelope text-luxuryGold-400 shrink-0"></i>
-                        <span class="truncate">{{ hotel_settings.email|default:"info@hotelichhya.com" }}</span>
+                        <span class="truncate">{{ hotel_settings.contact_email }}</span>
                     </a>
                 </div>
             </div>

@@ -131,7 +131,7 @@ def book_table_ajax(request, venue_id):
         )
 
     # Save reservation
-    DiningReservation.objects.create(
+    reservation = DiningReservation.objects.create(
         venue=venue,
         name=name,
         email=email,
@@ -141,6 +141,21 @@ def book_table_ajax(request, venue_id):
         guests=guests,
         special_requests=special_requests
     )
+
+    try:
+        from admin_dashboard.models.notification import create_admin_notification
+        from contact.utils import send_inquiry_notification_email
+        from django.urls import reverse
+        time_str = time.strftime("%I:%M %p") if hasattr(time, 'strftime') else str(time)
+        create_admin_notification(
+            notification_type='dining_reservation_created',
+            title=f"New Dining Reservation from {name}",
+            message=f"Venue: {venue.name} on {date} at {time_str} ({guests} guests)",
+            link_url=reverse('admin_dashboard:dining_dashboard')
+        )
+        send_inquiry_notification_email('dining', reservation)
+    except Exception:
+        pass
 
     import json
     guest_text = f"{guests} guest" if guests == 1 else f"{guests} guests"

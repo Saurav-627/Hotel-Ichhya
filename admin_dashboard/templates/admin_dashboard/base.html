@@ -20,35 +20,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
-    <!-- Tailwind CSS with custom theme -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Outfit', 'sans-serif'],
-                        serif: ['Playfair Display', 'serif'],
-                    },
-                    colors: {
-                        luxuryGold: {
-                            50: '#FAF5E9',
-                            100: '#F3E7CA',
-                            200: '#E5CC94',
-                            300: '#D3AA5E',
-                            400: '#C48E37',
-                            500: '#B47825',
-                            600: '#99601D',
-                            700: '#784817',
-                            800: '#5D3713',
-                            900: '#4D2E11',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Air Datepicker CSS & JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.5.0/air-datepicker.css">
+    <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.5.0/air-datepicker.js"></script>
+
+    <!-- Production Compiled Tailwind CSS -->
+    <link rel="stylesheet" href="{% static 'css/main.bundle.css' %}">
     
     <!-- Alpine.js -->
     <script defer src="https://unpkg.com/alpinejs@3.13.5/dist/cdn.min.js"></script>
@@ -251,7 +228,7 @@
             </div>
             
             <!-- Links Container -->
-            <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5 no-scrollbar">
+            <nav id="admin-sidebar-nav" class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5 no-scrollbar">
                 
                 <!-- Overview -->
                 <a href="{% url 'admin_dashboard:home' %}" class="flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-luxuryGold-500/10 hover:text-luxuryGold-600 transition group {% if request.resolver_match.url_name == 'home' %}bg-luxuryGold-500/10 text-luxuryGold-600 font-semibold{% else %}text-neutral-600{% endif %}">
@@ -279,6 +256,12 @@
                         <a href="{% url 'admin_dashboard:room_availability_calendar' %}" class="block py-2 text-sm text-neutral-600 hover:text-luxuryGold-600 {% if request.resolver_match.url_name == 'room_availability_calendar' %}text-luxuryGold-600 font-medium{% endif %}">Availability Calendar</a>
                     </div>
                 </div>
+
+                <!-- Add-on Services (Top Level) -->
+                <a href="{% url 'admin_dashboard:addon_dashboard' %}" class="flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-luxuryGold-500/10 hover:text-luxuryGold-600 transition group {% if 'addon' in request.path %}bg-luxuryGold-500/10 text-luxuryGold-600 font-semibold{% else %}text-neutral-600{% endif %}">
+                    <div class="w-5 text-center"><i class="fa-solid fa-concierge-bell text-lg"></i></div>
+                    <span x-show="sidebarOpen">Add-on Services</span>
+                </a>
                 
                 <!-- Payments -->
                 <a href="{% url 'admin_dashboard:payment_list' %}" class="flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-luxuryGold-500/10 hover:text-luxuryGold-600 transition group {% if 'payments' in request.path %}bg-luxuryGold-500/10 text-luxuryGold-600 font-semibold{% else %}text-neutral-600{% endif %}">
@@ -321,6 +304,14 @@
                     <div class="w-5 text-center"><i class="fa-solid fa-users text-lg"></i></div>
                     <span x-show="sidebarOpen">User Accounts</span>
                 </a>
+
+                <!-- Promo & Coupon Manager -->
+                {% if perms.booking.view_coupon or user.is_superuser %}
+                <a href="{% url 'admin_dashboard:coupon_dashboard' %}" class="flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-luxuryGold-500/10 hover:text-luxuryGold-600 transition group {% if 'coupons' in request.path %}bg-luxuryGold-500/10 text-luxuryGold-600 font-semibold{% else %}text-neutral-600{% endif %}">
+                    <div class="w-5 text-center"><i class="fa-solid fa-ticket text-lg"></i></div>
+                    <span x-show="sidebarOpen">Coupons & Promos</span>
+                </a>
+                {% endif %}
 
                 <!-- General settings -->
                 <a href="{% url 'admin_dashboard:settings_dashboard' %}" class="flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-luxuryGold-500/10 hover:text-luxuryGold-600 transition group {% if 'settings' in request.path and 'rooms' not in request.path %}bg-luxuryGold-500/10 text-luxuryGold-600 font-semibold{% else %}text-neutral-600{% endif %}">
@@ -379,14 +370,77 @@
                 </div>
                 
                 <!-- Utilities -->
-                <div class="flex items-center gap-6">
+                <div class="flex items-center gap-5">
                     
+                    <!-- Notification Bell Dropdown -->
+                    <div x-data="{ notifOpen: false }" class="relative">
+                        <button @click="notifOpen = !notifOpen" class="relative text-neutral-500 hover:text-luxuryGold-600 p-2 rounded-lg transition-colors focus:outline-none" title="Notifications">
+                            <i class="fa-solid fa-bell text-xl"></i>
+                            {% if unread_notifications_count > 0 %}
+                            <span class="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-extrabold flex items-center justify-center rounded-full border-2 border-white">
+                                {{ unread_notifications_count }}
+                            </span>
+                            {% endif %}
+                        </button>
+
+                        <div x-show="notifOpen" @click.away="notifOpen = false" x-cloak
+                             class="absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 overflow-hidden">
+                            <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                                <h4 class="font-serif font-bold text-sm text-gray-900">Notifications</h4>
+                                {% if unread_notifications_count > 0 %}
+                                <form action="{% url 'admin_dashboard:notification_mark_all_read' %}" method="POST" class="m-0">
+                                    {% csrf_token %}
+                                    <button type="submit" class="text-[11px] font-semibold text-luxuryGold-600 hover:underline">Mark all read</button>
+                                </form>
+                                {% endif %}
+                            </div>
+
+                            {% if unread_inquiries_count > 0 %}
+                            <a href="{% url 'admin_dashboard:contact_dashboard' %}?tab=inquiries" class="block px-4 py-2.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold border-b border-gray-100 flex items-center justify-between hover:bg-rose-500/20 transition">
+                                <span><i class="fa-solid fa-envelope-open-text mr-1.5"></i> {{ unread_inquiries_count }} New Guest Inquiry(ies)</span>
+                                <span class="text-[10px] uppercase font-bold underline">Review &rarr;</span>
+                            </a>
+                            {% endif %}
+
+                            <div class="max-h-80 overflow-y-auto divide-y divide-gray-50">
+                                {% for note in header_notifications %}
+                                <a href="{% if note.link_url %}{{ note.link_url }}{% else %}{% url 'admin_dashboard:notification_list' %}{% endif %}"
+                                   class="block px-4 py-3 transition-colors {% if not note.is_read %}bg-luxuryGold-500/10{% else %}hover:bg-gray-50{% endif %}">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold {% if note.notification_type == 'payment_success' %}bg-emerald-100 text-emerald-700{% elif note.notification_type == 'booking_created' %}bg-amber-100 text-amber-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                                            {% if note.notification_type == 'payment_success' %}<i class="fa-solid fa-file-invoice-dollar"></i>
+                                            {% elif note.notification_type == 'booking_created' %}<i class="fa-solid fa-calendar-check"></i>
+                                            {% else %}<i class="fa-solid fa-envelope"></i>{% endif %}
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-xs font-bold text-gray-900 truncate">{{ note.title }}</p>
+                                            <p class="text-[11px] text-gray-500 line-clamp-2 mt-0.5">{{ note.message }}</p>
+                                            <p class="text-[10px] text-gray-400 mt-1">{{ note.created_at|timesince }} ago</p>
+                                        </div>
+                                    </div>
+                                </a>
+                                {% empty %}
+                                <div class="px-4 py-6 text-center text-xs text-gray-400">
+                                    No recent notifications.
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="px-4 py-2 border-t border-gray-100 text-center bg-gray-50/50">
+                                <a href="{% url 'admin_dashboard:notification_list' %}" class="text-[11px] font-bold text-luxuryGold-600 hover:underline">
+                                    View all notifications
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Direct to Public site fallback -->
                     <a href="/" target="_blank" class="text-sm font-semibold text-luxuryGold-500 hover:text-luxuryGold-600 flex items-center gap-2">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i>
                         <span class="hidden md:inline">View Website</span>
                     </a>
                 </div>
+
             </header>
             
             <!-- Main Content panel -->
@@ -413,8 +467,6 @@
         
     </div>
 
-    <!-- Air Datepicker JS -->
-    <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.5.0/air-datepicker.js"></script>
     <script>
         window.defaultAirDatepickerConfig = {
             locale: {
@@ -432,6 +484,42 @@
             autoClose: true,
             buttons: ['today', 'clear'],
             dateFormat: 'yyyy-MM-dd',
+            container: document.body,
+            position({$datepicker, $target}) {
+                if (!$target || !$datepicker) return;
+                const rect = $target.getBoundingClientRect();
+                const pickerWidth = $datepicker.offsetWidth || 280;
+                const pickerHeight = $datepicker.offsetHeight || 310;
+                const windowWidth = document.documentElement.clientWidth || window.innerWidth;
+                const windowHeight = window.innerHeight;
+
+                const spaceBelow = windowHeight - rect.bottom;
+                const spaceAbove = rect.top;
+                const spaceRight = windowWidth - rect.left;
+                const spaceLeft = rect.right;
+
+                $datepicker.style.position = 'absolute';
+
+                // Vertical positioning (Above vs Below)
+                let top;
+                if (spaceBelow < pickerHeight && spaceAbove > spaceBelow) {
+                    top = rect.top + window.scrollY - pickerHeight - 6;
+                } else {
+                    top = rect.bottom + window.scrollY + 6;
+                }
+
+                // Horizontal positioning (Left vs Right space tracking & viewport boundary clamping)
+                let left = rect.left + window.scrollX;
+                if (spaceRight < pickerWidth && spaceLeft >= pickerWidth) {
+                    left = rect.right + window.scrollX - pickerWidth;
+                } else if (left + pickerWidth > windowWidth + window.scrollX - 12) {
+                    left = windowWidth + window.scrollX - pickerWidth - 12;
+                }
+                left = Math.max(12 + window.scrollX, left);
+
+                $datepicker.style.left = `${left}px`;
+                $datepicker.style.top = `${top}px`;
+            }
         };
 
         document.addEventListener("DOMContentLoaded", function() {
@@ -461,6 +549,22 @@
                     }
                 });
             });
+
+            // Auto-scroll Active Sidebar Item into View
+            function scrollToActiveSidebarItem() {
+                const sidebarNav = document.getElementById('admin-sidebar-nav');
+                if (!sidebarNav) return;
+                
+                // Find active link (top-level or dropdown child)
+                const activeLink = sidebarNav.querySelector('a.bg-luxuryGold-500\\/10, a.text-luxuryGold-600');
+                if (activeLink) {
+                    activeLink.scrollIntoView({ block: 'center', behavior: 'instant' });
+                }
+            }
+
+            // Execute after Alpine and DOM render
+            setTimeout(scrollToActiveSidebarItem, 50);
+            setTimeout(scrollToActiveSidebarItem, 200);
         });
     </script>
 

@@ -11,15 +11,3 @@ currencies:
   is_published: true
   sequence: 2
   is_custom: false
-- iso_code: EUR
-  name: Euro
-  symbol: €
-  is_published: true
-  sequence: 3
-  is_custom: false
-- iso_code: GBP
-  name: British Pound
-  symbol: £
-  is_published: true
-  sequence: 4
-  is_custom: false

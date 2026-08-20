@@ -1,0 +1,28 @@
+{% extends 'admin_dashboard/base.html' %}
+
+{% block page_title %}Delete Add-on Service{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto my-12 custom-card rounded-2xl p-6 text-center space-y-6 shadow-xl">
+    <div class="w-16 h-16 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center text-2xl mx-auto">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+    
+    <div>
+        <h3 class="text-lg font-bold text-neutral-900 dark:text-neutral-100 font-serif">Delete Add-on Service?</h3>
+        <p class="text-xs text-neutral-500 mt-2">
+            Are you sure you want to permanently delete <strong class="text-neutral-800 dark:text-neutral-200">"{{ addon.name }}"</strong>? This action cannot be undone.
+        </p>
+    </div>
+
+    <form method="POST" class="flex items-center justify-center gap-4 pt-4 border-t border-neutral-200 dark:border-neutral-800">
+        {% csrf_token %}
+        <a href="{% url 'admin_dashboard:addon_dashboard' %}" class="px-5 py-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 text-neutral-400 hover:text-neutral-200 text-xs font-semibold transition">
+            Cancel
+        </a>
+        <button type="submit" class="px-5 py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-lg text-xs transition">
+            Confirm Delete
+        </button>
+    </form>
+</div>
+{% endblock %}

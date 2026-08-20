@@ -19,13 +19,21 @@ EventVenueImageFormSet = inlineformset_factory(
 
 class ConferenceDashboardView(StaffRequiredMixin, View):
     def get(self, request):
-        venues = EventVenue.objects.all().prefetch_related('base_prices__currency')
-        inquiries = EventInquiry.objects.all().select_related('venue')
+        from django.core.paginator import Paginator
+        venues_qs = EventVenue.objects.all().prefetch_related('base_prices__currency').order_by('id')
+        inquiries_qs = EventInquiry.objects.all().select_related('venue').order_by('-created_at')
         active_tab = request.GET.get('tab', 'venues')
+        page_number = request.GET.get('page', 1)
+
+        venues_paginator = Paginator(venues_qs, 10)
+        venues_page = venues_paginator.get_page(page_number if active_tab == 'venues' else 1)
+
+        inquiries_paginator = Paginator(inquiries_qs, 10)
+        inquiries_page = inquiries_paginator.get_page(page_number if active_tab == 'inquiries' else 1)
 
         return render(request, 'admin_dashboard/conference/dashboard.html', {
-            'venues': venues,
-            'inquiries': inquiries,
+            'venues': venues_page,
+            'inquiries': inquiries_page,
             'active_tab': active_tab,
         })
 
@@ -120,4 +128,21 @@ class EventInquiryUpdateStatusView(StaffRequiredMixin, View):
             messages.success(request, f"Event inquiry updated to {status.capitalize()}.")
         else:
             messages.error(request, "Invalid status choice.")
+        return redirect(reverse_lazy('admin_dashboard:conference_dashboard') + "?tab=inquiries")
+
+
+class EventInquiryDeleteView(StaffRequiredMixin, DeleteView):
+    model = EventInquiry
+    template_name = 'admin_dashboard/confirm_delete.html'
+
+    def get_success_url(self):
+        messages.success(self.request, "Event inquiry cleared successfully.")
+        return reverse_lazy('admin_dashboard:conference_dashboard') + "?tab=inquiries"
+
+
+class ClearAllEventInquiriesView(StaffRequiredMixin, View):
+    def post(self, request):
+        count = EventInquiry.objects.count()
+        EventInquiry.objects.all().delete()
+        messages.success(request, f"Cleared all {count} event inquiry record(s).")
         return redirect(reverse_lazy('admin_dashboard:conference_dashboard') + "?tab=inquiries")

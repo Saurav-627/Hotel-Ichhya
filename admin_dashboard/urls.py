@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import auth, home, settings, rooms, bookings, payments, dining, recreation, conference, contact, cms, users
+from .views import auth, home, settings, rooms, bookings, payments, dining, recreation, conference, contact, cms, users, coupons, notifications, addons
 
 app_name = 'admin_dashboard'
+
 
 urlpatterns = [
     # Auth
@@ -10,6 +11,17 @@ urlpatterns = [
     
     # Dashboard Home
     path('', home.DashboardHomeView.as_view(), name='home'),
+
+    # Notifications
+    path('notifications/', notifications.NotificationListView.as_view(), name='notification_list'),
+    path('notifications/<int:pk>/read/', notifications.mark_notification_read, name='notification_mark_read'),
+    path('notifications/read-all/', notifications.mark_all_notifications_read, name='notification_mark_all_read'),
+
+    # Promo & Coupon Manager
+    path('coupons/', coupons.CouponDashboardView.as_view(), name='coupon_dashboard'),
+    path('coupons/add/', coupons.CouponCreateView.as_view(), name='coupon_create'),
+    path('coupons/<int:pk>/edit/', coupons.CouponUpdateView.as_view(), name='coupon_edit'),
+    path('coupons/<int:pk>/delete/', coupons.CouponDeleteView.as_view(), name='coupon_delete'),
     
     # Bookings
     path('bookings/', bookings.BookingListView.as_view(), name='booking_list'),
@@ -39,6 +51,13 @@ urlpatterns = [
     path('rooms/bulk-price/', rooms.RoomBulkPriceUpdateView.as_view(), name='room_bulk_price'),
     path('rooms/bulk-publish/', rooms.RoomBulkPublishView.as_view(), name='room_bulk_publish'),
     
+    # Addons
+    path('addons/', addons.AddonDashboardView.as_view(), name='addon_dashboard'),
+    path('addons/add/', addons.AddonCreateView.as_view(), name='addon_create'),
+    path('addons/<int:pk>/edit/', addons.AddonUpdateView.as_view(), name='addon_edit'),
+    path('addons/<int:pk>/delete/', addons.AddonDeleteView.as_view(), name='addon_delete'),
+
+    
     # Payments
     path('payments/', payments.PaymentListView.as_view(), name='payment_list'),
     path('payments/<int:pk>/', payments.PaymentDetailView.as_view(), name='payment_detail'),
@@ -49,6 +68,8 @@ urlpatterns = [
     path('dining/venue/<int:pk>/edit/', dining.DiningVenueUpdateView.as_view(), name='dining_venue_edit'),
     path('dining/venue/<int:pk>/delete/', dining.DiningVenueDeleteView.as_view(), name='dining_venue_delete'),
     path('dining/reservation/<int:pk>/update-status/', dining.DiningReservationUpdateStatusView.as_view(), name='dining_reservation_update_status'),
+    path('dining/reservation/<int:pk>/delete/', dining.DiningReservationDeleteView.as_view(), name='dining_reservation_delete'),
+    path('dining/reservations/clear-all/', dining.ClearAllDiningReservationsView.as_view(), name='dining_reservation_clear_all'),
     
     # Recreation
     path('recreation/', recreation.RecreationDashboardView.as_view(), name='recreation_dashboard'),
@@ -62,6 +83,8 @@ urlpatterns = [
     path('conference/venue/<int:pk>/edit/', conference.EventVenueUpdateView.as_view(), name='event_venue_edit'),
     path('conference/venue/<int:pk>/delete/', conference.EventVenueDeleteView.as_view(), name='event_venue_delete'),
     path('conference/inquiry/<int:pk>/update-status/', conference.EventInquiryUpdateStatusView.as_view(), name='event_inquiry_update_status'),
+    path('conference/inquiry/<int:pk>/delete/', conference.EventInquiryDeleteView.as_view(), name='event_inquiry_delete'),
+    path('conference/inquiries/clear-all/', conference.ClearAllEventInquiriesView.as_view(), name='event_inquiry_clear_all'),
     
     # Contact
     path('contact/', contact.ContactDashboardView.as_view(), name='contact_dashboard'),
@@ -69,6 +92,12 @@ urlpatterns = [
     path('contact/branch/<int:pk>/edit/', contact.BranchUpdateView.as_view(), name='branch_edit'),
     path('contact/branch/<int:pk>/delete/', contact.BranchDeleteView.as_view(), name='branch_delete'),
     path('contact/inquiry/<int:pk>/', contact.ContactInquiryDetailView.as_view(), name='contact_inquiry_detail'),
+    path('contact/inquiry/<int:pk>/delete/', contact.ContactInquiryDeleteView.as_view(), name='contact_inquiry_delete'),
+    path('contact/inquiries/clear-all/', contact.ClearAllContactInquiriesView.as_view(), name='contact_inquiry_clear_all'),
+    path('contact/broadcast/', contact.BroadcastNewsletterView.as_view(), name='contact_broadcast'),
+    path('contact/subscribers/<int:pk>/toggle/', contact.NewsletterSubscriberToggleStatusView.as_view(), name='newsletter_subscriber_toggle'),
+    path('contact/subscribers/<int:pk>/delete/', contact.NewsletterSubscriberDeleteView.as_view(), name='newsletter_subscriber_delete'),
+
     
     # CMS Content
     path('cms/', cms.CmsDashboardView.as_view(), name='cms_dashboard'),

@@ -43,8 +43,14 @@ run: ## Start the local development server (accessible from other devices)
 shell: ## Open a Django shell with models and database access
 	$(PYTHON) manage.py shell
 
-collectstatic: ## Collect static files into staticfiles directory
-	$(PYTHON) manage.py collectstatic --noinput
+build-css: ## Build minified production Tailwind CSS
+	npm run build:css
+
+collectstatic: build-css ## Collect static files into staticfiles directory
+	$(PYTHON) manage.py collectstatic --noinput --clear
+
+mailpit: ## Run Mailpit local SMTP server (1025) & Web UI (8025) via Docker
+	docker run -d --name mailpit --rm -p 8025:8025 -p 1025:1025 axllent/mailpit
 
 ##@ Database & Migrations
 makemigrations: ## Generate new migrations based on model changes

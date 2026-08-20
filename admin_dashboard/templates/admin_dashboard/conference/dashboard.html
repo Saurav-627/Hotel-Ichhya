@@ -83,6 +83,42 @@
     </div>
 
     {% elif active_tab == 'inquiries' %}
+    <!-- Clear All Header Bar -->
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-base font-serif font-bold text-neutral-900 dark:text-neutral-100">Event &amp; Banquets Inquiries</h3>
+        {% if inquiries %}
+        <div x-data="{ clearModalOpen: false }">
+            <button type="button" @click="clearModalOpen = true" class="px-3.5 py-1.5 bg-rose-500/10 hover:bg-rose-600 text-rose-500 hover:text-white font-bold rounded-xl text-xs transition-colors border border-rose-500/20 flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-trash-can"></i> Clear All Event Inquiries
+            </button>
+
+            <!-- Modal Backdrop & Card -->
+            <div x-show="clearModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-950/70 backdrop-blur-sm">
+                <div @click.away="clearModalOpen = false" class="custom-card rounded-2xl p-6 sm:p-8 max-w-md w-full text-center bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-2xl space-y-5">
+                    <div class="h-14 w-14 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto text-2xl border border-rose-500/20">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-neutral-900 dark:text-neutral-100 font-serif">Clear All Event Inquiries?</h3>
+                        <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 leading-relaxed">
+                            Are you sure you want to permanently delete <strong>ALL event &amp; banquet inquiries</strong>? This action cannot be undone.
+                        </p>
+                    </div>
+                    <form action="{% url 'admin_dashboard:event_inquiry_clear_all' %}" method="POST" class="flex items-center justify-center gap-3 pt-2 m-0">
+                        {% csrf_token %}
+                        <button type="button" @click="clearModalOpen = false" class="px-5 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 text-xs font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-lg transition-colors cursor-pointer">
+                            Yes, Clear All
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
     <!-- Event Inquiries list -->
     <div class="custom-card rounded-2xl overflow-hidden shadow-sm">
         <table class="w-full text-left border-collapse">
@@ -126,15 +162,21 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <form action="{% url 'admin_dashboard:event_inquiry_update_status' inq.id %}" method="post" class="m-0 flex items-center justify-end gap-1.5">
-                            {% csrf_token %}
-                            <select name="status" onchange="this.form.submit()" 
-                                    class="px-2 py-1 rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-xs cursor-pointer">
-                                <option value="pending" {% if inq.status == 'pending' %}selected{% endif %}>Pending</option>
-                                <option value="processed" {% if inq.status == 'processed' %}selected{% endif %}>Processed</option>
-                                <option value="cancelled" {% if inq.status == 'cancelled' %}selected{% endif %}>Cancel</option>
-                            </select>
-                        </form>
+                        <div class="flex items-center justify-end gap-3">
+                            <form action="{% url 'admin_dashboard:event_inquiry_update_status' inq.id %}" method="post" class="m-0">
+                                {% csrf_token %}
+                                <select name="status" onchange="this.form.submit()" 
+                                        class="px-2 py-1 rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-xs cursor-pointer">
+                                    <option value="pending" {% if inq.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="processed" {% if inq.status == 'processed' %}selected{% endif %}>Processed</option>
+                                    <option value="cancelled" {% if inq.status == 'cancelled' %}selected{% endif %}>Cancel</option>
+                                </select>
+                            </form>
+                            <a href="{% url 'admin_dashboard:event_inquiry_delete' inq.id %}" 
+                               class="text-neutral-400 hover:text-rose-500 transition text-sm" title="Clear Inquiry">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
@@ -146,6 +188,20 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        {% if inquiries.has_other_pages %}
+        <div class="flex items-center justify-between px-6 py-4 border-t border-neutral-200 dark:border-neutral-800 bg-neutral-50/30 dark:bg-neutral-900/10">
+            <span class="text-xs text-neutral-500">Page {{ inquiries.number }} of {{ inquiries.paginator.num_pages }}</span>
+            <div class="flex items-center gap-1">
+                {% if inquiries.has_previous %}
+                <a href="?tab=inquiries&page={{ inquiries.previous_page_number }}" class="px-3 py-1 bg-neutral-200 dark:bg-neutral-800 rounded text-xs font-semibold hover:bg-luxuryGold-500 hover:text-neutral-950 transition">Prev</a>
+                {% endif %}
+                {% if inquiries.has_next %}
+                <a href="?tab=inquiries&page={{ inquiries.next_page_number }}" class="px-3 py-1 bg-neutral-200 dark:bg-neutral-800 rounded text-xs font-semibold hover:bg-luxuryGold-500 hover:text-neutral-950 transition">Next</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </div>
     {% endif %}
 

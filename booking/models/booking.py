@@ -64,11 +64,44 @@ class Booking(models.Model):
         return (self.check_out - self.check_in).days
 
     @property
+    def base_lodging_subtotal(self):
+        return self.subtotal
+
+
+    @property
     def daily_rate(self):
         n = self.nights
         if n > 0 and self.num_rooms > 0:
             return self.subtotal / (n * self.num_rooms)
         return self.subtotal
+
+    @property
+    def addons_total(self):
+        from decimal import Decimal
+        from django.db.models import Sum
+        return self.booking_addons.aggregate(total=Sum('total_price'))['total'] or Decimal('0.00')
+
+    @property
+    def full_subtotal(self):
+        return self.subtotal + self.addons_total
+
+    def calculate_and_update_totals(self, apply_tax=True):
+        from decimal import Decimal
+        from django.db.models import Sum
+        
+        addons_sum = self.booking_addons.aggregate(total=Sum('total_price'))['total'] or Decimal('0.00')
+        combined_subtotal = self.subtotal + addons_sum
+        taxable = combined_subtotal - self.discount
+
+        if apply_tax and getattr(self.room, 'tax_percentage', None):
+            tax_pct = Decimal(str(self.room.tax_percentage))
+            self.tax = (taxable * (tax_pct / Decimal('100.00'))).quantize(Decimal('0.01'))
+        else:
+            self.tax = Decimal('0.00')
+
+        self.total = taxable + self.tax
+        self.save(update_fields=['tax', 'total'])
+        return self.total
 
     @property
     def active_seasonal_price(self):

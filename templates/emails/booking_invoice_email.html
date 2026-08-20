@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation & Receipt — {{ hotel_settings.site_name|default:"Hotel Ichchha" }}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F6F4EF; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #44403C;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F6F4EF; padding: 40px 0;">
+        <tr>
+            <td align="center">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #FFFFFF; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); border: 1px solid #E6DFD3;">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td align="center" style="background: linear-gradient(135deg, #1C1917 0%, #292524 100%); padding: 36px 30px; text-align: center;">
+                            {% if logo_url %}
+                            <img src="{{ logo_url }}" alt="Logo" style="max-height: 75px; width: auto; max-width: 240px; display: block; margin: 0 auto 14px auto; object-fit: contain;">
+                            {% endif %}
+                            <h1 style="color: #FFFFFF; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 1px; text-transform: uppercase;">
+                                {{ hotel_settings.site_name|default:"Hotel Ichchha" }}
+                            </h1>
+                            <p style="color: #D3AA5E; font-size: 11px; font-weight: 600; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 2px;">
+                                Luxury Hospitality &amp; Resort Experience
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Confirmation Greeting -->
+                    <tr>
+                        <td style="padding: 32px 32px 20px 32px;">
+                            <div style="background-color: #FAF7F2; border: 1px solid #C59B27; border-radius: 12px; padding: 16px 20px; text-align: center; margin-bottom: 24px;">
+                                <h2 style="color: #9A6419; font-size: 18px; font-weight: 800; margin: 0;">
+                                    ✓ Booking Reserved &amp; Confirmed
+                                </h2>
+                                <p style="color: #78716C; font-size: 13px; margin: 4px 0 0 0;">
+                                    Reservation Code: <strong style="color: #1C1917; font-family: monospace; font-size: 14px;">{{ booking.booking_uid }}</strong>
+                                </p>
+                            </div>
+
+                            <p style="color: #1C1917; font-size: 15px; line-height: 1.6; margin: 0 0 14px 0;">
+                                Dear <strong>{{ booking.guest_name }}</strong>,
+                            </p>
+                            <p style="color: #44403C; font-size: 14px; line-height: 1.6; margin: 0 0 20px 0;">
+                                Thank you for choosing <strong>{{ hotel_settings.site_name|default:"Hotel Ichchha" }}</strong>. We have received your reservation and look forward to welcoming you. Below is your official receipt summary:
+                            </p>
+
+                            <!-- Reservation Table -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #FAF8F5; border-radius: 10px; border: 1px solid #E7E5E4; margin-bottom: 24px; font-size: 13px;">
+                                <tr>
+                                    <td style="padding: 11px 16px; border-bottom: 1px solid #E7E5E4; color: #78716C; width: 40%;">Guest Name</td>
+                                    <td style="padding: 11px 16px; border-bottom: 1px solid #E7E5E4; color: #1C1917; font-weight: 600;">{{ booking.guest_name }}</td>
+                                </tr>
+                                {% if booking.room %}
+                                <tr>
+                                    <td style="padding: 11px 16px; border-bottom: 1px solid #E7E5E4; color: #78716C;">Chamber / Suite</td>
+                                    <td style="padding: 11px 16px; border-bottom: 1px solid #E7E5E4; color: #1C1917; font-weight: 600;">{{ booking.room.title }} ({{ booking.num_rooms }} room{% if booking.num_rooms > 1 %}s{% endif %})</td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <td style="padding: 11px 16px; border-bottom: 1px solid #E7E5E4; color: #78716C;">Check-In Date</td>
+                                    <td style="padding: 11px 16px; border-bottom: 1px solid #E7E5E4; color: #1C1917; font-weight: 600;">{{ booking.check_in|date:"F d, Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 11px 16px; border-bottom: 1px solid #E7E5E4; color: #78716C;">Check-Out Date</td>
+                                    <td style="padding: 11px 16px; border-bottom: 1px solid #E7E5E4; color: #1C1917; font-weight: 600;">{{ booking.check_out|date:"F d, Y" }} ({{ booking.nights }} night{% if booking.nights > 1 %}s{% endif %})</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 11px 16px; color: #78716C;">Guests</td>
+                                    <td style="padding: 11px 16px; color: #1C1917; font-weight: 600;">{{ booking.adults }} Adult(s){% if booking.children %}, {{ booking.children }} Child(ren){% endif %}</td>
+                                </tr>
+                            </table>
+
+                            <!-- Itemized Breakdown Table -->
+                            <h3 style="color: #1C1917; font-size: 15px; font-weight: 700; margin: 0 0 12px 0;">Itemized Breakdown</h3>
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse: collapse; background-color: #FAF8F5; border-radius: 10px; border: 1px solid #E7E5E4; overflow: hidden;">
+                                <thead>
+                                    <tr style="background-color: #F3EFE6; border-bottom: 1px solid #E7E5E4;">
+                                        <th align="left" style="padding: 10px 14px; font-size: 11px; color: #9A6419; text-transform: uppercase; letter-spacing: 1px;">Description</th>
+                                        <th align="right" style="padding: 10px 14px; font-size: 11px; color: #9A6419; text-transform: uppercase; letter-spacing: 1px;">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="border-bottom: 1px solid #E7E5E4;">
+                                        <td style="padding: 12px 14px; font-size: 13px; color: #1C1917;">
+                                            <strong>Room Lodging:</strong> {{ booking.room.title }}<br>
+                                            <small style="color: #78716C;">{{ booking.num_rooms }} room(s) x {{ booking.nights }} night(s) @ {{ booking.currency_code }} {{ booking.daily_rate|floatformat:2 }}/night</small>
+                                            {% with seasonal=booking.active_seasonal_price %}
+                                                {% if seasonal %}
+                                                    <br><span style="color: #9A6419; font-size: 11px; font-weight: 600;">🏷️ Seasonal Offer: {{ seasonal.name }}</span>
+                                                {% elif booking.daily_rate < booking.room.base_price %}
+                                                    <br><span style="color: #059669; font-size: 11px; font-weight: 600;">🏷️ Special Discounted Rate Applied</span>
+                                                {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        <td align="right" style="padding: 12px 14px; font-size: 13px; color: #1C1917; font-weight: 600;">
+                                            {{ booking.currency_code }} {{ booking.subtotal|floatformat:2 }}
+                                        </td>
+                                    </tr>
+
+                                    {% for b_addon in booking.booking_addons.all %}
+                                    <tr style="border-bottom: 1px solid #E7E5E4;">
+                                        <td style="padding: 10px 14px; font-size: 13px; color: #1C1917;">
+                                            <strong>Add-on Service:</strong> {{ b_addon.addon_name }} (x{{ b_addon.quantity }})<br>
+                                            <small style="color: #78716C;">{{ b_addon.price_type_display }}</small>
+                                        </td>
+                                        <td align="right" style="padding: 10px 14px; font-size: 13px; color: #9A6419; font-weight: 600;">
+                                            + {{ booking.currency_code }} {{ b_addon.total_price }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+
+                                    {% if booking.discount > 0 %}
+                                    <tr style="border-bottom: 1px solid #E7E5E4;">
+                                        <td style="padding: 10px 14px; font-size: 13px; color: #059669;">
+                                            Discount Coupon ({% if booking.coupon %}{{ booking.coupon.code }}{% else %}Promo{% endif %})
+                                        </td>
+                                        <td align="right" style="padding: 10px 14px; font-size: 13px; color: #059669; font-weight: 600;">
+                                            - {{ booking.currency_code }} {{ booking.discount }}
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+
+                                    {% if booking.tax > 0 %}
+                                    <tr style="border-bottom: 1px solid #E7E5E4;">
+                                        <td style="padding: 10px 14px; font-size: 13px; color: #78716C;">
+                                            Tax &amp; VAT
+                                        </td>
+                                        <td align="right" style="padding: 10px 14px; font-size: 13px; color: #78716C; font-weight: 600;">
+                                            {{ booking.currency_code }} {{ booking.tax }}
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+
+                                    <tr style="background-color: #F3EFE6;">
+                                        <td style="padding: 14px 14px; font-size: 14px; color: #1C1917; font-weight: 800;">
+                                            Total Amount
+                                        </td>
+                                        <td align="right" style="padding: 14px 14px; font-size: 16px; color: #9A6419; font-weight: 800;">
+                                            {{ booking.currency_code }} {{ booking.total|floatformat:2 }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div style="text-align: center; margin: 28px 0 16px 0;">
+                                <a href="{{ invoice_url }}" target="_blank" style="background: linear-gradient(135deg, #C59B27 0%, #9A6419 100%); color: #FFFFFF; text-decoration: none; padding: 14px 32px; border-radius: 50px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; display: inline-block; box-shadow: 0 6px 18px rgba(154, 100, 25, 0.25);">
+                                    View Printable Receipt
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #FAF8F5; padding: 24px 30px; border-top: 1px solid #E7E5E4; text-align: center;">
+                            <p style="color: #78716C; font-size: 12px; margin: 0;">
+                                &copy; {% now "Y" %} {{ hotel_settings.site_name|default:"Hotel Ichchha" }} · All Rights Reserved.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

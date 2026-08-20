@@ -1,11 +1,11 @@
 {% extends 'admin_dashboard/base.html' %}
 
-{% block page_title %}Branches & Contact Inquiries{% endblock %}
-{% block page_subtitle %}Review hotel physical branches locations and general web contact messages.{% endblock %}
+{% block page_title %}Branches, Inquiries &amp; Newsletter Subscribers{% endblock %}
+{% block page_subtitle %}Manage hotel branches, web contact inquiries, and email newsletter subscribers.{% endblock %}
 
 {% block breadcrumbs %}
 <i class="fa-solid fa-chevron-right text-xs"></i>
-<span class="text-neutral-500">Branches & Contact</span>
+<span class="text-neutral-500">Branches &amp; Subscribers</span>
 {% endblock %}
 
 {% block page_actions %}
@@ -13,6 +13,10 @@
     {% if active_tab == 'branches' %}
     <a href="{% url 'admin_dashboard:branch_create' %}" class="px-4 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-lg text-sm transition">
         <i class="fa-solid fa-plus mr-1.5"></i> Add Branch
+    </a>
+    {% elif active_tab == 'subscribers' %}
+    <a href="{% url 'admin_dashboard:contact_broadcast' %}" class="px-4 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-lg text-sm transition flex items-center gap-2">
+        <i class="fa-solid fa-paper-plane"></i> Broadcast Campaign
     </a>
     {% endif %}
 </div>
@@ -27,7 +31,12 @@
     </a>
     <a href="?tab=inquiries" 
        class="px-5 py-3 border-b-2 font-semibold text-sm transition-all duration-200 {% if active_tab == 'inquiries' %}border-luxuryGold-500 text-luxuryGold-500{% else %}border-transparent text-neutral-400 hover:text-neutral-200{% endif %}">
-        Contact Inquiries
+        Contact Inquiries ({{ inquiries_total|default:0 }})
+    </a>
+    <a href="?tab=subscribers" 
+       class="px-5 py-3 border-b-2 font-semibold text-sm transition-all duration-200 {% if active_tab == 'subscribers' %}border-luxuryGold-500 text-luxuryGold-500{% else %}border-transparent text-neutral-400 hover:text-neutral-200{% endif %} flex items-center gap-2">
+        <span>Newsletter Subscribers</span>
+        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-luxuryGold-500/10 text-luxuryGold-500 border border-luxuryGold-500/20">{{ subscribers_total|default:0 }}</span>
     </a>
 </div>
 
@@ -78,6 +87,42 @@
     </div>
 
     {% elif active_tab == 'inquiries' %}
+    <!-- Clear All Header Bar -->
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-base font-serif font-bold text-neutral-900 dark:text-neutral-100">Guest Contact Inquiries</h3>
+        {% if inquiries %}
+        <div x-data="{ clearModalOpen: false }">
+            <button type="button" @click="clearModalOpen = true" class="px-3.5 py-1.5 bg-rose-500/10 hover:bg-rose-600 text-rose-500 hover:text-white font-bold rounded-xl text-xs transition-colors border border-rose-500/20 flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-trash-can"></i> Clear All Inquiries
+            </button>
+
+            <!-- Modal Backdrop & Card -->
+            <div x-show="clearModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-950/70 backdrop-blur-sm">
+                <div @click.away="clearModalOpen = false" class="custom-card rounded-2xl p-6 sm:p-8 max-w-md w-full text-center bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-2xl space-y-5">
+                    <div class="h-14 w-14 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto text-2xl border border-rose-500/20">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-neutral-900 dark:text-neutral-100 font-serif">Clear All Contact Inquiries?</h3>
+                        <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 leading-relaxed">
+                            Are you sure you want to permanently delete <strong>ALL contact inquiry records</strong>? This action cannot be undone.
+                        </p>
+                    </div>
+                    <form action="{% url 'admin_dashboard:contact_inquiry_clear_all' %}" method="POST" class="flex items-center justify-center gap-3 pt-2 m-0">
+                        {% csrf_token %}
+                        <button type="button" @click="clearModalOpen = false" class="px-5 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 text-xs font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-lg transition-colors cursor-pointer">
+                            Yes, Clear All
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
     <!-- Inquiries List table -->
     <div class="custom-card rounded-2xl overflow-hidden shadow-sm">
         <table class="w-full text-left border-collapse">
@@ -105,16 +150,105 @@
                     <td class="px-6 py-4 text-neutral-500 italic max-w-xs truncate" title="{{ inq.message }}">{{ inq.message }}</td>
                     <td class="px-6 py-4 text-neutral-500 text-xs font-semibold">{{ inq.created_at|date:"M d, Y · H:i" }}</td>
                     <td class="px-6 py-4 text-right">
-                        <a href="{% url 'admin_dashboard:contact_inquiry_detail' inq.id %}" 
-                           class="text-xs font-bold text-luxuryGold-500 hover:text-luxuryGold-400">
-                            Read Message <i class="fa-solid fa-angle-right"></i>
-                        </a>
+                        <div class="flex items-center justify-end gap-4">
+                            <a href="{% url 'admin_dashboard:contact_inquiry_detail' inq.id %}" 
+                               class="text-xs font-bold text-luxuryGold-500 hover:text-luxuryGold-400">
+                                Read Message <i class="fa-solid fa-angle-right"></i>
+                            </a>
+                            <a href="{% url 'admin_dashboard:contact_inquiry_delete' inq.id %}" 
+                               class="text-neutral-400 hover:text-rose-500 transition text-sm" title="Clear Inquiry">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
                     <td colspan="6" class="px-6 py-12 text-center text-sm text-neutral-500">
                         No general contact inquiries received yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if inquiries.has_other_pages %}
+        <div class="flex items-center justify-between px-6 py-4 border-t border-neutral-200 dark:border-neutral-800 bg-neutral-50/30 dark:bg-neutral-900/10">
+            <span class="text-xs text-neutral-500">Page {{ inquiries.number }} of {{ inquiries.paginator.num_pages }}</span>
+            <div class="flex items-center gap-1">
+                {% if inquiries.has_previous %}
+                <a href="?tab=inquiries&page={{ inquiries.previous_page_number }}" class="px-3 py-1 bg-neutral-200 dark:bg-neutral-800 rounded text-xs font-semibold hover:bg-luxuryGold-500 hover:text-neutral-950 transition">Prev</a>
+                {% endif %}
+                {% if inquiries.has_next %}
+                <a href="?tab=inquiries&page={{ inquiries.next_page_number }}" class="px-3 py-1 bg-neutral-200 dark:bg-neutral-800 rounded text-xs font-semibold hover:bg-luxuryGold-500 hover:text-neutral-950 transition">Next</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% elif active_tab == 'subscribers' %}
+    <!-- Newsletter Subscribers Table -->
+    <div class="custom-card rounded-2xl overflow-hidden shadow-sm">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="text-xs uppercase text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30">
+                    <th class="px-6 py-4 font-semibold">Subscriber Email</th>
+                    <th class="px-6 py-4 font-semibold">Verification Status</th>
+                    <th class="px-6 py-4 font-semibold">Active Status</th>
+                    <th class="px-6 py-4 font-semibold">Subscribed Date</th>
+                    <th class="px-6 py-4 text-right font-semibold">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-neutral-200 dark:divide-neutral-800 text-sm">
+                {% for sub in subscribers %}
+                <tr class="hover:bg-neutral-50/30 dark:hover:bg-neutral-900/10 transition duration-150">
+                    <td class="px-6 py-4">
+                        <span class="font-bold text-neutral-900 dark:text-neutral-100">{{ sub.email }}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if sub.is_verified %}
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                            <i class="fa-solid fa-circle-check text-[10px]"></i> Verified Opt-In
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                            <i class="fa-solid fa-clock text-[10px]"></i> Unverified Pending
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if sub.is_active %}
+                        <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-semibold">Active</span>
+                        {% else %}
+                        <span class="px-2.5 py-0.5 rounded-full bg-neutral-500/10 text-neutral-400 text-xs font-semibold">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-neutral-500 text-xs font-semibold">
+                        {{ sub.created_at|date:"M d, Y · H:i" }}
+                    </td>
+                    <td class="px-6 py-4 text-right flex items-center justify-end gap-3">
+                        <form method="POST" action="{% url 'admin_dashboard:newsletter_subscriber_toggle' sub.id %}">
+                            {% csrf_token %}
+                            {% if sub.is_active and sub.is_verified %}
+                            <button type="submit" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-neutral-500/10 hover:bg-neutral-500/20 text-neutral-400 transition" title="Deactivate subscriber">
+                                Deactivate
+                            </button>
+                            {% else %}
+                            <button type="submit" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-luxuryGold-500/10 hover:bg-luxuryGold-500/20 text-luxuryGold-500 transition" title="Manually verify and activate">
+                                Verify &amp; Activate
+                            </button>
+                            {% endif %}
+                        </form>
+                        <a href="{% url 'admin_dashboard:newsletter_subscriber_delete' sub.id %}" class="p-1.5 text-neutral-400 hover:text-rose-500 transition" title="Delete subscriber">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-sm text-neutral-500">
+                        No newsletter subscribers found.
                     </td>
                 </tr>
                 {% endfor %}

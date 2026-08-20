@@ -1,22 +1,30 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.decorators.http import require_POST
-from django.contrib import messages
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from rooms.models.room import Room
-from rooms.models.room_availability import RoomAvailability
-from django.db.models import Sum
-from ..models.booking import Booking
-from ..models.coupon import Coupon
 import datetime
 import json
+import logging
+from decimal import Decimal
+
+from django.contrib import messages
+from django.db.models import Prefetch, Sum
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
+from admin_dashboard.models.notification import create_admin_notification
+from core.services.email_service import send_booking_invoice_email
+from rooms.models.room import Room
+from rooms.models.room_availability import RoomAvailability
+from rooms.models.room_base_price import RoomBasePrice
+
+from ..models.booking import Booking
+from ..models.coupon import Coupon
+
+logger = logging.getLogger(__name__)
 
 
 @require_POST
 def create_booking(request, room_id):
-    from django.db.models import Prefetch
-    from rooms.models.room_base_price import RoomBasePrice
-    
     selected_currency = request.COOKIES.get('currency', 'USD')
     room_qs = Room.objects.prefetch_related(
         Prefetch(
@@ -28,9 +36,9 @@ def create_booking(request, room_id):
     room = get_object_or_404(room_qs, id=room_id, is_published=True)
     room.set_active_currency(selected_currency)
     
-    name = request.POST.get('name')
-    email = request.POST.get('email')
-    phone = request.POST.get('phone')
+    name = (request.POST.get('name') or '').strip()
+    email = (request.POST.get('email') or '').strip()
+    phone = (request.POST.get('phone') or '').strip()
     check_in_str = request.POST.get('check_in')
     check_out_str = request.POST.get('check_out')
     adults_str = request.POST.get('adults', '2')
@@ -46,6 +54,10 @@ def create_booking(request, room_id):
         num_rooms = max(1, int(request.POST.get('num_rooms', '1')))
     except (ValueError, TypeError):
         messages.error(request, "Invalid input formats.")
+        return redirect('rooms:room_detail', slug=room.slug)
+
+    if check_out <= check_in:
+        messages.error(request, "Check-out date must be after check-in date.")
         return redirect('rooms:room_detail', slug=room.slug)
 
     # Double check availability: blocked if any date can't accommodate num_rooms
@@ -71,9 +83,9 @@ def create_booking(request, room_id):
         return redirect('rooms:room_detail', slug=room.slug)
 
     nights = (check_out - check_in).days
-    daily_price = room.base_price
-    # Match any seasonal override that overlaps with the booking dates (not just fully covers it).
-    # Currency-specific override wins; wildcard (no currency) is fallback.
+    daily_price = room.final_price
+    
+    # Seasonal rate override
     seasonal = (
         room.seasonal_prices.filter(
             start_date__lte=check_out, end_date__gte=check_in, is_active=True,
@@ -87,24 +99,67 @@ def create_booking(request, room_id):
     if seasonal:
         daily_price = seasonal.price_override
 
-    subtotal = daily_price * nights * num_rooms
+    room_subtotal = daily_price * nights * num_rooms
+
+    # Process selected add-ons
+    from ..models.addon import Addon, BookingAddon
+    selected_addon_ids = request.POST.getlist('selected_addons') or request.POST.getlist('selected_addons[]')
+    addon_items = []
+    addons_subtotal = Decimal('0.00')
+
+    if selected_addon_ids:
+        addons_qs = Addon.objects.filter(id__in=selected_addon_ids, is_active=True).prefetch_related('prices__currency')
+        for addon in addons_qs:
+            addon.set_active_currency(selected_currency)
+            unit_price = addon.current_price or Decimal('0.00')
+            if addon.price_type == 'per_night':
+                qty_calc = Decimal(str(nights * num_rooms))
+                display_qty = nights * num_rooms
+            elif addon.price_type == 'per_person':
+                qty_calc = Decimal(str(adults + children))
+                display_qty = adults + children
+            elif addon.price_type == 'per_person_per_night':
+                qty_calc = Decimal(str((adults + children) * nights))
+                display_qty = (adults + children) * nights
+            else:
+                qty_calc = Decimal('1')
+                display_qty = 1
+
+            item_total = unit_price * qty_calc
+            addons_subtotal += item_total
+            addon_items.append({
+                'addon': addon,
+                'name': addon.name,
+                'price_type': addon.price_type,
+                'unit_price': unit_price,
+                'quantity': display_qty,
+                'total_price': item_total
+            })
+
+    subtotal = room_subtotal + addons_subtotal
     
-    # Process promo code
-    from decimal import Decimal
+    # Process promo code with multi-currency & min-spend validation
     discount = Decimal('0.00')
     coupon = None
     if promo_code:
         coupon_obj = Coupon.objects.filter(code__iexact=promo_code, is_active=True).first()
-        if coupon_obj and coupon_obj.is_valid(subtotal):
-            coupon = coupon_obj
-            discount = coupon_obj.calculate_discount(subtotal)
-            messages.success(request, f"Promo code '{promo_code}' applied successfully!")
+        if coupon_obj:
+            is_valid, err_msg = coupon_obj.is_valid(order_amount=subtotal, product_type='room', active_currency_code=selected_currency)
+            if is_valid:
+                coupon = coupon_obj
+                discount = coupon_obj.calculate_discount(subtotal)
+                messages.success(request, f"Promo code '{promo_code}' applied successfully!")
+            else:
+                messages.warning(request, f"Promo code '{promo_code}': {err_msg}")
         else:
-            messages.warning(request, "Invalid or expired promo code.")
+            messages.warning(request, f"Invalid or expired promo code '{promo_code}'.")
 
     taxable_amount = subtotal - discount
-    tax = 0
-    total = taxable_amount
+    tax = Decimal('0.00')
+    if getattr(room, 'tax_percentage', None):
+        tax_pct = Decimal(str(room.tax_percentage))
+        tax = (taxable_amount * (tax_pct / Decimal('100.00'))).quantize(Decimal('0.01'))
+    total = taxable_amount + tax
 
     # Create Booking
     booking = Booking.objects.create(
@@ -118,7 +173,7 @@ def create_booking(request, room_id):
         adults=adults,
         children=children,
         num_rooms=num_rooms,
-        subtotal=subtotal,
+        subtotal=room_subtotal,
         currency_code=selected_currency,
         coupon=coupon,
         discount=discount,
@@ -128,25 +183,63 @@ def create_booking(request, room_id):
         status='draft'
     )
 
+    # Save BookingAddon line items
+    for item in addon_items:
+        BookingAddon.objects.create(
+            booking=booking,
+            addon=item['addon'],
+            addon_name=item['name'],
+            price_type=item['price_type'],
+            unit_price=item['unit_price'],
+            quantity=item['quantity'],
+            total_price=item['total_price']
+        )
+
+    # Recalculate booking.tax and booking.total incorporating add-ons
+    booking.calculate_and_update_totals(apply_tax=True)
+
+    # Track coupon redemption
+    if coupon:
+        coupon.redeem()
+
+
+    # Trigger Admin Real-Time Notification
+    try:
+        create_admin_notification(
+            notification_type='booking_created',
+            title=f"New Room Booking [{booking.booking_uid}]",
+            message=f"{booking.guest_name} reserved {room.title} ({booking.currency_code} {booking.total}) for {booking.nights} night(s).",
+            link_url=reverse('admin_dashboard:booking_detail', kwargs={'pk': booking.pk})
+        )
+    except Exception as e:
+        logger.error(f"Failed to create booking notification: {e}")
+
+    # Note: Invoice email is deferred until payment succeeds in payment_callback
+
     return redirect('booking:checkout_page', booking_uid=booking.booking_uid)
 
+
 def checkout_page(request, booking_uid):
-    from django.db.models import Prefetch
-    from rooms.models.room_base_price import RoomBasePrice
-    
-    selected_currency = request.COOKIES.get('currency', 'USD')
-    
     booking_qs = Booking.objects.prefetch_related(
+        'booking_addons__addon',
         Prefetch(
             'room__base_prices',
-            queryset=RoomBasePrice.objects.filter(currency__iso_code=selected_currency),
-            to_attr='active_currency_price'
+            queryset=RoomBasePrice.objects.all()
         )
     )
+
     booking = get_object_or_404(booking_qs, booking_uid=booking_uid)
-    booking.room.set_active_currency(selected_currency)
+    locked_currency = booking.currency_code or 'USD'
+    booking.room.set_active_currency(locked_currency)
     
-    return render(request, 'booking/checkout.html', {'booking': booking})
+    context = {
+        'booking': booking,
+        'selected_currency': locked_currency,
+        'is_checkout_page': True,
+    }
+    return render(request, 'booking/checkout.html', context)
+
+
 
 @csrf_exempt
 @require_POST
@@ -189,7 +282,7 @@ def channel_manager_sync(request):
     
     # Calculate price
     nights = (check_out - check_in).days
-    subtotal = room.base_price * nights
+    subtotal = (room.base_price or Decimal("0.00")) * nights
     total = subtotal
     
     if not booking:
@@ -202,7 +295,7 @@ def channel_manager_sync(request):
             check_in=check_in,
             check_out=check_out,
             subtotal=subtotal,
-            tax=0,
+            tax=Decimal("0.00"),
             total=total,
             status='confirmed',  # OTA bookings are usually confirmed
             channel_name=channel,
@@ -219,11 +312,9 @@ def channel_manager_sync(request):
         booking.check_in = check_in
         booking.check_out = check_out
         booking.subtotal = subtotal
-        booking.tax = 0
+        booking.tax = Decimal("0.00")
         booking.total = total
         booking.channel_raw_payload = data
         booking.save()
         
         return JsonResponse({'status': 'success', 'message': 'Booking updated successfully', 'booking_id': booking.id})
-
-

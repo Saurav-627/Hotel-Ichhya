@@ -184,22 +184,39 @@
             <h3 class="text-base font-semibold text-neutral-900 dark:text-neutral-100 font-serif mb-4">Financial Summary</h3>
             <div class="space-y-2.5 text-sm">
                  <div class="flex justify-between text-neutral-500">
-                    <span>Subtotal Price</span>
-                    <span>{{ booking.currency_code }} {{ booking.subtotal }}</span>
+                    <span>Lodging Subtotal</span>
+                    <span>{{ booking.currency_code }} {{ booking.subtotal|floatformat:2 }}</span>
                 </div>
-                {% if booking.coupon %}
-                <div class="flex justify-between text-emerald-500 font-medium">
-                    <span>Discount ({{ booking.coupon.code }})</span>
-                    <span>-{{ booking.currency_code }} {{ booking.discount }}</span>
+
+                {% if booking.booking_addons.all %}
+                <div class="pt-2 border-t border-dashed border-neutral-200 dark:border-neutral-800 space-y-1.5">
+                    <span class="text-xs font-bold text-luxuryGold-500 uppercase block">Selected Add-on Services:</span>
+                    {% for b_addon in booking.booking_addons.all %}
+                    <div class="flex justify-between text-xs text-neutral-600 dark:text-neutral-400 pl-2 border-l-2 border-luxuryGold-500/40">
+                        <span>{{ b_addon.addon_name }} (x{{ b_addon.quantity }})</span>
+                        <span class="font-semibold text-luxuryGold-500">+ {{ booking.currency_code }} {{ b_addon.total_price|floatformat:2 }}</span>
+                    </div>
+                    {% endfor %}
                 </div>
                 {% endif %}
-                <div class="flex justify-between text-neutral-500">
-                    <span>Tax (13% Standard)</span>
-                    <span>{{ booking.currency_code }} {{ booking.tax }}</span>
+
+                {% if booking.coupon %}
+                <div class="flex justify-between text-emerald-500 font-medium pt-1">
+                    <span>Discount ({% if booking.coupon %}{{ booking.coupon.code }}{% else %}Promo{% endif %})</span>
+                    <span>-{{ booking.currency_code }} {{ booking.discount|floatformat:2 }}</span>
                 </div>
+                {% endif %}
+
+                {% if booking.tax > 0 %}
+                <div class="flex justify-between text-neutral-500">
+                    <span>Tax &amp; VAT</span>
+                    <span>{{ booking.currency_code }} {{ booking.tax|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+
                 <div class="flex justify-between font-bold text-neutral-900 dark:text-neutral-100 pt-2 border-t border-neutral-200 dark:border-neutral-800">
-                    <span>Total Bill</span>
-                    <span>{{ booking.currency_code }} {{ booking.total }}</span>
+                    <span>Grand Total</span>
+                    <span class="text-luxuryGold-500 font-serif text-lg">{{ booking.currency_code }} {{ booking.total|floatformat:2 }}</span>
                 </div>
             </div>
             

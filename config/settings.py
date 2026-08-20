@@ -88,6 +88,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.global_settings',
                 'seo.context_processors.seo_meta',
+                'admin_dashboard.context_processors.admin_notifications',
             ],
         },
     },
@@ -191,4 +192,16 @@ ESEWA_DEMO = env.bool('ESEWA_DEMO', default=True)
 KHALTI_CLIENT_ID = env('KHALTI_CLIENT_ID', default='')
 KHALTI_CLIENT_SECRET = env('KHALTI_CLIENT_SECRET', default='test_secret_key_5c8e3381e3cb41ee84e03d36b42b9e67')
 KHALTI_DEMO = env.bool('KHALTI_DEMO', default=True)
+
+# Email & Production SMTP Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = env('EMAIL_HOST', default='')
+EMAIL_PORT = env.int('EMAIL_PORT', default=1025)
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
+EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=False)
+EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=False)
+EMAIL_TIMEOUT = env.int('EMAIL_TIMEOUT', default=10)
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Hotel Ichchha <noreply@hotelichchha.com>')
+SITE_DOMAIN = env('SITE_DOMAIN', default='127.0.0.1:8000')
 
