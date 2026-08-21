@@ -105,6 +105,15 @@ urlpatterns = [
     path('cms/hero/<int:pk>/edit/', cms.HeroSlideUpdateView.as_view(), name='hero_edit'),
     path('cms/hero/<int:pk>/delete/', cms.HeroSlideDeleteView.as_view(), name='hero_delete'),
     path('cms/about/', cms.AboutPreviewUpdateView.as_view(), name='about_update'),
+    path('cms/about-page/', cms.AboutPageUpdateView.as_view(), name='about_page_update'),
+    
+    path('cms/team/add/', cms.TeamMemberCreateView.as_view(), name='team_member_create'),
+    path('cms/team/<int:pk>/edit/', cms.TeamMemberUpdateView.as_view(), name='team_member_edit'),
+    path('cms/team/<int:pk>/delete/', cms.TeamMemberDeleteView.as_view(), name='team_member_delete'),
+
+    path('cms/facility/add/', cms.AboutFacilityCreateView.as_view(), name='about_facility_create'),
+    path('cms/facility/<int:pk>/edit/', cms.AboutFacilityUpdateView.as_view(), name='about_facility_edit'),
+    path('cms/facility/<int:pk>/delete/', cms.AboutFacilityDeleteView.as_view(), name='about_facility_delete'),
     
     path('cms/blog/add/', cms.BlogPostCreateView.as_view(), name='blog_create'),
     path('cms/blog/<int:pk>/edit/', cms.BlogPostUpdateView.as_view(), name='blog_edit'),

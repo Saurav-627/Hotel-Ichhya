@@ -1,7 +1,8 @@
 <!-- GLOBAL SEARCH MODAL -->
 <template x-teleport="body">
     <div x-show="searchOpen" 
-         x-effect="document.body.style.overflow = searchOpen ? 'hidden' : ''"
+         x-effect="document.body.style.overflow = searchOpen ? 'hidden' : ''; if (window.lenis) { searchOpen ? window.lenis.stop() : window.lenis.start(); }"
+         data-lenis-prevent
          class="fixed inset-0 z-[99999] flex items-center justify-center p-4" 
          style="display: none;">
         <div x-show="searchOpen" @click="searchOpen = false" class="fixed inset-0 bg-black/80 backdrop-blur-sm"></div>

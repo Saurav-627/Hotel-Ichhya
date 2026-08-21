@@ -1,7 +1,8 @@
 <!-- MOBILE SIDE MENU -->
 <template x-teleport="body">
     <div x-show="mobileMenuOpen" 
-         x-effect="document.body.style.overflow = mobileMenuOpen ? 'hidden' : ''"
+         x-effect="document.body.style.overflow = mobileMenuOpen ? 'hidden' : ''; if (window.lenis) { mobileMenuOpen ? window.lenis.stop() : window.lenis.start(); }"
+         data-lenis-prevent
          class="fixed inset-0 z-[99999] flex md:hidden" 
          style="display: none;">
         <!-- Backdrop -->
@@ -41,22 +42,22 @@
                 {% for item in header_menu %}
                     <a href="{{ item.url }}" data-nav-mobile class="block py-2 text-base font-medium border-b border-transparent hover:text-luxuryGold-400">{{ item.name }}</a>
                 {% empty %}
+                    <a href="{% url 'about:about_page' %}" class="block py-2 text-base font-medium hover:text-luxuryGold-400">About</a>
                     <a href="{% url 'rooms:room_list' %}" class="block py-2 text-base font-medium hover:text-luxuryGold-400">Rooms & Suites</a>
                     <a href="{% url 'dining:dining_list' %}" class="block py-2 text-base font-medium hover:text-luxuryGold-400">Dining</a>
                     <a href="{% url 'recreation:recreation_list' %}" class="block py-2 text-base font-medium hover:text-luxuryGold-400">Recreation</a>
                     <a href="{% url 'conference:venue_list' %}" class="block py-2 text-base font-medium hover:text-luxuryGold-400">Events</a>
                     <a href="{% url 'gallery:gallery_list' %}" class="block py-2 text-base font-medium hover:text-luxuryGold-400">Gallery</a>
-                    <a href="{% url 'blogs:blog_list' %}" class="block py-2 text-base font-medium hover:text-luxuryGold-400">News</a>
                     <a href="{% url 'contact:contact_page' %}" class="block py-2 text-base font-medium hover:text-luxuryGold-400">Contact</a>
                 {% endfor %}
 
                 <div class="pt-6">
-                    <a href="{% url 'rooms:room_list' %}" class="block text-center w-full py-3 text-sm font-semibold uppercase tracking-wider rounded-lg border border-luxuryGold-400 {% if selected_theme == 'light' %}bg-amber-800 text-white{% else %}bg-luxuryGold-500 text-black{% endif %}"
+                    <a href="{{ hotel_settings.header_cta_url|default:'/rooms/' }}" class="block text-center w-full py-3 text-sm font-semibold uppercase tracking-wider rounded-lg border border-luxuryGold-400 {% if selected_theme == 'light' %}bg-amber-800 text-white{% else %}bg-luxuryGold-500 text-black{% endif %}"
                        :class="{
                            'bg-amber-800 text-white': currentTheme === 'light',
                            'bg-luxuryGold-500 text-black': currentTheme !== 'light'
                        }">
-                        Book A Stay
+                        {{ hotel_settings.header_cta_text|default:"Book A Stay" }}
                     </a>
                 </div>
 

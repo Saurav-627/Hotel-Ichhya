@@ -78,7 +78,8 @@
                 <!-- LIGHTBOX MODAL -->
                 <template x-teleport="body">
                     <div x-show="lightboxOpen" 
-                         x-effect="document.body.style.overflow = lightboxOpen ? 'hidden' : ''"
+                         x-effect="document.body.style.overflow = lightboxOpen ? 'hidden' : ''; if (window.lenis) { lightboxOpen ? window.lenis.stop() : window.lenis.start(); }"
+                         data-lenis-prevent
                          @keydown.escape.window="lightboxOpen = false"
                          class="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 bg-black/95 backdrop-blur-md" 
                          style="display: none;">

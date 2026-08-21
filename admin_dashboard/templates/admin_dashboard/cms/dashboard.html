@@ -15,6 +15,14 @@
     <a href="{% url 'admin_dashboard:hero_create' %}" class="px-4 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-lg text-sm transition">
         <i class="fa-solid fa-plus mr-1.5"></i> Add Hero Slide
     </a>
+    {% elif active_tab == 'team' %}
+    <a href="{% url 'admin_dashboard:team_member_create' %}" class="px-4 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-lg text-sm transition">
+        <i class="fa-solid fa-user-plus mr-1.5"></i> Add Leadership Member
+    </a>
+    {% elif active_tab == 'about_page' %}
+    <a href="{% url 'admin_dashboard:about_facility_create' %}" class="px-4 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-lg text-sm transition">
+        <i class="fa-solid fa-plus mr-1.5"></i> Add Facility Highlight
+    </a>
     {% elif active_tab == 'blogs' %}
     <a href="{% url 'admin_dashboard:blog_create' %}" class="px-4 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-lg text-sm transition">
         <i class="fa-solid fa-plus mr-1.5"></i> Create Blog Post
@@ -39,7 +47,9 @@
 <!-- Tabs navigation -->
 <div class="flex items-center gap-2 border-b border-neutral-200 dark:border-neutral-800 mb-8 overflow-x-auto no-scrollbar">
     <a href="?tab=hero" class="px-5 py-3 border-b-2 font-semibold text-sm transition shrink-0 {% if active_tab == 'hero' %}border-luxuryGold-500 text-luxuryGold-500{% else %}border-transparent text-neutral-400 hover:text-neutral-200{% endif %}">Hero slides</a>
-    <a href="?tab=about" class="px-5 py-3 border-b-2 font-semibold text-sm transition shrink-0 {% if active_tab == 'about' %}border-luxuryGold-500 text-luxuryGold-500{% else %}border-transparent text-neutral-400 hover:text-neutral-200{% endif %}">About Preview</a>
+    <a href="?tab=about" class="px-5 py-3 border-b-2 font-semibold text-sm transition shrink-0 {% if active_tab == 'about' %}border-luxuryGold-500 text-luxuryGold-500{% else %}border-transparent text-neutral-400 hover:text-neutral-200{% endif %}">Homepage CMS</a>
+    <a href="?tab=about_page" class="px-5 py-3 border-b-2 font-semibold text-sm transition shrink-0 {% if active_tab == 'about_page' %}border-luxuryGold-500 text-luxuryGold-500{% else %}border-transparent text-neutral-400 hover:text-neutral-200{% endif %}">About Page (Full)</a>
+    <a href="?tab=team" class="px-5 py-3 border-b-2 font-semibold text-sm transition shrink-0 {% if active_tab == 'team' %}border-luxuryGold-500 text-luxuryGold-500{% else %}border-transparent text-neutral-400 hover:text-neutral-200{% endif %}">Leadership Team</a>
     <a href="?tab=blogs" class="px-5 py-3 border-b-2 font-semibold text-sm transition shrink-0 {% if active_tab == 'blogs' %}border-luxuryGold-500 text-luxuryGold-500{% else %}border-transparent text-neutral-400 hover:text-neutral-200{% endif %}">Blog Posts</a>
     <a href="?tab=testimonials" class="px-5 py-3 border-b-2 font-semibold text-sm transition shrink-0 {% if active_tab == 'testimonials' %}border-luxuryGold-500 text-luxuryGold-500{% else %}border-transparent text-neutral-400 hover:text-neutral-200{% endif %}">Testimonials</a>
     <a href="?tab=nearby" class="px-5 py-3 border-b-2 font-semibold text-sm transition shrink-0 {% if active_tab == 'nearby' %}border-luxuryGold-500 text-luxuryGold-500{% else %}border-transparent text-neutral-400 hover:text-neutral-200{% endif %}">Nearby Attractions</a>
@@ -99,84 +109,655 @@
     </div>
 
     {% elif active_tab == 'about' %}
-    <!-- About Preview singleton form -->
-    <div class="max-w-3xl">
-        <div class="custom-card rounded-2xl p-8 bg-white/50 dark:bg-neutral-900/50">
-            <form action="{% url 'admin_dashboard:about_update' %}" method="post" enctype="multipart/form-data" class="space-y-6">
-                {% csrf_token %}
-                <h4 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif pb-2 border-b border-neutral-200 dark:border-neutral-800">
-                    About Preview Section Settings
-                </h4>
+    <!-- Comprehensive Homepage CMS Editor (100% Dynamic) -->
+    <div class="space-y-8 max-w-5xl">
+        <form action="{% url 'admin_dashboard:about_update' %}" method="post" enctype="multipart/form-data" class="space-y-8">
+            {% csrf_token %}
+
+            <!-- 1. Hero Search Bar Widget -->
+            <div class="custom-card rounded-2xl p-8 bg-white/50 dark:bg-neutral-900/50 space-y-6">
+                <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-3">
+                    <h4 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass text-luxuryGold-500"></i> 1. Real-Time Booking Search Widget
+                    </h4>
+                    <span class="text-xs text-neutral-400">Floating search bar below hero slideshow</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Search Button Text</label>
+                        {{ about_form.search_button_text }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. About Preview & Promo Video Section -->
+            <div class="custom-card rounded-2xl p-8 bg-white/50 dark:bg-neutral-900/50 space-y-6">
+                <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-3">
+                    <h4 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif flex items-center gap-2">
+                        <i class="fa-solid fa-hotel text-luxuryGold-500"></i> 2. About Resort Preview Section
+                    </h4>
+                    <span class="text-xs text-neutral-400">Homepage introduction & resort video</span>
+                </div>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div class="sm:col-span-2">
-                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Section Title</label>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Section Subtitle / Tagline</label>
+                        {{ about_form.subtitle }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Section Main Title</label>
                         {{ about_form.title }}
                     </div>
                     <div class="sm:col-span-2">
-                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Subtitle</label>
-                        {{ about_form.subtitle }}
-                    </div>
-                    <div class="sm:col-span-2">
-                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Intro content text</label>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Intro Content Text</label>
                         {{ about_form.content }}
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase mb-2">Illustration image</label>
+                        <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase mb-2">Showcase Cover Image</label>
                         {{ about_form.image }}
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase mb-2">Promo Video File (Upload MP4/WebM)</label>
+                        <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase mb-2">Promo Video File (MP4/WebM)</label>
                         {{ about_form.video_file }}
                         {% if about_form.instance.video_file %}
                         <p class="mt-1 text-xs text-amber-600 dark:text-amber-400">
-                            Current video: <a href="{{ about_form.instance.video_file.url }}" target="_blank" class="underline font-mono inline-flex items-center gap-1"><i class="fa-solid fa-file-video text-xs"></i> View Video</a>
+                            Current: <a href="{{ about_form.instance.video_file.url }}" target="_blank" class="underline font-mono inline-flex items-center gap-1"><i class="fa-solid fa-file-video text-xs"></i> View Video</a>
                         </p>
                         {% endif %}
                     </div>
                     <div class="sm:col-span-2">
-                        <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase mb-2">Promo Video URL (External Embed/Link)</label>
+                        <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase mb-2">External Video URL (YouTube / Vimeo / Direct Link)</label>
                         {{ about_form.video_url }}
                     </div>
                 </div>
 
-                <h4 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif mt-8 pb-2 border-b border-neutral-200 dark:border-neutral-800">
-                    Statistic counters (Home section)
-                </h4>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+                <!-- Homepage Statistics Counters -->
+                <div class="pt-4 border-t border-neutral-200 dark:border-neutral-800 space-y-4">
+                    <h5 class="text-xs font-bold uppercase tracking-wider text-luxuryGold-600 dark:text-luxuryGold-400">Key Statistics Counters</h5>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+                        <div class="p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-1">
+                            <label class="block text-neutral-700 dark:text-neutral-300 font-semibold">Stat 1 Value</label>
+                            {{ about_form.stat1_value }}
+                            <label class="block text-neutral-700 dark:text-neutral-300 pt-1">Stat 1 Label</label>
+                            {{ about_form.stat1_label }}
+                        </div>
+                        <div class="p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-1">
+                            <label class="block text-neutral-700 dark:text-neutral-300 font-semibold">Stat 2 Value</label>
+                            {{ about_form.stat2_value }}
+                            <label class="block text-neutral-700 dark:text-neutral-300 pt-1">Stat 2 Label</label>
+                            {{ about_form.stat2_label }}
+                        </div>
+                        <div class="p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-1">
+                            <label class="block text-neutral-700 dark:text-neutral-300 font-semibold">Stat 3 Value</label>
+                            {{ about_form.stat3_value }}
+                            <label class="block text-neutral-700 dark:text-neutral-300 pt-1">Stat 3 Label</label>
+                            {{ about_form.stat3_label }}
+                        </div>
+                        <div class="p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-1">
+                            <label class="block text-neutral-700 dark:text-neutral-300 font-semibold">Stat 4 Value</label>
+                            {{ about_form.stat4_value }}
+                            <label class="block text-neutral-700 dark:text-neutral-300 pt-1">Stat 4 Label</label>
+                            {{ about_form.stat4_label }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Featured Rooms Section Headers -->
+            <div class="custom-card rounded-2xl p-8 bg-white/50 dark:bg-neutral-900/50 space-y-6">
+                <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-3">
+                    <h4 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif flex items-center gap-2">
+                        <i class="fa-solid fa-bed text-luxuryGold-500"></i> 3. Featured Rooms &amp; Suites Section
+                    </h4>
+                    <span class="text-xs text-neutral-400">Headings for homepage room chambers showcase</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
-                        <label class="block text-neutral-700 mb-1">Stat 1 Value</label>
-                        {{ about_form.stat1_value }}
-                        <label class="block text-neutral-700 mt-2 mb-1">Stat 1 Label</label>
-                        {{ about_form.stat1_label }}
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Section Badge</label>
+                        {{ about_form.rooms_badge }}
                     </div>
                     <div>
-                        <label class="block text-neutral-700 mb-1">Stat 2 Value</label>
-                        {{ about_form.stat2_value }}
-                        <label class="block text-neutral-700 mt-2 mb-1">Stat 2 Label</label>
-                        {{ about_form.stat2_label }}
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Main Heading</label>
+                        {{ about_form.rooms_title }}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Subtitle / Tagline</label>
+                        {{ about_form.rooms_subtitle }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Signature Facilities Section Headers -->
+            <div class="custom-card rounded-2xl p-8 bg-white/50 dark:bg-neutral-900/50 space-y-6">
+                <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-3">
+                    <h4 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif flex items-center gap-2">
+                        <i class="fa-solid fa-bell-concierge text-luxuryGold-500"></i> 4. Resort Services &amp; Facilities Section
+                    </h4>
+                    <span class="text-xs text-neutral-400">Headings for 6-item amenities grid</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Section Badge</label>
+                        {{ about_form.facilities_badge }}
                     </div>
                     <div>
-                        <label class="block text-neutral-700 mb-1">Stat 3 Value</label>
-                        {{ about_form.stat3_value }}
-                        <label class="block text-neutral-700 mt-2 mb-1">Stat 3 Label</label>
-                        {{ about_form.stat3_label }}
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Main Heading</label>
+                        {{ about_form.facilities_title }}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Subtitle / Tagline</label>
+                        {{ about_form.facilities_subtitle }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Fine Dining Preview Section Headers -->
+            <div class="custom-card rounded-2xl p-8 bg-white/50 dark:bg-neutral-900/50 space-y-6">
+                <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-3">
+                    <h4 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif flex items-center gap-2">
+                        <i class="fa-solid fa-utensils text-luxuryGold-500"></i> 5. Gastronomy &amp; Lounge Preview Section
+                    </h4>
+                    <span class="text-xs text-neutral-400">Headings & CTA button for fine dining preview</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Section Badge</label>
+                        {{ about_form.dining_badge }}
                     </div>
                     <div>
-                        <label class="block text-neutral-700 mb-1">Stat 4 Value</label>
-                        {{ about_form.stat4_value }}
-                        <label class="block text-neutral-700 mt-2 mb-1">Stat 4 Label</label>
-                        {{ about_form.stat4_label }}
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Main Heading</label>
+                        {{ about_form.dining_title }}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Subtitle / Description</label>
+                        {{ about_form.dining_subtitle }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Action Button Text</label>
+                        {{ about_form.dining_button_text }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Testimonials Section Headers -->
+            <div class="custom-card rounded-2xl p-8 bg-white/50 dark:bg-neutral-900/50 space-y-6">
+                <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-3">
+                    <h4 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif flex items-center gap-2">
+                        <i class="fa-solid fa-quote-left text-luxuryGold-500"></i> 6. Guest Memoirs (Testimonials) Section
+                    </h4>
+                    <span class="text-xs text-neutral-400">Headings above guest reviews carousel</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Section Badge</label>
+                        {{ about_form.testimonials_badge }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Main Heading</label>
+                        {{ about_form.testimonials_title }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. Nearby Attractions Section Headers -->
+            <div class="custom-card rounded-2xl p-8 bg-white/50 dark:bg-neutral-900/50 space-y-6">
+                <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-3">
+                    <h4 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif flex items-center gap-2">
+                        <i class="fa-solid fa-map-location-dot text-luxuryGold-500"></i> 7. Local Sights &amp; Attractions Section
+                    </h4>
+                    <span class="text-xs text-neutral-400">Headings above nearby places grid</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Section Badge</label>
+                        {{ about_form.attractions_badge }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Main Heading</label>
+                        {{ about_form.attractions_title }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. Newsletter Subscription Section -->
+            <div class="custom-card rounded-2xl p-8 bg-white/50 dark:bg-neutral-900/50 space-y-6">
+                <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-3">
+                    <h4 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif flex items-center gap-2">
+                        <i class="fa-solid fa-envelope-open-text text-luxuryGold-500"></i> 8. Newsletter Subscription Banner
+                    </h4>
+                    <span class="text-xs text-neutral-400">Footer newsletter call-to-action</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Banner Badge</label>
+                        {{ about_form.newsletter_badge }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Banner Main Title</label>
+                        {{ about_form.newsletter_title }}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Banner Description / Subtitle</label>
+                        {{ about_form.newsletter_subtitle }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Subscribe Button Label</label>
+                        {{ about_form.newsletter_button_text }}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase mb-2">Custom Background Banner Image</label>
+                        {{ about_form.newsletter_image }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-end">
+                <button type="submit" 
+                        class="px-8 py-3 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-xl shadow-lg transition text-sm">
+                    <i class="fa-solid fa-floppy-disk mr-2"></i> Save Homepage CMS Settings
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% elif active_tab == 'about_page' %}
+    <!-- Comprehensive About Page CMS Editor (100% Dynamic) -->
+    <div class="space-y-8 max-w-5xl">
+        <div class="p-4 rounded-xl bg-luxuryGold-500/10 border border-luxuryGold-500/30 flex items-center justify-between text-xs">
+            <span class="text-luxuryGold-400 font-semibold">
+                <i class="fa-solid fa-circle-info mr-1.5"></i> The top Hero Banner for the About page is managed under the <a href="?tab=seo" class="underline font-bold text-white hover:text-luxuryGold-300">SEO Meta tags tab</a>.
+            </span>
+            <a href="?tab=seo" class="px-3 py-1 bg-luxuryGold-500 text-black font-bold rounded-md hover:bg-luxuryGold-400 transition">
+                Manage SEO &amp; Hero Banner
+            </a>
+        </div>
+
+        <form action="{% url 'admin_dashboard:about_page_update' %}" method="post" enctype="multipart/form-data" class="space-y-8">
+            {% csrf_token %}
+
+            <!-- 1. Story & Heritage Section -->
+            <div class="custom-card rounded-2xl p-8 bg-white/50 dark:bg-neutral-900/50 space-y-6">
+                <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-3">
+                    <h4 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif flex items-center gap-2">
+                        <i class="fa-solid fa-hotel text-luxuryGold-500"></i> 1. Story &amp; Heritage Section
+                    </h4>
+                    <span class="text-xs text-neutral-400">Brand narrative &amp; overview</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Story Badge</label>
+                        {{ about_page_form.story_badge }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Story Title</label>
+                        {{ about_page_form.story_title }}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Story Subtitle</label>
+                        {{ about_page_form.story_subtitle }}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Floating Photo Badge</label>
+                        {{ about_page_form.story_floating_badge }}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Full Story Narrative</label>
+                        {{ about_page_form.story_content }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase mb-2">Showcase Image 1 (Large)</label>
+                        {{ about_page_form.story_image_1 }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase mb-2">Showcase Image 2 (Secondary)</label>
+                        {{ about_page_form.story_image_2 }}
                     </div>
                 </div>
 
-                <div class="pt-6 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-end">
-                    <button type="submit" 
-                            class="px-6 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-xl shadow-lg transition">
-                        Update CMS Section
-                    </button>
+                <!-- 6 Feature Highlight Badges -->
+                <div class="pt-4 border-t border-neutral-200 dark:border-neutral-800 space-y-4">
+                    <h5 class="text-xs font-bold uppercase tracking-wider text-luxuryGold-600 dark:text-luxuryGold-400">6 Key Feature Highlight Badges</h5>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                        <div class="p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-1">
+                            <label class="block text-neutral-700 dark:text-neutral-300 font-semibold">Badge 1 Text</label>
+                            {{ about_page_form.story_feature_1_text }}
+                            <label class="block text-neutral-700 dark:text-neutral-300 pt-1">Badge 1 FontAwesome Icon</label>
+                            {{ about_page_form.story_feature_1_icon }}
+                        </div>
+                        <div class="p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-1">
+                            <label class="block text-neutral-700 dark:text-neutral-300 font-semibold">Badge 2 Text</label>
+                            {{ about_page_form.story_feature_2_text }}
+                            <label class="block text-neutral-700 dark:text-neutral-300 pt-1">Badge 2 FontAwesome Icon</label>
+                            {{ about_page_form.story_feature_2_icon }}
+                        </div>
+                        <div class="p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-1">
+                            <label class="block text-neutral-700 dark:text-neutral-300 font-semibold">Badge 3 Text</label>
+                            {{ about_page_form.story_feature_3_text }}
+                            <label class="block text-neutral-700 dark:text-neutral-300 pt-1">Badge 3 FontAwesome Icon</label>
+                            {{ about_page_form.story_feature_3_icon }}
+                        </div>
+                        <div class="p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-1">
+                            <label class="block text-neutral-700 dark:text-neutral-300 font-semibold">Badge 4 Text</label>
+                            {{ about_page_form.story_feature_4_text }}
+                            <label class="block text-neutral-700 dark:text-neutral-300 pt-1">Badge 4 FontAwesome Icon</label>
+                            {{ about_page_form.story_feature_4_icon }}
+                        </div>
+                        <div class="p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-1">
+                            <label class="block text-neutral-700 dark:text-neutral-300 font-semibold">Badge 5 Text</label>
+                            {{ about_page_form.story_feature_5_text }}
+                            <label class="block text-neutral-700 dark:text-neutral-300 pt-1">Badge 5 FontAwesome Icon</label>
+                            {{ about_page_form.story_feature_5_icon }}
+                        </div>
+                        <div class="p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-1">
+                            <label class="block text-neutral-700 dark:text-neutral-300 font-semibold">Badge 6 Text</label>
+                            {{ about_page_form.story_feature_6_text }}
+                            <label class="block text-neutral-700 dark:text-neutral-300 pt-1">Badge 6 FontAwesome Icon</label>
+                            {{ about_page_form.story_feature_6_icon }}
+                        </div>
+                    </div>
                 </div>
-            </form>
+            </div>
+
+            <!-- 2. Key Statistics Highlights -->
+            <div class="custom-card rounded-2xl p-8 bg-white/50 dark:bg-neutral-900/50 space-y-6">
+                <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-3">
+                    <h4 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif flex items-center gap-2">
+                        <i class="fa-solid fa-chart-simple text-luxuryGold-500"></i> 2. Key Statistics Highlights
+                    </h4>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+                    <div>
+                        <label class="block text-neutral-700 dark:text-neutral-300 mb-1 font-semibold">Stat 1 Value</label>
+                        {{ about_page_form.stat1_value }}
+                        <label class="block text-neutral-700 dark:text-neutral-300 mt-2 mb-1">Stat 1 Label</label>
+                        {{ about_page_form.stat1_label }}
+                    </div>
+                    <div>
+                        <label class="block text-neutral-700 dark:text-neutral-300 mb-1 font-semibold">Stat 2 Value</label>
+                        {{ about_page_form.stat2_value }}
+                        <label class="block text-neutral-700 dark:text-neutral-300 mt-2 mb-1">Stat 2 Label</label>
+                        {{ about_page_form.stat2_label }}
+                    </div>
+                    <div>
+                        <label class="block text-neutral-700 dark:text-neutral-300 mb-1 font-semibold">Stat 3 Value</label>
+                        {{ about_page_form.stat3_value }}
+                        <label class="block text-neutral-700 dark:text-neutral-300 mt-2 mb-1">Stat 3 Label</label>
+                        {{ about_page_form.stat3_label }}
+                    </div>
+                    <div>
+                        <label class="block text-neutral-700 dark:text-neutral-300 mb-1 font-semibold">Stat 4 Value</label>
+                        {{ about_page_form.stat4_value }}
+                        <label class="block text-neutral-700 dark:text-neutral-300 mt-2 mb-1">Stat 4 Label</label>
+                        {{ about_page_form.stat4_label }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Message from the CEO Section -->
+            <div class="custom-card rounded-2xl p-8 bg-white/50 dark:bg-neutral-900/50 space-y-6">
+                <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-3">
+                    <h4 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif flex items-center gap-2">
+                        <i class="fa-solid fa-user-tie text-luxuryGold-500"></i> 3. Message from the CEO
+                    </h4>
+                    <span class="text-xs text-neutral-400">Leadership statement &amp; credentials</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Section Badge</label>
+                        {{ about_page_form.ceo_badge }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Section Title</label>
+                        {{ about_page_form.ceo_title }}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Section Subtitle</label>
+                        {{ about_page_form.ceo_subtitle }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">CEO Name</label>
+                        {{ about_page_form.ceo_name }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">CEO Title / Role</label>
+                        {{ about_page_form.ceo_role }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Swiss Credentials Badge</label>
+                        {{ about_page_form.ceo_credentials }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Designation Tagline</label>
+                        {{ about_page_form.ceo_designation }}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Highlighted Quote Statement</label>
+                        {{ about_page_form.ceo_quote }}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Full CEO Message / Biography</label>
+                        {{ about_page_form.ceo_message }}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase mb-2">CEO Portrait Photo</label>
+                        {{ about_page_form.ceo_image }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Core Values & Philosophy -->
+            <div class="custom-card rounded-2xl p-8 bg-white/50 dark:bg-neutral-900/50 space-y-6">
+                <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-3">
+                    <h4 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif flex items-center gap-2">
+                        <i class="fa-solid fa-compass text-luxuryGold-500"></i> 4. Philosophy &amp; Core Pillars
+                    </h4>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div class="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-2">
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase">Mission Title</label>
+                        {{ about_page_form.mission_title }}
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase pt-2">Mission Statement</label>
+                        {{ about_page_form.mission_content }}
+                    </div>
+                    <div class="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-2">
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase">Vision Title</label>
+                        {{ about_page_form.vision_title }}
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase pt-2">Vision Statement</label>
+                        {{ about_page_form.vision_content }}
+                    </div>
+                    <div class="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-2">
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase">Core Values Title</label>
+                        {{ about_page_form.values_title }}
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase pt-2">Values Statement</label>
+                        {{ about_page_form.values_content }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Leadership Governance Section Headers -->
+            <div class="custom-card rounded-2xl p-8 bg-white/50 dark:bg-neutral-900/50 space-y-6">
+                <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-3">
+                    <h4 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif flex items-center gap-2">
+                        <i class="fa-solid fa-users text-luxuryGold-500"></i> 5. Leadership Governance Headers
+                    </h4>
+                    <span class="text-xs text-neutral-400">Heading &amp; subtitle for Board of Directors section</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Team Badge</label>
+                        {{ about_page_form.team_badge }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Team Section Main Title</label>
+                        {{ about_page_form.team_title }}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Team Section Subtitle / Tagline</label>
+                        {{ about_page_form.team_subtitle }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Video Showcase Section -->
+            <div class="custom-card rounded-2xl p-8 bg-white/50 dark:bg-neutral-900/50 space-y-6">
+                <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-3">
+                    <h4 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif flex items-center gap-2">
+                        <i class="fa-solid fa-video text-luxuryGold-500"></i> 6. Visual / Video Tour Showcase
+                    </h4>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Video Section Badge</label>
+                        {{ about_page_form.video_badge }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Video Title</label>
+                        {{ about_page_form.video_title }}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Video Subtitle</label>
+                        {{ about_page_form.video_subtitle }}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Direct Video URL (MP4 / YouTube / Vimeo)</label>
+                        {{ about_page_form.video_url }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase mb-2">Or Upload Custom Video File (MP4/WebM)</label>
+                        {{ about_page_form.video_file }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase mb-2">Video Cover Poster Thumbnail</label>
+                        {{ about_page_form.video_thumbnail }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. 5-Star Amenities Section Headers -->
+            <div class="custom-card rounded-2xl p-8 bg-white/50 dark:bg-neutral-900/50 space-y-6">
+                <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-3">
+                    <h4 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif flex items-center gap-2">
+                        <i class="fa-solid fa-sparkles text-luxuryGold-500"></i> 7. Amenities Section Headers
+                    </h4>
+                    <span class="text-xs text-neutral-400">Heading &amp; subtitle for 5-star amenities list</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Amenities Badge</label>
+                        {{ about_page_form.facilities_badge }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Amenities Section Main Title</label>
+                        {{ about_page_form.facilities_title }}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-neutral-700 uppercase mb-2">Amenities Section Subtitle / Tagline</label>
+                        {{ about_page_form.facilities_subtitle }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-end">
+                <button type="submit" 
+                        class="px-8 py-3 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-xl shadow-lg transition text-sm">
+                    <i class="fa-solid fa-floppy-disk mr-2"></i> Save About Page Settings
+                </button>
+            </div>
+        </form>
+
+        <!-- Facilities Highlights Table -->
+        <div class="custom-card rounded-2xl p-6 bg-white/50 dark:bg-neutral-900/50 mt-10">
+            <div class="flex items-center justify-between mb-4 pb-2 border-b border-neutral-200 dark:border-neutral-800">
+                <h4 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-luxuryGold-500"></i> About Page Amenities Highlights
+                </h4>
+                <a href="{% url 'admin_dashboard:about_facility_create' %}" class="text-xs font-bold text-luxuryGold-500 hover:text-luxuryGold-400">
+                    <i class="fa-solid fa-plus mr-1"></i> Add Amenity Highlight
+                </a>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {% for f in about_facilities %}
+                <div class="p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-3">
+                        <i class="{{ f.icon }} text-luxuryGold-500 text-base"></i>
+                        <div>
+                            <p class="font-bold text-neutral-900 dark:text-neutral-100">{{ f.title }}</p>
+                            <p class="text-[10px] text-neutral-500">Order: {{ f.order }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <a href="{% url 'admin_dashboard:about_facility_edit' f.id %}" class="text-neutral-400 hover:text-luxuryGold-500" title="Edit">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        <a href="{% url 'admin_dashboard:about_facility_delete' f.id %}" class="text-neutral-400 hover:text-rose-500" title="Delete">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="col-span-4 text-center text-xs text-neutral-500 py-4">No amenity highlights added yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% elif active_tab == 'team' %}
+    <!-- Leadership Team List -->
+    <div class="space-y-6">
+        <div class="custom-card rounded-2xl overflow-hidden shadow-sm">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="text-xs uppercase text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30">
+                        <th class="px-6 py-4 font-semibold">Photo</th>
+                        <th class="px-6 py-4 font-semibold">Name</th>
+                        <th class="px-6 py-4 font-semibold">Role / Title</th>
+                        <th class="px-6 py-4 font-semibold">Bio Snippet</th>
+                        <th class="px-6 py-4 font-semibold">Order</th>
+                        <th class="px-6 py-4 font-semibold">Status</th>
+                        <th class="px-6 py-4 text-right font-semibold">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-neutral-200 dark:divide-neutral-800 text-sm">
+                    {% for member in team_members %}
+                    <tr class="hover:bg-neutral-50/30 dark:hover:bg-neutral-900/10 transition duration-150">
+                        <td class="px-6 py-3">
+                            {% if member.image %}
+                            <img src="{{ member.image.url }}" alt="{{ member.name }}" class="h-12 w-12 rounded-xl object-cover border border-luxuryGold-500/30">
+                            {% else %}
+                            <div class="h-12 w-12 rounded-xl bg-neutral-800 flex items-center justify-center text-luxuryGold-400 font-bold">
+                                {{ member.name|slice:":2" }}
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 font-bold text-neutral-900 dark:text-neutral-100">{{ member.name }}</td>
+                        <td class="px-6 py-4 text-luxuryGold-600 dark:text-luxuryGold-400 font-semibold">{{ member.role }}</td>
+                        <td class="px-6 py-4 text-neutral-500 text-xs max-w-xs truncate" title="{{ member.bio }}">{{ member.bio }}</td>
+                        <td class="px-6 py-4 font-mono text-xs font-semibold">{{ member.order }}</td>
+                        <td class="px-6 py-4">
+                            {% if member.is_published %}
+                            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-semibold text-xs">Published</span>
+                            {% else %}
+                            <span class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-500 font-semibold text-xs">Hidden</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-3 text-sm">
+                                <a href="{% url 'admin_dashboard:team_member_edit' member.id %}" class="text-neutral-400 hover:text-luxuryGold-500" title="Edit">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                                <a href="{% url 'admin_dashboard:team_member_delete' member.id %}" class="text-neutral-400 hover:text-rose-500" title="Delete">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center text-sm text-neutral-500">No leadership team members created yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 

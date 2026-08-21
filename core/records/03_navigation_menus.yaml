@@ -1,31 +1,31 @@
 navigation_menus:
+- name: About
+  url: /about/
+  position: header
+  order: 1
+  is_published: true
 - name: Rooms & Suites
   url: /rooms/
   position: header
-  order: 1
+  order: 2
   is_published: true
 - name: Dining
   url: /dining/
   position: header
-  order: 2
+  order: 3
   is_published: true
 - name: Recreation
   url: /recreation/
   position: header
-  order: 3
+  order: 4
   is_published: true
 - name: Events
   url: /conference/
   position: header
-  order: 4
+  order: 5
   is_published: true
 - name: Gallery
   url: /gallery/
-  position: header
-  order: 5
-  is_published: true
-- name: News
-  url: /blogs/
   position: header
   order: 6
   is_published: true
@@ -34,28 +34,28 @@ navigation_menus:
   position: header
   order: 7
   is_published: true
-- name: Book A Chamber
+- name: Rooms & Suites
   url: /rooms/
   position: footer_links
   order: 1
   is_published: true
-- name: Fine Gastronomy
+- name: Dining & Lounges
   url: /dining/
   position: footer_links
   order: 2
   is_published: true
-- name: Wellness Spa
+- name: Wellness & Spa
   url: /recreation/
   position: footer_links
   order: 3
   is_published: true
-- name: Events & Conferences
+- name: Events & Banquets
   url: /conference/
   position: footer_links
   order: 4
   is_published: true
-- name: Contact Desk
-  url: /contact/
+- name: News & Articles
+  url: /blogs/
   position: footer_links
   order: 5
   is_published: true

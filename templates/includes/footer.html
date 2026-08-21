@@ -52,20 +52,22 @@
                     {% for link in footer_quick_links %}
                         <li><a href="{{ link.url }}" class="hover:text-luxuryGold-400 transition-colors">{{ link.name }}</a></li>
                     {% empty %}
+                        <li><a href="{% url 'about:about_page' %}" class="hover:text-luxuryGold-400 transition-colors">About Hotel</a></li>
                         <li><a href="{% url 'rooms:room_list' %}" class="hover:text-luxuryGold-400 transition-colors">Rooms & Suites</a></li>
                         <li><a href="{% url 'dining:dining_list' %}" class="hover:text-luxuryGold-400 transition-colors">Fine Dining</a></li>
                         <li><a href="{% url 'recreation:recreation_list' %}" class="hover:text-luxuryGold-400 transition-colors">Wellness Spa</a></li>
                         <li><a href="{% url 'conference:venue_list' %}" class="hover:text-luxuryGold-400 transition-colors">Events & Meetings</a></li>
                         <li><a href="{% url 'gallery:gallery_list' %}" class="hover:text-luxuryGold-400 transition-colors">Gallery</a></li>
+                        <li><a href="{% url 'blogs:blog_list' %}" class="hover:text-luxuryGold-400 transition-colors">News & Articles</a></li>
                     {% endfor %}
                 </ul>
             </div>
 
-            <!-- OTA Partners Column -->
+            <!-- OTA Links Column -->
             <div>
                 <h4 class="font-luxury-title text-xs sm:text-sm font-semibold uppercase tracking-widest mb-3 sm:mb-6"
                     :class="{ 'text-amber-800': currentTheme === 'light', 'text-luxuryGold-300': currentTheme !== 'light' }">
-                    OTA Partners
+                    OTA Links
                 </h4>
                 <ul class="space-y-2.5 sm:space-y-3 text-xs sm:text-sm">
                     {% for link in footer_ota_links %}
@@ -106,7 +108,7 @@
                 {{ hotel_settings.copyright_text|safe }}
             </div>
             <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-6">
-                <span>Awards: World Luxury Hotel Winner 2026</span>
+                <span>{{ hotel_settings.awards_text|default:"Awards: World Luxury Hotel Winner 2026" }}</span>
                 <div class="flex items-center gap-3 text-lg opacity-80 justify-center">
                     <i class="fa-brands fa-cc-visa"></i>
                     <i class="fa-brands fa-cc-mastercard"></i>

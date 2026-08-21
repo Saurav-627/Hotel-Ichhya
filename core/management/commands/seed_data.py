@@ -37,6 +37,12 @@ GLOBAL_MODEL_REGISTRY = {
     "testimonials": ("testimonials", "Testimonial", ["guest_name", "source"], False),
     "branches": ("contact", "Branch", ["name"], False),
     "coupons": ("booking", "Coupon", ["code"], False),
+
+    # About Page & Leadership
+    "about_page": ("about", "AboutPage", None, True),
+    "team_members": ("about", "TeamMember", ["name"], False),
+    "facility_highlights": ("about", "AboutFacility", ["title"], False),
+    "about_facilities": ("about", "AboutFacility", ["title"], False),
 }
 
 

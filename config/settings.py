@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'payments.apps.PaymentsConfig',
     'contact.apps.ContactConfig',
     'blogs.apps.BlogsConfig',
+    'about.apps.AboutConfig',
     'seo.apps.SeoConfig',
     'settings_manager.apps.SettingsManagerConfig',
 ]

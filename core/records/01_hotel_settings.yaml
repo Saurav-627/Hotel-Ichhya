@@ -3,11 +3,19 @@ hotel_settings:
   theme: luxury
   contact_phone: +977-53-520591
   contact_email: info@hotelichchha.com
+  inquiry_notification_email: info@hotelichchha.com
   address: Simara-03, Bara, Nepal
+  header_badge: "⭐ 5-Star Luxury Resort"
+  header_cta_text: "Book A Stay"
+  header_cta_url: "/rooms/"
   about_text: Hotel Ichchha is a luxury five-star hotel in Simara, Bara, Nepal offering
     premium accommodation, conference halls, destination wedding facilities, spa,
     swimming pool, restaurant, and hospitality services.
   copyright_text: '&copy; 2026 Hotel Ichchha Resort. All Rights Reserved.'
+  awards_text: 'Awards: World Luxury Hotel Winner 2026'
+  contact_form_title: 'Send an Inquiry'
+  contact_form_subtitle: 'Have a custom event or dining reservation question? Complete the form below.'
+  contact_form_button_text: 'Submit Inquiry Message'
   facebook_url: https://www.facebook.com/HotelIchchha/
   instagram_url: https://www.instagram.com/hotel_ichchha/
   twitter_url: https://x.com/IchchhaHotel

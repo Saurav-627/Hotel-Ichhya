@@ -136,7 +136,7 @@
                             'bg-amber-800 text-white hover:bg-amber-900': currentTheme === 'light',
                             'bg-luxuryGold-500 text-black hover:bg-luxuryGold-400 gold-glow': currentTheme !== 'light'
                         }">
-                    Search Rooms
+                    {{ about_preview.search_button_text|default:"Search Rooms" }}
                 </button>
             </div>
         </form>
@@ -218,9 +218,9 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="text-center max-w-2xl mx-auto space-y-3 sm:space-y-4 mb-8 sm:mb-16" data-animate="fadeInUp">
-            <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500 whitespace-nowrap">Premium Sanctuary</span>
-            <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold">Rooms &amp; Suites</h2>
-            <p class="text-xs sm:text-sm opacity-80">Explore our signature guest chambers designed for ultimate relaxation and comfort.</p>
+            <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500 whitespace-nowrap">{{ about_preview.rooms_badge|default:"Premium Sanctuary" }}</span>
+            <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold">{{ about_preview.rooms_title|default:"Rooms &amp; Suites" }}</h2>
+            <p class="text-xs sm:text-sm opacity-80">{{ about_preview.rooms_subtitle|default:"Explore our signature guest chambers designed for ultimate relaxation and comfort." }}</p>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -287,9 +287,9 @@
 <!-- SIGNATURE HOTEL FACILITIES SECTION -->
 <section class="py-12 sm:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center max-w-2xl mx-auto space-y-3 sm:space-y-4 mb-8 sm:mb-16" data-animate="fadeInUp">
-        <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500 whitespace-nowrap">Elite Hospitality</span>
-        <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold">Resort Services &amp; Facilities</h2>
-        <p class="text-xs sm:text-sm opacity-80">Indulge in our carefully curated amenities, designed to elevate your stay to a world-class level.</p>
+        <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500 whitespace-nowrap">{{ about_preview.facilities_badge|default:"Elite Hospitality" }}</span>
+        <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold">{{ about_preview.facilities_title|default:"Resort Services &amp; Facilities" }}</h2>
+        <p class="text-xs sm:text-sm opacity-80">{{ about_preview.facilities_subtitle|default:"Indulge in our carefully curated amenities, designed to elevate your stay to a world-class level." }}</p>
     </div>
 
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6 lg:gap-8">
@@ -344,10 +344,10 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             
             <div class="space-y-4 sm:space-y-6" data-animate="fadeInLeft">
-                <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500 whitespace-nowrap">Fine Culinary</span>
-                <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold">Gastronomy &amp; Lounge</h2>
+                <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500 whitespace-nowrap">{{ about_preview.dining_badge|default:"Fine Culinary" }}</span>
+                <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold">{{ about_preview.dining_title|default:"Gastronomy &amp; Lounge" }}</h2>
                 <p class="text-xs sm:text-sm opacity-80 leading-relaxed">
-                    Savor international delicacies, authentic Nepalese cuisine, and masterfully mixed cocktails curated by globally acclaimed chefs.
+                    {{ about_preview.dining_subtitle|default:"Savor international delicacies, authentic Nepalese cuisine, and masterfully mixed cocktails curated by globally acclaimed chefs." }}
                 </p>
                 <div class="space-y-3 sm:space-y-4">
                     {% for venue in featured_dining %}
@@ -364,7 +364,7 @@
                     <a href="{% url 'dining:dining_list' %}" 
                        class="inline-block px-7 sm:px-9 py-3 sm:py-3.5 text-xs font-bold uppercase tracking-widest rounded-full border border-luxuryGold-400 text-center whitespace-nowrap transition-all duration-300 shadow-md cursor-pointer"
                        :class="{ 'bg-amber-800 text-white hover:bg-amber-900': currentTheme === 'light', 'hover:bg-luxuryGold-500 hover:text-black gold-glow': currentTheme !== 'light' }">
-                        Explore More
+                        {{ about_preview.dining_button_text|default:"Explore More" }}
                     </a>
                 </div>
             </div>
@@ -435,8 +435,8 @@
     prev() { this.activeIndex = (this.activeIndex - 1 + this.itemsCount) % this.itemsCount }
 }" x-init="if (itemsCount > 1) setInterval(() => next(), 6000)">
     <div class="text-center max-w-2xl mx-auto space-y-3 sm:space-y-4 mb-8 sm:mb-16" data-animate="fadeInUp">
-        <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500 whitespace-nowrap">Guest Memoirs</span>
-        <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold">What Our Guests Say</h2>
+        <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500 whitespace-nowrap">{{ about_preview.testimonials_badge|default:"Guest Memoirs" }}</span>
+        <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold">{{ about_preview.testimonials_title|default:"What Our Guests Say" }}</h2>
     </div>
 
     <div class="relative min-h-[180px] sm:min-h-[220px] max-w-4xl mx-auto flex items-center justify-center">
@@ -508,8 +508,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="text-center max-w-2xl mx-auto space-y-3 sm:space-y-4 mb-8 sm:mb-16" data-animate="fadeInUp">
-            <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500 whitespace-nowrap">Explore Nearby</span>
-            <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold">Local Sights &amp; Attractions</h2>
+            <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500 whitespace-nowrap">{{ about_preview.attractions_badge|default:"Explore Nearby" }}</span>
+            <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold">{{ about_preview.attractions_title|default:"Local Sights &amp; Attractions" }}</h2>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -547,14 +547,14 @@
 
 <!-- NEWSLETTER / CTA APP MODULE -->
 <section class="py-12 sm:py-24 border-t border-amber-900/10 text-center relative overflow-hidden bg-cover bg-center"
-         style="background-image: url('https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1200');">
+         style="background-image: url('{% if about_preview.newsletter_image %}{{ about_preview.newsletter_image.url }}{% else %}https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1200{% endif %}');">
     <!-- Overlay -->
     <div class="absolute inset-0 bg-black/85"></div>
     <div class="relative max-w-4xl mx-auto px-4 space-y-4 sm:space-y-6 z-10 text-white" data-animate="fadeInUp">
-        <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-300 whitespace-nowrap">Newsletter Subscription</span>
-        <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold text-white">Join The Elite Guild</h2>
+        <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-300 whitespace-nowrap">{{ about_preview.newsletter_badge|default:"Newsletter Subscription" }}</span>
+        <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold text-white">{{ about_preview.newsletter_title|default:"Join The Elite Guild" }}</h2>
         <p class="text-xs sm:text-sm text-white/80 max-w-xl mx-auto leading-relaxed">
-            Subscribe to receive exclusive offers, luxury travel logs, seasonal booking discounts, and resort news.
+            {{ about_preview.newsletter_subtitle|default:"Subscribe to receive exclusive offers, luxury travel logs, seasonal booking discounts, and resort news." }}
         </p>
         
         <form method="POST" action="{% url 'contact:subscribe_newsletter' %}" 
@@ -596,7 +596,7 @@
                 <button type="submit" :disabled="loading" 
                         class="px-8 py-3 sm:py-3.5 rounded-full text-xs font-bold uppercase tracking-widest bg-luxuryGold-500 text-black hover:bg-luxuryGold-400 gold-glow transition-all whitespace-nowrap shrink-0 cursor-pointer flex items-center justify-center gap-2"
                         :class="{ 'opacity-60 cursor-wait': loading }">
-                    <span x-show="!loading">Subscribe</span>
+                    <span x-show="!loading">{{ about_preview.newsletter_button_text|default:"Subscribe" }}</span>
                     <span x-show="loading" style="display:none;"><i class="fa-solid fa-spinner fa-spin"></i> Subscribing...</span>
                 </button>
             </div>

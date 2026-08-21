@@ -1,0 +1,474 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+    /* CEO & Story custom decorative styles */
+    .ceo-quote-box {
+        position: relative;
+    }
+    .ceo-quote-box::before {
+        content: '"';
+        position: absolute;
+        top: -20px;
+        left: -15px;
+        font-size: 80px;
+        font-family: 'Playfair Display', Georgia, serif;
+        opacity: 0.15;
+        line-height: 1;
+        pointer-events: none;
+        color: #D3AA5E;
+    }
+    .team-card-overlay {
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(10, 9, 8, 0.75) 45%, rgba(10, 9, 8, 0.98) 100%);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HEADER HERO BANNER (Standard SEO Controlled) -->
+<section class="py-12 sm:py-20 border-b border-amber-900/10 text-center relative overflow-hidden bg-cover bg-center"
+         style="background-image: url('{% if seo_raw and seo_raw.header_image %}{{ seo_raw.header_image.url }}{% else %}https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1600{% endif %}');">
+    <div class="absolute inset-0 bg-black/75"></div>
+    <div class="relative z-10 space-y-3 sm:space-y-4 px-4">
+        <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-300">{{ seo_raw.header_subtitle|default:"Our Legacy &amp; Heritage" }}</span>
+        <h1 class="font-luxury-title text-3xl sm:text-6xl font-bold text-white leading-tight">{{ seo_raw.header_title|default:"About Hotel Ichchha" }}</h1>
+        <p class="text-xs sm:text-sm text-white/80 max-w-xl mx-auto">{{ seo_raw.header_description|default:"Discover our story, leadership, and 5-star luxury hospitality benchmark in Simara, Nepal." }}</p>
+    </div>
+</section>
+
+
+<!-- 2. STORY & OVERVIEW + RESORT VIDEO (100% Dynamic) -->
+<section id="story" class="py-14 sm:py-20 lg:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center">
+        
+        <!-- Left: Story Narrative (7 cols on lg) -->
+        <div class="lg:col-span-7 space-y-6" data-animate="fadeInLeft">
+            <div class="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-luxuryGold-500">
+                <i class="fa-solid fa-landmark text-sm"></i>
+                <span>{{ about_page.story_badge|default:"Our Heritage & Story" }}</span>
+            </div>
+
+            <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold leading-tight"
+                :class="{ 'text-neutral-900': currentTheme === 'light', 'text-amber-100': currentTheme !== 'light' }">
+                {{ about_page.story_title|default:"A Verdant Oasis in the Heart of Simara" }}
+            </h2>
+
+            <h3 class="text-sm sm:text-base font-semibold text-luxuryGold-600 dark:text-luxuryGold-400">
+                {{ about_page.story_subtitle|default:"Redefining Five-Star Hospitality in Nepal's Southern Gateway" }}
+            </h3>
+
+            <div class="text-xs sm:text-sm leading-relaxed space-y-4 opacity-90"
+                 :class="{ 'text-neutral-700': currentTheme === 'light', 'text-neutral-300': currentTheme !== 'light' }">
+                {{ about_page.story_content|linebreaks }}
+            </div>
+
+            <!-- Key Feature Badges Grid (100% Dynamic Icons & Labels) -->
+            <div class="pt-2 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div class="p-3 rounded-xl border flex items-center gap-2.5 transition duration-300 hover:border-luxuryGold-500/50"
+                     :class="{ 'bg-gray-50 border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
+                    <i class="{{ about_page.story_feature_1_icon|default:'fa-solid fa-bed' }} text-luxuryGold-500 text-sm"></i>
+                    <span class="text-xs font-semibold">{{ about_page.story_feature_1_text|default:"96 Luxury Rooms" }}</span>
+                </div>
+                <div class="p-3 rounded-xl border flex items-center gap-2.5 transition duration-300 hover:border-luxuryGold-500/50"
+                     :class="{ 'bg-gray-50 border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
+                    <i class="{{ about_page.story_feature_2_icon|default:'fa-solid fa-ring' }} text-luxuryGold-500 text-sm"></i>
+                    <span class="text-xs font-semibold">{{ about_page.story_feature_2_text|default:"Destination Weddings" }}</span>
+                </div>
+                <div class="p-3 rounded-xl border flex items-center gap-2.5 transition duration-300 hover:border-luxuryGold-500/50"
+                     :class="{ 'bg-gray-50 border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
+                    <i class="{{ about_page.story_feature_3_icon|default:'fa-solid fa-plane-arrival' }} text-luxuryGold-500 text-sm"></i>
+                    <span class="text-xs font-semibold">{{ about_page.story_feature_3_text|default:"Simara Airport 5 Min" }}</span>
+                </div>
+                <div class="p-3 rounded-xl border flex items-center gap-2.5 transition duration-300 hover:border-luxuryGold-500/50"
+                     :class="{ 'bg-gray-50 border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
+                    <i class="{{ about_page.story_feature_4_icon|default:'fa-solid fa-spa' }} text-luxuryGold-500 text-sm"></i>
+                    <span class="text-xs font-semibold">{{ about_page.story_feature_4_text|default:"Ayurvedic Spa" }}</span>
+                </div>
+                <div class="p-3 rounded-xl border flex items-center gap-2.5 transition duration-300 hover:border-luxuryGold-500/50"
+                     :class="{ 'bg-gray-50 border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
+                    <i class="{{ about_page.story_feature_5_icon|default:'fa-solid fa-utensils' }} text-luxuryGold-500 text-sm"></i>
+                    <span class="text-xs font-semibold">{{ about_page.story_feature_5_text|default:"Gourmet Dining" }}</span>
+                </div>
+                <div class="p-3 rounded-xl border flex items-center gap-2.5 transition duration-300 hover:border-luxuryGold-500/50"
+                     :class="{ 'bg-gray-50 border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
+                    <i class="{{ about_page.story_feature_6_icon|default:'fa-solid fa-users-rectangle' }} text-luxuryGold-500 text-sm"></i>
+                    <span class="text-xs font-semibold">{{ about_page.story_feature_6_text|default:"1,000+ Pax Hall" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Video Tour Player (5 cols on lg) -->
+        <div class="lg:col-span-5 relative" data-animate="fadeInRight">
+            <div class="rounded-3xl overflow-hidden shadow-2xl border border-luxuryGold-500/40 bg-black relative aspect-video group">
+                {% if about_page.video_file %}
+                <video controls playsinline class="w-full h-full object-cover" poster="{% if about_page.video_thumbnail %}{{ about_page.video_thumbnail.url }}{% endif %}">
+                    <source src="{{ about_page.video_file.url }}" type="video/mp4">
+                    Your browser does not support HTML5 video.
+                </video>
+                {% elif about_page.video_url %}
+                <video controls playsinline class="w-full h-full object-cover" poster="{% if about_page.video_thumbnail %}{{ about_page.video_thumbnail.url }}{% endif %}">
+                    <source src="{{ about_page.video_url }}" type="video/mp4">
+                    Your browser does not support HTML5 video.
+                </video>
+                {% else %}
+                <video controls playsinline class="w-full h-full object-cover" poster="{% if about_page.video_thumbnail %}{{ about_page.video_thumbnail.url }}{% endif %}">
+                    <source src="https://hotelichchha.com/backend/images/articles/video/LAeuf-intro_video--hqhIzqZ.mp4" type="video/mp4">
+                    Your browser does not support HTML5 video.
+                </video>
+                {% endif %}
+            </div>
+            
+            {% if about_page.video_title %}
+            <p class="text-center text-xs opacity-75 mt-3 font-medium flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-play text-luxuryGold-500 text-[10px]"></i>
+                <span>{{ about_page.video_title }}</span>
+            </p>
+            {% endif %}
+        </div>
+
+    </div>
+</section>
+
+
+<!-- 3. STATISTICS COUNTERS (100% Dynamic) -->
+<section class="py-12 sm:py-16 border-y border-amber-900/20"
+         :class="{ 'bg-gray-100/70': currentTheme === 'light', 'bg-[#0E0D0B]': currentTheme !== 'light' }">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
+            
+            <div class="p-4 sm:p-6 rounded-2xl transition-transform duration-300 hover:scale-105" data-animate="fadeInUp">
+                <div class="text-3xl sm:text-5xl font-extrabold font-serif text-luxuryGold-500 mb-2 gold-text-glow">
+                    {{ about_page.stat1_value|default:"96" }}
+                </div>
+                <div class="text-xs sm:text-sm font-semibold uppercase tracking-wider opacity-80">
+                    {{ about_page.stat1_label|default:"Luxury Rooms & Suites" }}
+                </div>
+            </div>
+
+            <div class="p-4 sm:p-6 rounded-2xl transition-transform duration-300 hover:scale-105" data-animate="fadeInUp">
+                <div class="text-3xl sm:text-5xl font-extrabold font-serif text-luxuryGold-500 mb-2 gold-text-glow">
+                    {{ about_page.stat2_value|default:"5-Star" }}
+                </div>
+                <div class="text-xs sm:text-sm font-semibold uppercase tracking-wider opacity-80">
+                    {{ about_page.stat2_label|default:"Luxury Rating" }}
+                </div>
+            </div>
+
+            <div class="p-4 sm:p-6 rounded-2xl transition-transform duration-300 hover:scale-105" data-animate="fadeInUp">
+                <div class="text-3xl sm:text-5xl font-extrabold font-serif text-luxuryGold-500 mb-2 gold-text-glow">
+                    {{ about_page.stat3_value|default:"27+" }}
+                </div>
+                <div class="text-xs sm:text-sm font-semibold uppercase tracking-wider opacity-80">
+                    {{ about_page.stat3_label|default:"Years Hospitality Leadership" }}
+                </div>
+            </div>
+
+            <div class="p-4 sm:p-6 rounded-2xl transition-transform duration-300 hover:scale-105" data-animate="fadeInUp">
+                <div class="text-3xl sm:text-5xl font-extrabold font-serif text-luxuryGold-500 mb-2 gold-text-glow">
+                    {{ about_page.stat4_value|default:"1,000+" }}
+                </div>
+                <div class="text-xs sm:text-sm font-semibold uppercase tracking-wider opacity-80">
+                    {{ about_page.stat4_label|default:"Banqueting Pax Capacity" }}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- 4. MESSAGE FROM THE CEO (100% Dynamic & Image Only on Left) -->
+<section class="py-14 sm:py-20 lg:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="p-6 sm:p-8 lg:p-12 rounded-3xl border shadow-xl transition-all"
+         :class="{
+             'bg-white border-gray-200': currentTheme === 'light',
+             'bg-[#141210] border-amber-900/30 text-amber-100': currentTheme !== 'light'
+         }">
+        
+        <div class="flex flex-col md:flex-row gap-8 lg:gap-12 items-center md:items-start">
+            
+            <!-- Left: CEO Portrait Image ONLY (Larger & Prominent) -->
+            <div class="w-60 sm:w-72 md:w-80 lg:w-[350px] shrink-0" data-animate="fadeInLeft">
+                <div class="w-full rounded-3xl overflow-hidden border-2 border-luxuryGold-500/40 shadow-2xl relative group bg-neutral-900 aspect-[3/4]">
+                    {% if about_page.ceo_image %}
+                    <img src="{{ about_page.ceo_image.url }}" 
+                         alt="{{ about_page.ceo_name }}" 
+                         class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500">
+                    {% else %}
+                    <img src="https://hotelichchha.com/assets/ceo-BSBOXKBW.webp" 
+                         alt="{{ about_page.ceo_name }}" 
+                         class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500">
+                    {% endif %}
+                    
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60"></div>
+                </div>
+            </div>
+
+            <!-- Right: All CEO Details, Title, Name, Role, Quote & Message -->
+            <div class="flex-1 min-w-0 space-y-5" data-animate="fadeInRight">
+                
+                <!-- Header & Executive Details -->
+                <div>
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <span class="text-xs font-bold uppercase tracking-widest text-luxuryGold-500">{{ about_page.ceo_badge|default:"Executive Leadership" }}</span>
+                        {% if about_page.ceo_credentials %}
+                        <span class="text-[11px] font-semibold px-3 py-1 rounded-full bg-luxuryGold-500/15 text-luxuryGold-600 dark:text-luxuryGold-300 border border-luxuryGold-500/30 flex items-center gap-1.5">
+                            <i class="fa-solid fa-graduation-cap"></i> {{ about_page.ceo_credentials|default:"Swiss Hotel Mgmt School Alumnus" }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <h2 class="font-luxury-title text-2xl sm:text-3xl lg:text-4xl font-bold"
+                        :class="{ 'text-neutral-900': currentTheme === 'light', 'text-amber-100': currentTheme !== 'light' }">
+                        {{ about_page.ceo_title|default:"Message from the CEO" }}
+                    </h2>
+                    
+                    <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <span class="font-luxury-title text-base sm:text-lg font-bold text-luxuryGold-600 dark:text-luxuryGold-400">
+                            {{ about_page.ceo_name|default:"Rewanta Prasad Dhaubhadel" }}
+                        </span>
+                        <span class="text-xs opacity-50 hidden sm:inline">•</span>
+                        <span class="text-xs font-semibold uppercase tracking-wider opacity-75">
+                            {{ about_page.ceo_role|default:"Chief Executive Officer (CEO)" }}
+                        </span>
+                    </div>
+
+                    <p class="text-xs sm:text-sm opacity-80 mt-1">
+                        {{ about_page.ceo_subtitle|default:"We are committed to providing the best hospitality services to our guests." }}
+                    </p>
+                </div>
+                
+                <!-- Highlighted Quote Card -->
+                <div class="p-5 sm:p-6 rounded-2xl border ceo-quote-box shadow-sm"
+                     :class="{
+                         'bg-amber-50/80 border-amber-200 text-neutral-800': currentTheme === 'light',
+                         'bg-[#191613] border-luxuryGold-500/30 text-luxuryGold-200': currentTheme !== 'light'
+                     }">
+                    <p class="font-luxury-title text-sm sm:text-base italic leading-relaxed">
+                        "{{ about_page.ceo_quote|default:"With a heart rooted in tradition and eyes set on innovation, I remain committed to advancing Nepal’s hospitality industry and creating opportunities for sustainable growth and global recognition." }}"
+                    </p>
+                </div>
+
+                <!-- Full Narrative Paragraphs -->
+                <div class="text-xs sm:text-sm leading-relaxed space-y-3.5 text-justify opacity-90"
+                     :class="{ 'text-neutral-700': currentTheme === 'light', 'text-neutral-300': currentTheme !== 'light' }">
+                    {{ about_page.ceo_message|linebreaks }}
+                </div>
+
+                <!-- Signature block -->
+                <div class="pt-4 border-t border-amber-900/20 flex items-center justify-between">
+                    <div>
+                        <span class="font-luxury-title text-lg font-bold text-luxuryGold-500 block italic">
+                            {{ about_page.ceo_signature_text|default:"Rewanta Prasad Dhaubhadel (Rebu)" }}
+                        </span>
+                        <span class="text-xs opacity-60">{{ about_page.ceo_designation|default:"Chief Executive Officer • Hotel Ichchha" }}</span>
+                    </div>
+                    <div class="h-10 w-24 opacity-30 flex items-center justify-end">
+                        <i class="fa-solid fa-signature text-2xl text-luxuryGold-500"></i>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- 5. LEADERSHIP & BOARD OF DIRECTORS (100% Dynamic) -->
+<section class="max-w-7xl mx-auto py-14 sm:py-20 border-t border-amber-900/20"
+         :class="{ 'bg-gray-50/80': currentTheme === 'light', 'bg-[#0B0A08]': currentTheme !== 'light' }">
+    <div class="px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="text-center max-w-3xl mx-auto mb-10 sm:mb-12" data-animate="fadeInDown">
+            <span class="text-xs font-bold uppercase tracking-widest text-luxuryGold-500 block mb-2">{{ about_page.team_badge|default:"Visionary Governance" }}</span>
+            <h2 class="font-luxury-title text-2xl sm:text-4xl font-bold mb-2.5"
+                :class="{ 'text-neutral-900': currentTheme === 'light', 'text-amber-100': currentTheme !== 'light' }">
+                {{ about_page.team_title|default:"Get to Know the Faces Behind Our Success" }}
+            </h2>
+            <p class="text-xs sm:text-sm opacity-80 max-w-2xl mx-auto">
+                {{ about_page.team_subtitle|default:"Unveil the talented individuals who embark on a collective mission to elevate your experience at Hotel Ichchha." }}
+            </p>
+        </div>
+
+        <!-- Team Members Grid (Clean Photo + Full Hover Overlay) -->
+        <div class="flex flex-wrap justify-center gap-6 sm:gap-8">
+            {% for member in team_members %}
+            <div class="relative w-60 sm:w-64 md:w-64 max-w-[260px] aspect-[3/4] rounded-2xl overflow-hidden shadow-md group cursor-pointer border border-gray-200 dark:border-amber-900/30 bg-neutral-900 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl shrink-0"
+                 data-animate="fadeInUp">
+                
+                <!-- 1. Background Portrait Photo (Full & Clear) -->
+                {% if member.image %}
+                <img src="{{ member.image.url }}" 
+                     alt="{{ member.name }}" 
+                     class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105">
+                {% else %}
+                <div class="w-full h-full bg-neutral-800 flex items-center justify-center text-luxuryGold-400 font-bold text-2xl">
+                    {{ member.name|slice:":2" }}
+                </div>
+                {% endif %}
+
+                <!-- 2. Bottom Name & Role Bar (Visible in Normal State, Fades Out on Hover) -->
+                <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent transition-opacity duration-300 group-hover:opacity-0 z-10 flex flex-col justify-end text-center">
+                    <h3 class="font-luxury-title text-sm sm:text-base font-bold text-white drop-shadow-md">
+                        {{ member.name }}
+                    </h3>
+                    <p class="text-xs font-semibold text-luxuryGold-400 mt-0.5 tracking-wider drop-shadow">
+                        {{ member.role }}
+                    </p>
+                </div>
+
+                <!-- 3. Full Hover Overlay (Fades In on Hover: Dark Glass with Centered Bio & Social Links) -->
+                <div class="absolute inset-0 bg-black/75 backdrop-blur-[2px] p-5 flex flex-col justify-center items-center text-center text-white opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
+                    <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-luxuryGold-500/20 text-luxuryGold-300 border border-luxuryGold-500/40 mb-2">
+                        {{ member.role }}
+                    </span>
+                    <h3 class="font-luxury-title text-base font-bold text-white mb-2">
+                        {{ member.name }}
+                    </h3>
+                    <p class="text-xs text-neutral-200 leading-relaxed line-clamp-5 font-light">
+                        {{ member.bio }}
+                    </p>
+
+                    {% if member.linkedin_url or member.email %}
+                    <div class="mt-3.5 pt-2.5 border-t border-white/20 flex items-center justify-center gap-3 text-sm text-luxuryGold-400">
+                        {% if member.linkedin_url %}
+                        <a href="{{ member.linkedin_url }}" target="_blank" class="hover:text-white transition transform hover:scale-110" title="LinkedIn Profile"><i class="fa-brands fa-linkedin text-sm"></i></a>
+                        {% endif %}
+                        {% if member.email %}
+                        <a href="mailto:{{ member.email }}" class="hover:text-white transition transform hover:scale-110" title="Email"><i class="fa-regular fa-envelope text-sm"></i></a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+            {% empty %}
+            <div class="w-full text-center py-12 text-sm opacity-60">
+                Leadership information being updated.
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</section>
+
+
+<!-- 6. MISSION, VISION & CORE VALUES (100% Dynamic) -->
+<section class="py-16 sm:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <!-- Mission Card -->
+        <div class="p-8 rounded-3xl border transition-all duration-500 hover:-translate-y-2 shadow-lg flex flex-col justify-between"
+             data-animate="fadeInUp"
+             :class="{
+                 'bg-white border-gray-200': currentTheme === 'light',
+                 'bg-[#161412] border-amber-900/30 hover:border-luxuryGold-500/40': currentTheme !== 'light'
+             }">
+            <div class="space-y-4">
+                <div class="h-14 w-14 rounded-2xl bg-luxuryGold-500/10 border border-luxuryGold-500/30 flex items-center justify-center text-luxuryGold-500 text-2xl shadow-inner">
+                    <i class="fa-solid fa-bullseye"></i>
+                </div>
+                <h3 class="font-luxury-title text-xl sm:text-2xl font-bold"
+                    :class="{ 'text-neutral-900': currentTheme === 'light', 'text-amber-100': currentTheme !== 'light' }">
+                    {{ about_page.mission_title|default:"Our Mission" }}
+                </h3>
+                <p class="text-xs sm:text-sm leading-relaxed opacity-85"
+                    :class="{ 'text-neutral-700': currentTheme === 'light', 'text-neutral-300': currentTheme !== 'light' }">
+                    {{ about_page.mission_text|default:"To deliver authentic Nepalese warmth fused with international 5-star hospitality standards, creating unforgettable memories for every guest." }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Vision Card -->
+        <div class="p-8 rounded-3xl border transition-all duration-500 hover:-translate-y-2 shadow-lg flex flex-col justify-between"
+             data-animate="fadeInUp"
+             :class="{
+                 'bg-white border-gray-200': currentTheme === 'light',
+                 'bg-[#161412] border-amber-900/30 hover:border-luxuryGold-500/40': currentTheme !== 'light'
+             }">
+            <div class="space-y-4">
+                <div class="h-14 w-14 rounded-2xl bg-luxuryGold-500/10 border border-luxuryGold-500/30 flex items-center justify-center text-luxuryGold-500 text-2xl shadow-inner">
+                    <i class="fa-solid fa-eye"></i>
+                </div>
+                <h3 class="font-luxury-title text-xl sm:text-2xl font-bold"
+                    :class="{ 'text-neutral-900': currentTheme === 'light', 'text-amber-100': currentTheme !== 'light' }">
+                    {{ about_page.vision_title|default:"Our Vision" }}
+                </h3>
+                <p class="text-xs sm:text-sm leading-relaxed opacity-85"
+                    :class="{ 'text-neutral-700': currentTheme === 'light', 'text-neutral-300': currentTheme !== 'light' }">
+                    {{ about_page.vision_text|default:"To be recognized as Nepal's premier luxury destination resort and conference hub, setting the benchmark for service excellence." }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Values Card -->
+        <div class="p-8 rounded-3xl border transition-all duration-500 hover:-translate-y-2 shadow-lg flex flex-col justify-between"
+             data-animate="fadeInUp"
+             :class="{
+                 'bg-white border-gray-200': currentTheme === 'light',
+                 'bg-[#161412] border-amber-900/30 hover:border-luxuryGold-500/40': currentTheme !== 'light'
+             }">
+            <div class="space-y-4">
+                <div class="h-14 w-14 rounded-2xl bg-luxuryGold-500/10 border border-luxuryGold-500/30 flex items-center justify-center text-luxuryGold-500 text-2xl shadow-inner">
+                    <i class="fa-solid fa-gem"></i>
+                </div>
+                <h3 class="font-luxury-title text-xl sm:text-2xl font-bold"
+                    :class="{ 'text-neutral-900': currentTheme === 'light', 'text-amber-100': currentTheme !== 'light' }">
+                    {{ about_page.values_title|default:"Our Core Values" }}
+                </h3>
+                <p class="text-xs sm:text-sm leading-relaxed opacity-85"
+                    :class="{ 'text-neutral-700': currentTheme === 'light', 'text-neutral-300': currentTheme !== 'light' }">
+                    {{ about_page.values_text|default:"Guest-first excellence, uncompromising integrity, cultural pride, culinary artistry, and passionate commitment to sustainability." }}
+                </p>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- 6. 5-STAR AMENITIES & FACILITIES HIGHLIGHTS (100% Dynamic) -->
+<section class="py-16 sm:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-3xl mx-auto mb-12 sm:mb-16" data-animate="fadeInDown">
+        <span class="text-xs font-bold uppercase tracking-widest text-luxuryGold-500 block mb-2">{{ about_page.facilities_badge|default:"World-Class Comfort" }}</span>
+        <h2 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold mb-3"
+            :class="{ 'text-neutral-900': currentTheme === 'light', 'text-amber-100': currentTheme !== 'light' }">
+            {{ about_page.facilities_title|default:"Comprehensive 5-Star Amenities" }}
+        </h2>
+        <p class="text-xs sm:text-sm opacity-80 max-w-xl mx-auto">
+            {{ about_page.facilities_subtitle|default:"Everything you need for an unmatched stay, relaxing wellness retreat, or grand conference event in Simara." }}
+        </p>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        {% for f in facilities %}
+        <div class="p-5 sm:p-6 rounded-2xl border transition-all duration-300 hover:scale-105 shadow-sm flex flex-col items-center text-center group"
+             data-animate="fadeInUp"
+             :class="{
+                 'bg-white border-gray-200 hover:border-luxuryGold-400': currentTheme === 'light',
+                 'bg-[#161412] border-amber-900/30 hover:border-luxuryGold-500/50': currentTheme !== 'light'
+             }">
+            <div class="h-12 w-12 rounded-2xl bg-luxuryGold-500/10 flex items-center justify-center text-luxuryGold-500 text-xl mb-3 group-hover:scale-110 transition-transform">
+                <i class="{{ f.icon }}"></i>
+            </div>
+            <h4 class="font-bold text-xs sm:text-sm mb-1"
+                :class="{ 'text-neutral-900': currentTheme === 'light', 'text-neutral-100': currentTheme !== 'light' }">
+                {{ f.title }}
+            </h4>
+            <p class="text-[11px] opacity-70 leading-relaxed">
+                {{ f.description }}
+            </p>
+        </div>
+        {% empty %}
+        <div class="col-span-4 text-center py-8 text-xs opacity-60">
+            Amenities loaded dynamically.
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock %}
+

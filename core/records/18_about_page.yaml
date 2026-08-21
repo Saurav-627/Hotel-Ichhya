@@ -1,0 +1,159 @@
+# Hotel Ichchha - About Page & Leadership Data Fixture
+# Admins can add and manage images dynamically from the Admin CMS Portal
+
+about_page:
+  hero_badge: "⭐ Nepal's First 5-Star Hotel in Simara"
+  hero_title: "Nepal's First 5-Star Hotel in Simara"
+  hero_subtitle: "Hotel Ichchha — Simara, Bara, Nepal"
+  hero_description: "A verdant oasis in the heart of Simara offering exceptional comfort, convenience, enjoyment, and five-star hospitality services."
+  hero_button_text: "Book A Stay"
+  hero_button_url: "/rooms/"
+  hero_secondary_button_text: "Our Heritage"
+  hero_secondary_button_url: "#story"
+  
+  story_badge: "Our Heritage & Story"
+  story_title: "A Verdant Oasis in the Heart of Simara"
+  story_subtitle: "Redefining Five-Star Hospitality in Nepal's Southern Gateway"
+  story_floating_badge: "5-Star Certified"
+  story_content: >-
+    Being a top hospitality provider in Nepal, Hotel Ichchha guarantees finest offerings due to its convenient location in Simara, Bara. It is the premier choice for business executives, leisure seekers, destination weddings, and pilgrimage journeys. With 96 exquisitely appointed rooms and suites, multiple dining venues, a serene wellness spa, expansive conference halls, and lush gardens, Hotel Ichchha sets a new benchmark in guest experience and luxury service excellence.
+
+  story_feature_1_icon: "fa-solid fa-bed"
+  story_feature_1_text: "96 Luxury Rooms"
+  story_feature_2_icon: "fa-solid fa-ring"
+  story_feature_2_text: "Destination Weddings"
+  story_feature_3_icon: "fa-solid fa-plane-arrival"
+  story_feature_3_text: "Simara Airport 5 Min"
+  story_feature_4_icon: "fa-solid fa-spa"
+  story_feature_4_text: "Ayurvedic Spa"
+  story_feature_5_icon: "fa-solid fa-utensils"
+  story_feature_5_text: "Gourmet Dining"
+  story_feature_6_icon: "fa-solid fa-users-rectangle"
+  story_feature_6_text: "1,000+ Pax Hall"
+  
+  stat1_value: "96"
+  stat1_label: "Luxury Rooms & Suites"
+  stat2_value: "5-Star"
+  stat2_label: "Luxury Rating"
+  stat3_value: "27+"
+  stat3_label: "Years Hospitality Leadership"
+  stat4_value: "1,000+"
+  stat4_label: "Banqueting Pax Capacity"
+
+  ceo_badge: "Executive Leadership"
+  ceo_title: "Message from the CEO"
+  ceo_subtitle: "We are committed to providing the best hospitality services to our guests."
+  ceo_name: "Rewanta Prasad Dhaubhadel"
+  ceo_role: "Chief Executive Officer (CEO)"
+  ceo_credentials: "Swiss Hotel Mgmt School Alumnus"
+  ceo_designation: "Chief Executive Officer • Hotel Ichchha"
+  ceo_signature_text: "Rewanta Prasad Dhaubhadel (Rebu)"
+  ceo_quote: "With a heart rooted in tradition and eyes set on innovation, I remain committed to advancing Nepal’s hospitality industry and creating opportunities for sustainable growth and global recognition."
+  ceo_message: >-
+    Rewanta Prasad Dhaubhadel (fondly known as Rebu) brings over 27 years of distinguished leadership across the hospitality, tourism, and education sectors. Holding an International Diploma in Hotel Management from the Swiss Hotel Management School (SHMS), Switzerland, and a degree in Business Administration from Nepal, Mr. Dhaubhadel embodies a harmonious blend of Swiss precision and authentic Nepalese warmth.
+
+    His extensive international experience spanning Geneva, Lausanne, and Montreux enriched his understanding of global hospitality standards, culinary innovation, and guest satisfaction. Returning to Nepal, he held key leadership roles at Hotel Royal Singi, oversaw corporate travel operations, and served as CEO of Global Academy of Tourism & Hospitality Education (GATE College), nurturing thousands of future hospitality leaders.
+
+    At Hotel Ichchha, his vision is to transform Simara into Nepal's leading luxury leisure and MICE destination, combining world-class 5-star comfort with sustainable community growth.
+
+  mission_title: "Our Mission"
+  mission_text: "To deliver authentic Nepalese warmth fused with international 5-star hospitality standards, creating unforgettable memories for every guest."
+  vision_title: "Our Vision"
+  vision_text: "To be recognized as Nepal's premier luxury destination resort and conference hub, setting the benchmark for service excellence."
+  values_title: "Our Core Values"
+  values_text: "Guest-first excellence, uncompromising integrity, cultural pride, culinary artistry, and passionate commitment to sustainability."
+
+  team_badge: "Visionary Governance"
+  team_title: "Get to Know the Faces Behind Our Success"
+  team_subtitle: "Unveil the talented individuals who embark on a collective mission to elevate your experience at Hotel Ichchha."
+
+  video_badge: "Resort Visual Tour"
+  video_title: "Experience Hotel Ichchha in Motion"
+  video_subtitle: "Take a glimpse into our lush resort grounds, sparkling pool, plush suites, and banquet venues."
+  video_url: "https://hotelichchha.com/backend/images/articles/video/LAeuf-intro_video--hqhIzqZ.mp4"
+
+  facilities_badge: "World-Class Comfort"
+  facilities_title: "Comprehensive 5-Star Amenities"
+  facilities_subtitle: "Everything you need for an unmatched stay, relaxing wellness retreat, or grand conference event in Simara."
+
+  cta_badge: "Reservations & Inquiries"
+  cta_title: "Plan Your Unforgettable Stay in Simara"
+  cta_subtitle: "Whether you are traveling for business, leisure, or a grand wedding celebration, our dedicated team awaits to welcome you."
+  cta_button_text: "Book A Stay"
+  cta_button_url: "/rooms/"
+  cta_secondary_button_text: "Contact Concierge"
+  cta_secondary_button_url: "/contact/"
+
+team_members:
+  - name: "Ichchha Bahadur Wagle"
+    role: "Chairman"
+    bio: "Ichchha Bahadur Wagle is a respected business visionary with over 30 years of leadership in hospitality, real estate development, and commercial trade across Nepal. His visionary guidance established Hotel Ichchha as the benchmark of luxury hospitality in Madhesh Province."
+    order: 1
+    is_published: true
+
+  - name: "Moonsun Wagle"
+    role: "Director"
+    bio: "With over 5 years of specialized expertise in Human Resource management, organizational development, and talent acquisition, Moonsun Wagle oversees staff excellence and operational culture across Hotel Ichchha."
+    order: 2
+    is_published: true
+
+  - name: "Sushila Basnet"
+    role: "Director"
+    bio: "Bringing more than 5 years of leadership in corporate administration and community engagement, Sushila Basnet steers guest relations and corporate governance at Hotel Ichchha."
+    order: 3
+    is_published: true
+
+  - name: "Rewanta Prasad Dhaubhadel"
+    role: "Chief Executive Officer (CEO)"
+    bio: "Swiss Hotel Management School (SHMS) alumnus with 27+ years of international leadership across Europe and Nepal. Leading Hotel Ichchha with exceptional service excellence and strategic vision."
+    order: 4
+    is_published: true
+
+facility_highlights:
+  - title: "24/7 In-Room Dining"
+    icon: "fa-solid fa-bell-concierge"
+    description: "Round-the-clock bespoke dining service brought directly to your suite."
+    order: 1
+    is_published: true
+
+  - title: "High-Speed Wi-Fi"
+    icon: "fa-solid fa-wifi"
+    description: "Seamless optical fiber connectivity across the entire resort grounds."
+    order: 2
+    is_published: true
+
+  - title: "Ayurvedic Luxury Spa"
+    icon: "fa-solid fa-spa"
+    description: "Holistic wellness therapies, sauna, steam, and rejuvenation rituals."
+    order: 3
+    is_published: true
+
+  - title: "Fitness Center"
+    icon: "fa-solid fa-dumbbell"
+    description: "State-of-the-art cardiovascular and strength training equipment."
+    order: 4
+    is_published: true
+
+  - title: "Resort Swimming Pool"
+    icon: "fa-solid fa-water-ladder"
+    description: "Pristine outdoor pool with poolside bar and sun lounges."
+    order: 5
+    is_published: true
+
+  - title: "Fine Dining & Lounge"
+    icon: "fa-solid fa-utensils"
+    description: "Multi-cuisine gourmet restaurant and signature cocktail bar."
+    order: 6
+    is_published: true
+
+  - title: "Grand Banquets & Halls"
+    icon: "fa-solid fa-users-rectangle"
+    description: "Over 1,000 pax capacity for conferences, expos, and royal weddings."
+    order: 7
+    is_published: true
+
+  - title: "Airport Transfers"
+    icon: "fa-solid fa-plane-arrival"
+    description: "Complimentary luxury chauffeur pickup from Simara Airport."
+    order: 8
+    is_published: true

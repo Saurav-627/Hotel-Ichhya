@@ -28,6 +28,7 @@ from blogs.models.post import BlogPost
 from nearby_places.models.attraction import Attraction
 from testimonials.models.testimonial import Testimonial
 from seo.models.seo_data import SEOData
+from about.models import AboutPage, TeamMember, AboutFacility
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -463,5 +464,23 @@ AddonPriceFormSet = forms.inlineformset_factory(
     min_num=1,
     validate_min=True
 )
+
+
+class AboutPageForm(TailwindFormMixin, forms.ModelForm):
+    class Meta:
+        model = AboutPage
+        fields = '__all__'
+
+
+class TeamMemberForm(TailwindFormMixin, forms.ModelForm):
+    class Meta:
+        model = TeamMember
+        fields = '__all__'
+
+
+class AboutFacilityForm(TailwindFormMixin, forms.ModelForm):
+    class Meta:
+        model = AboutFacility
+        fields = '__all__'
 
 

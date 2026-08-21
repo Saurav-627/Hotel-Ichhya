@@ -67,8 +67,8 @@
                      'bg-[#161412] border-amber-900/20 text-amber-100': currentTheme !== 'light'
                  }">
                 
-                <h3 class="font-luxury-title text-xl sm:text-2xl font-semibold mb-2">Send an Inquiry</h3>
-                <p class="text-xs opacity-75 mb-6">Have a custom event or dining reservation question? Complete the form below.</p>
+                <h3 class="font-luxury-title text-xl sm:text-2xl font-semibold mb-2">{{ hotel_settings.contact_form_title|default:"Send an Inquiry" }}</h3>
+                <p class="text-xs opacity-75 mb-6">{{ hotel_settings.contact_form_subtitle|default:"Have a custom event or dining reservation question? Complete the form below." }}</p>
 
                 <!-- HTMX Response feedback -->
                 <div id="contact-response" class="mb-6"></div>
@@ -203,7 +203,7 @@
                                 'bg-amber-800 text-white': currentTheme === 'light',
                                 'bg-luxuryGold-500 text-black gold-glow': currentTheme !== 'light'
                             }">
-                        Submit Inquiry Message
+                        {{ hotel_settings.contact_form_button_text|default:"Submit Inquiry Message" }}
                     </button>
                 </form>
 

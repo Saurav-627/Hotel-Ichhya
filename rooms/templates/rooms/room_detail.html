@@ -65,7 +65,8 @@
                 <!-- LIGHTBOX MODAL -->
                 <template x-teleport="body">
                     <div x-show="lightboxOpen" 
-                         x-effect="document.body.style.overflow = lightboxOpen ? 'hidden' : ''"
+                         x-effect="document.body.style.overflow = lightboxOpen ? 'hidden' : ''; if (window.lenis) { lightboxOpen ? window.lenis.stop() : window.lenis.start(); }"
+                         data-lenis-prevent
                          @keydown.escape.window="lightboxOpen = false"
                          class="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 bg-black/95 backdrop-blur-md" 
                          style="display: none;">
@@ -685,10 +686,13 @@
                 <!-- Guest Personal Details Modal -->
                 <template x-teleport="body">
                     <div x-show="showModal" 
-                         x-effect="document.body.style.overflow = showModal ? 'hidden' : ''"
+                         x-effect="document.body.style.overflow = showModal ? 'hidden' : ''; if (window.lenis) { showModal ? window.lenis.stop() : window.lenis.start(); }"
+                         data-lenis-prevent
                          class="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate__animated animate__fadeIn" 
                          style="display: none;">
-                        <div @click.away="showModal = false" class="relative w-full max-w-4xl rounded-2xl p-4 sm:p-6 lg:p-8 border shadow-2xl overflow-y-auto max-h-[90vh] animate__animated animate__zoomIn text-left my-auto"
+                        <div @click.away="showModal = false" 
+                             data-lenis-prevent
+                             class="relative w-full max-w-4xl rounded-2xl p-4 sm:p-6 lg:p-8 border shadow-2xl overflow-y-auto max-h-[90vh] overscroll-contain animate__animated animate__zoomIn text-left my-auto"
                              :class="{
                                  'bg-white border-gray-200 text-gray-800': currentTheme === 'light',
                                  'bg-[#161412] border-amber-900/30 text-amber-200': currentTheme !== 'light'

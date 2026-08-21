@@ -19,3 +19,29 @@ about_preview:
   stat3_label: Star Rating
   stat4_value: 25k+
   stat4_label: Satisfied Guests
+
+  search_button_text: "Search Rooms"
+
+  rooms_badge: "Premium Sanctuary"
+  rooms_title: "Rooms & Suites"
+  rooms_subtitle: "Explore our signature guest chambers designed for ultimate relaxation and comfort."
+
+  facilities_badge: "Elite Hospitality"
+  facilities_title: "Resort Services & Facilities"
+  facilities_subtitle: "Indulge in our carefully curated amenities, designed to elevate your stay to a world-class level."
+
+  dining_badge: "Fine Culinary"
+  dining_title: "Gastronomy & Lounge"
+  dining_subtitle: "Savor international delicacies, authentic Nepalese cuisine, and masterfully mixed cocktails curated by globally acclaimed chefs."
+  dining_button_text: "Explore More"
+
+  testimonials_badge: "Guest Memoirs"
+  testimonials_title: "What Our Guests Say"
+
+  attractions_badge: "Explore Nearby"
+  attractions_title: "Local Sights & Attractions"
+
+  newsletter_badge: "Newsletter Subscription"
+  newsletter_title: "Join The Elite Guild"
+  newsletter_subtitle: "Subscribe to receive exclusive offers, luxury travel logs, seasonal booking discounts, and resort news."
+  newsletter_button_text: "Subscribe"

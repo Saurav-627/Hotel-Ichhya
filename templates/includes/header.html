@@ -35,7 +35,7 @@
         <!-- Desktop Right Quick Links & Social -->
         <div class="hidden md:flex items-center gap-5 whitespace-nowrap">
             <span class="text-luxuryGold-400 font-semibold uppercase tracking-wider text-[10px] bg-luxuryGold-500/10 px-2.5 py-0.5 rounded-full border border-luxuryGold-500/30">
-                ⭐ 5-Star Luxury Resort
+                {{ hotel_settings.header_badge|default:"⭐ 5-Star Luxury Resort" }}
             </span>
             <div class="flex items-center gap-3 opacity-80">
                 {% if hotel_settings.facebook_url %}
@@ -113,6 +113,10 @@
                     {% endif %}
                 {% empty %}
                     <!-- Fallback menus if database is empty -->
+                    <a href="{% url 'about:about_page' %}" class="relative text-xs sm:text-sm font-semibold tracking-wider uppercase hover:text-luxuryGold-400 transition-colors py-1 whitespace-nowrap group">
+                        About
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-luxuryGold-400 transition-all duration-300 group-hover:w-full"></span>
+                    </a>
                     <a href="{% url 'rooms:room_list' %}" class="relative text-xs sm:text-sm font-semibold tracking-wider uppercase hover:text-luxuryGold-400 transition-colors py-1 whitespace-nowrap group">
                         Rooms &amp; Suites
                         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-luxuryGold-400 transition-all duration-300 group-hover:w-full"></span>
@@ -131,10 +135,6 @@
                     </a>
                     <a href="{% url 'gallery:gallery_list' %}" class="relative text-xs sm:text-sm font-semibold tracking-wider uppercase hover:text-luxuryGold-400 transition-colors py-1 whitespace-nowrap group">
                         Gallery
-                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-luxuryGold-400 transition-all duration-300 group-hover:w-full"></span>
-                    </a>
-                    <a href="{% url 'blogs:blog_list' %}" class="relative text-xs sm:text-sm font-semibold tracking-wider uppercase hover:text-luxuryGold-400 transition-colors py-1 whitespace-nowrap group">
-                        News
                         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-luxuryGold-400 transition-all duration-300 group-hover:w-full"></span>
                     </a>
                     <a href="{% url 'contact:contact_page' %}" class="relative text-xs sm:text-sm font-semibold tracking-wider uppercase hover:text-luxuryGold-400 transition-colors py-1 whitespace-nowrap group">
@@ -206,9 +206,9 @@
                 </button>
 
                 <!-- Primary Booking CTA -->
-                <a href="{% url 'rooms:room_list' %}" 
+                <a href="{{ hotel_settings.header_cta_url|default:'/rooms/' }}" 
                    class="px-5 sm:px-6 py-2.5 text-xs font-bold uppercase tracking-widest rounded-full transition-transform duration-300 hover:scale-105 whitespace-nowrap shadow-md border border-luxuryGold-400 {% if selected_theme == 'light' %}bg-amber-800 text-white hover:bg-amber-900{% else %}bg-luxuryGold-500 text-[#0A0908] hover:bg-luxuryGold-400 gold-glow{% endif %}">
-                    Book A Stay
+                    {{ hotel_settings.header_cta_text|default:"Book A Stay" }}
                 </a>
             </div>
 

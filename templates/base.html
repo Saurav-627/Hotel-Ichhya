@@ -61,10 +61,24 @@
     <!-- Alpine.js -->
     <script defer src="https://unpkg.com/alpinejs@3.13.5/dist/cdn.min.js"></script>
 
+    <!-- Lenis Smooth Scrolling -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.css">
+    <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
+
     <style type="text/css">
         /* Global Smooth Scrolling */
         html {
             scroll-behavior: smooth !important;
+        }
+
+        /* Modal & Drawer Scroll Isolation */
+        [data-lenis-prevent], .modal-container, [role="dialog"], .overflow-y-auto {
+            overscroll-behavior: contain !important;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        body.modal-open, html.modal-open, body[style*="overflow: hidden"], body[style*="overflow:hidden"] {
+            overflow: hidden !important;
         }
 
         /* Custom Luxury Scrollbar Styling */
@@ -543,6 +557,77 @@
                 el.airDatepicker = picker;
             });
         });
+
+        // Global Luxury Smooth Inertia Scrolling (Lenis) with Automatic Modal Protection
+        if (typeof Lenis !== 'undefined') {
+            const lenis = new Lenis({
+                duration: 1.2,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                orientation: 'vertical',
+                gestureOrientation: 'vertical',
+                smoothWheel: true,
+                wheelMultiplier: 1.0,
+                touchMultiplier: 1.5,
+                infinite: false,
+                prevent: (node) => {
+                    if (!node) return false;
+                    const el = node instanceof Element ? node : (node.parentElement || null);
+                    if (!el) return false;
+                    return (
+                        el.closest('[data-lenis-prevent]') !== null ||
+                        el.closest('[data-lenis-prevent-wheel]') !== null ||
+                        el.closest('.overflow-y-auto') !== null ||
+                        el.closest('.overflow-auto') !== null ||
+                        el.closest('.air-datepicker') !== null ||
+                        el.closest('.fixed') !== null ||
+                        document.body.style.overflow === 'hidden' ||
+                        document.documentElement.style.overflow === 'hidden' ||
+                        document.body.classList.contains('overflow-hidden')
+                    );
+                }
+            });
+
+            function raf(time) {
+                lenis.raf(time);
+                requestAnimationFrame(raf);
+            }
+            requestAnimationFrame(raf);
+            window.lenis = lenis;
+
+            // Universal observer to halt background Lenis scrolling whenever any modal locks the body
+            let isBodyLocked = false;
+            const updateScrollState = () => {
+                const isLocked = document.body.style.overflow === 'hidden' || 
+                                 document.documentElement.style.overflow === 'hidden' ||
+                                 document.body.classList.contains('overflow-hidden') ||
+                                 document.body.classList.contains('modal-open');
+                if (isLocked && !isBodyLocked) {
+                    isBodyLocked = true;
+                    lenis.stop();
+                } else if (!isLocked && isBodyLocked) {
+                    isBodyLocked = false;
+                    lenis.start();
+                }
+            };
+
+            const bodyObserver = new MutationObserver(updateScrollState);
+            bodyObserver.observe(document.body, { attributes: true, attributeFilter: ['style', 'class'] });
+            bodyObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['style', 'class'] });
+
+            // Smooth scroll for in-page anchor links (e.g. #story)
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const targetId = this.getAttribute('href');
+                    if (targetId && targetId !== '#') {
+                        const targetEl = document.querySelector(targetId);
+                        if (targetEl) {
+                            e.preventDefault();
+                            lenis.scrollTo(targetEl, { offset: -80, duration: 1.2 });
+                        }
+                    }
+                });
+            });
+        }
     </script>
 
     <!-- Air Datepicker JS -->

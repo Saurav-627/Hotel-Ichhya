@@ -50,3 +50,10 @@ seo_banners:
   header_title: News & Luxury Insights
   header_description: Stay updated with our latest festival programs and culinary
     launches.
+- path: /about/
+  meta_title: About Us & Heritage | Hotel Ichchha
+  meta_description: Learn about Hotel Ichchha, Nepal's first 5-star hotel in Simara, Bara.
+  header_subtitle: ⭐ Nepal's First 5-Star Hotel in Simara
+  header_title: Nepal's First 5-Star Hotel in Simara
+  header_description: A verdant oasis in the heart of Simara offering exceptional comfort, convenience, enjoyment, and five-star hospitality services.
+

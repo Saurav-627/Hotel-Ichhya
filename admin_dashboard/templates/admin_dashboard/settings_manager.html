@@ -149,6 +149,24 @@
                 </div>
 
                 <h4 class="text-base font-semibold text-neutral-900 dark:text-neutral-100 font-serif mt-8 mb-4 pb-2 border-b border-neutral-200 dark:border-neutral-800">
+                    Header & Navigation Controls
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Top Header Info Badge</label>
+                        {{ settings_form.header_badge }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Header CTA Button Text</label>
+                        {{ settings_form.header_cta_text }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Header CTA Button URL</label>
+                        {{ settings_form.header_cta_url }}
+                    </div>
+                </div>
+
+                <h4 class="text-base font-semibold text-neutral-900 dark:text-neutral-100 font-serif mt-8 mb-4 pb-2 border-b border-neutral-200 dark:border-neutral-800">
                     Footer & Descriptions Info
                 </h4>
                 <div class="space-y-4">
@@ -159,6 +177,28 @@
                     <div>
                         <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Copyright text</label>
                         {{ settings_form.copyright_text }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Awards & Accreditation Text</label>
+                        {{ settings_form.awards_text }}
+                    </div>
+                </div>
+
+                <h4 class="text-base font-semibold text-neutral-900 dark:text-neutral-100 font-serif mt-8 mb-4 pb-2 border-b border-neutral-200 dark:border-neutral-800">
+                    Contact Page Inquiry Form Controls
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Inquiry Form Heading</label>
+                        {{ settings_form.contact_form_title }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Submit Button Text</label>
+                        {{ settings_form.contact_form_button_text }}
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Inquiry Form Subtitle</label>
+                        {{ settings_form.contact_form_subtitle }}
                     </div>
                 </div>
 
