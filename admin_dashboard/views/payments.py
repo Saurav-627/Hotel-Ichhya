@@ -4,6 +4,7 @@ from django.db.models.functions import Coalesce
 
 from admin_dashboard.mixins import StaffRequiredMixin
 from payments.models.payment import Payment
+from payments.models.payment_processor import PaymentProcessor
 
 class PaymentListView(StaffRequiredMixin, ListView):
     model = Payment
@@ -28,7 +29,7 @@ class PaymentListView(StaffRequiredMixin, ListView):
         # Filter by gateway
         gateway = self.request.GET.get('gateway', '').strip()
         if gateway:
-            queryset = queryset.filter(gateway=gateway)
+            queryset = queryset.filter(gateway__iexact=gateway)
             
         # Filter by status
         status = self.request.GET.get('status', '').strip()
@@ -39,12 +40,19 @@ class PaymentListView(StaffRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Gateway lists for filtering
-        # pyrefly: ignore [missing-attribute]
-        context['gateways'] = Payment.objects.values_list('gateway', flat=True).distinct()
-        context['selected_gateway'] = self.request.GET.get('gateway', '')
-        context['selected_status'] = self.request.GET.get('status', '')
-        context['search_query'] = self.request.GET.get('search', '')
+        
+        # Only show is_published payment processors for the gateway filter
+        published_processors = PaymentProcessor.objects.filter(is_published=True).order_by('name')
+        selected_gateway = self.request.GET.get('gateway', '').strip()
+        selected_status = self.request.GET.get('status', '').strip()
+        search_query = self.request.GET.get('search', '').strip()
+
+        context['published_processors'] = published_processors
+        context['status_choices'] = Payment.STATUS_CHOICES
+        context['selected_gateway'] = selected_gateway
+        context['selected_status'] = selected_status
+        context['search_query'] = search_query
+        context['has_active_filters'] = bool(search_query or selected_gateway or selected_status)
         
         # Calculate revenue summaries for analytics cards grouped by currency
         def get_currency_breakdown(queryset):
@@ -57,10 +65,16 @@ class PaymentListView(StaffRequiredMixin, ListView):
         total_payments = Payment.objects.filter(status='success')
         refunded_payments = Payment.objects.filter(status='refunded')
 
+        # Dynamically build stats for published processors
+        processor_stats = []
+        for proc in published_processors:
+            processor_stats.append({
+                'processor': proc,
+                'breakdown': get_currency_breakdown(total_payments.filter(gateway__iexact=proc.code))
+            })
+
         context['total_collected'] = get_currency_breakdown(total_payments)
-        context['stripe_collected'] = get_currency_breakdown(total_payments.filter(gateway__iexact='stripe'))
-        context['esewa_collected'] = get_currency_breakdown(total_payments.filter(gateway__iexact='esewa'))
-        context['khalti_collected'] = get_currency_breakdown(total_payments.filter(gateway__iexact='khalti'))
+        context['processor_stats'] = processor_stats
         context['refunded_collected'] = get_currency_breakdown(refunded_payments)
         
         return context

@@ -57,6 +57,9 @@ def send_booking_invoice_email(booking, payment=None, request=None):
                 protocol = 'http' if settings.DEBUG else 'https'
                 logo_url = f"{protocol}://{domain}{static_logo}"
 
+        if booking.room:
+            booking.room.set_active_currency(booking.currency_code)
+
         context = {
             'booking': booking,
             'payment': payment,
@@ -84,11 +87,171 @@ def send_booking_invoice_email(booking, payment=None, request=None):
         msg.send(fail_silently=False)
 
         logger.info(f"Successfully sent invoice email for Booking {booking.booking_uid} to {to_email}")
+
+        # Simultaneously notify hotel staff email without blocking guest invoice
+        try:
+            send_hotel_booking_notification_email(booking, payment=payment, request=request)
+        except Exception as hotel_err:
+            logger.error(f"Failed to dispatch hotel notification email for Booking {booking.booking_uid}: {hotel_err}")
+
         return True, "Email sent successfully."
 
     except Exception as e:
         error_msg = str(e)
         logger.error(f"Failed to send invoice email for Booking {booking.booking_uid} to {booking.guest_email}: {error_msg}")
+        return False, error_msg
+
+
+def send_hotel_booking_notification_email(booking, payment=None, request=None):
+    """
+    Renders and dispatches an instant booking notification alert to the hotel's contact email.
+    """
+    try:
+        from settings_manager.models.hotel_settings import HotelSettings
+        hotel_settings = HotelSettings.objects.first()
+        hotel_email = hotel_settings.contact_email if hotel_settings and hotel_settings.contact_email else 'info@hotelichchha.com'
+
+        # Build absolute URL for admin dashboard booking detail view
+        admin_booking_path = reverse('admin_dashboard:booking_detail', kwargs={'pk': booking.pk})
+        if request:
+            admin_booking_url = request.build_absolute_uri(admin_booking_path)
+        else:
+            domain = getattr(settings, 'SITE_DOMAIN', '127.0.0.1:8000')
+            protocol = 'http' if settings.DEBUG else 'https'
+            admin_booking_url = f"{protocol}://{domain}{admin_booking_path}"
+
+        logo_url = None
+        if hotel_settings and hotel_settings.logo:
+            logo_url = hotel_settings.logo.url
+            if not logo_url.startswith('http'):
+                if request:
+                    logo_url = request.build_absolute_uri(logo_url)
+                else:
+                    domain = getattr(settings, 'SITE_DOMAIN', '127.0.0.1:8000')
+                    protocol = 'http' if settings.DEBUG else 'https'
+                    logo_url = f"{protocol}://{domain}{logo_url}"
+
+        if not logo_url:
+            static_logo = '/static/images/hotel-logo.png'
+            if request:
+                logo_url = request.build_absolute_uri(static_logo)
+            else:
+                domain = getattr(settings, 'SITE_DOMAIN', '127.0.0.1:8000')
+                protocol = 'http' if settings.DEBUG else 'https'
+                logo_url = f"{protocol}://{domain}{static_logo}"
+
+        if booking.room:
+            booking.room.set_active_currency(booking.currency_code)
+
+        context = {
+            'booking': booking,
+            'payment': payment,
+            'admin_booking_url': admin_booking_url,
+            'logo_url': logo_url,
+            'hotel_settings': hotel_settings,
+        }
+
+        html_content = render_to_string('emails/booking_notification_hotel_email.html', context)
+        plain_content = strip_tags(html_content)
+
+        site_name = hotel_settings.site_name if hotel_settings else "Hotel Ichchha"
+        subject = f"🛎️ New Booking Alert [{booking.booking_uid}] — {booking.guest_name} ({booking.currency_code} {booking.total})"
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', f'{site_name} <noreply@hotelichchha.com>')
+
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_content,
+            from_email=from_email,
+            to=[hotel_email],
+            reply_to=[booking.guest_email] if booking.guest_email else None
+        )
+        msg.attach_alternative(html_content, "text/html")
+        msg.send(fail_silently=False)
+
+        logger.info(f"Successfully sent hotel booking alert for Booking {booking.booking_uid} to {hotel_email}")
+        return True, "Hotel notification sent successfully."
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f"Failed to send hotel booking alert for Booking {booking.booking_uid}: {error_msg}")
+        return False, error_msg
+
+
+def send_contact_inquiry_emails(inquiry, request=None):
+    """
+    Dispatches a staff notification alert to hotel_settings.contact_email upon receiving a contact inquiry.
+    """
+    if not inquiry:
+        return False, "No inquiry provided."
+
+    from settings_manager.models.hotel_settings import HotelSettings
+    hotel_settings = HotelSettings.objects.first()
+    hotel_email = hotel_settings.contact_email if hotel_settings and hotel_settings.contact_email else 'info@hotelichchha.com'
+    site_name = hotel_settings.site_name if hotel_settings else "Hotel Ichchha"
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', f'{site_name} <noreply@hotelichchha.com>')
+
+    logo_url = None
+    if hotel_settings and hotel_settings.logo:
+        logo_url = hotel_settings.logo.url
+        if not logo_url.startswith('http'):
+            if request:
+                logo_url = request.build_absolute_uri(logo_url)
+            else:
+                domain = getattr(settings, 'SITE_DOMAIN', '127.0.0.1:8000')
+                protocol = 'http' if settings.DEBUG else 'https'
+                logo_url = f"{protocol}://{domain}{logo_url}"
+
+    if not logo_url:
+        static_logo = '/static/images/hotel-logo.png'
+        if request:
+            logo_url = request.build_absolute_uri(static_logo)
+        else:
+            domain = getattr(settings, 'SITE_DOMAIN', '127.0.0.1:8000')
+            protocol = 'http' if settings.DEBUG else 'https'
+            logo_url = f"{protocol}://{domain}{static_logo}"
+
+    # Build Admin Inquiry Detail URL
+    admin_inquiry_url = None
+    try:
+        inquiry_path = reverse('admin_dashboard:contact_inquiry_detail', kwargs={'pk': inquiry.pk})
+        if request:
+            admin_inquiry_url = request.build_absolute_uri(inquiry_path)
+        else:
+            domain = getattr(settings, 'SITE_DOMAIN', '127.0.0.1:8000')
+            protocol = 'http' if settings.DEBUG else 'https'
+            admin_inquiry_url = f"{protocol}://{domain}{inquiry_path}"
+    except Exception:
+        admin_inquiry_url = None
+
+    context = {
+        'inquiry': inquiry,
+        'admin_inquiry_url': admin_inquiry_url,
+        'logo_url': logo_url,
+        'hotel_settings': hotel_settings,
+    }
+
+    try:
+        html_content = render_to_string('emails/contact_inquiry_hotel_email.html', context)
+        plain_content = strip_tags(html_content)
+
+        subject = f"📬 New Inquiry: {inquiry.subject} — From {inquiry.name}"
+
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_content,
+            from_email=from_email,
+            to=[hotel_email],
+            reply_to=[inquiry.email]
+        )
+        msg.attach_alternative(html_content, "text/html")
+        msg.send(fail_silently=False)
+
+        logger.info(f"Successfully dispatched contact inquiry email #{inquiry.pk} to {hotel_email}")
+        return True, "Contact inquiry email sent successfully."
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f"Failed to send contact inquiry notification for Inquiry #{inquiry.pk}: {error_msg}")
         return False, error_msg
 
 

@@ -75,13 +75,16 @@ def process_payment(request, booking_uid, gateway):
         }
 
         if gateway == 'khalti':
+            # pyrefly: ignore [bad-assignment]
             kwargs['display_name'] = f"Booking for {booking.room.title}"
+            # pyrefly: ignore [bad-assignment]
             kwargs['customer_info'] = {
                 'name': booking.guest_name,
                 'email': booking.guest_email,
                 'phone': booking.guest_phone,
             }
             from ..services.utils import to_minor_units
+            # pyrefly: ignore [bad-assignment]
             kwargs['product_items'] = [{
                 'identity': str(booking.room.id),
                 'name': booking.room.title,
@@ -152,12 +155,19 @@ def payment_callback(request, payment_id):
             booking.status = 'confirmed'
             booking.save(update_fields=['status'])
 
-            # Send Invoice & Receipt Email upon payment success
+            # Send Invoice & Receipt Email and Trigger Admin Notification upon payment success
             try:
                 from core.services.email_service import send_booking_invoice_email
+                from admin_dashboard.models.notification import create_admin_notification
                 send_booking_invoice_email(booking, payment=payment, request=request)
+                create_admin_notification(
+                    notification_type='payment_success',
+                    title=f"Booking Confirmed & Paid [{booking.booking_uid}]",
+                    message=f"Received {booking.currency_code} {payment.amount} via STRIPE from {booking.guest_name}.",
+                    link_url=reverse('admin_dashboard:booking_detail', kwargs={'pk': booking.pk})
+                )
             except Exception as e:
-                logger.error(f"Failed to send invoice email after Stripe payment: {e}")
+                logger.error(f"Failed to send invoice email/notification after Stripe payment: {e}")
 
         message = f"Payment of {booking.currency_code} {payment.amount} successful via Stripe!"
         return render(request, 'payments/success.html', {'booking': booking, 'payment': payment, 'message': message})
@@ -177,6 +187,7 @@ def payment_callback(request, payment_id):
 
         validation_result = processor.validate_payment(
             total_amount=float(payment.amount),
+            # pyrefly: ignore [bad-argument-type]
             transaction_id=transaction_id
         )
 
@@ -204,12 +215,19 @@ def payment_callback(request, payment_id):
                 booking.status = 'confirmed'
                 booking.save(update_fields=['status'])
 
-            # Send Invoice & Receipt Email upon payment success
+            # Send Invoice & Receipt Email and Trigger Admin Notification upon payment success
             try:
                 from core.services.email_service import send_booking_invoice_email
+                from admin_dashboard.models.notification import create_admin_notification
                 send_booking_invoice_email(booking, payment=payment, request=request)
+                create_admin_notification(
+                    notification_type='payment_success',
+                    title=f"Booking Confirmed & Paid [{booking.booking_uid}]",
+                    message=f"Received {booking.currency_code} {payment.amount} via {gateway.upper()} from {booking.guest_name}.",
+                    link_url=reverse('admin_dashboard:booking_detail', kwargs={'pk': booking.pk})
+                )
             except Exception as e:
-                logger.error(f"Failed to send invoice email after {gateway} payment: {e}")
+                logger.error(f"Failed to send invoice email/notification after {gateway} payment: {e}")
 
             message = f"Payment of {booking.currency_code} {payment.amount} successful via {gateway.upper()}!"
             return render(request, 'payments/success.html', {'booking': booking, 'payment': payment, 'message': message})

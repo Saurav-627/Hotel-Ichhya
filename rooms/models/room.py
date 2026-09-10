@@ -3,6 +3,12 @@ from django.utils.text import slugify
 
 class Room(models.Model):
     title = models.CharField(max_length=200)
+    room_number = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text="Room number / Room code (e.g. 101, 102, Villa A)"
+    )
     slug = models.SlugField(max_length=250, unique=True, blank=True)
     category = models.ForeignKey(
         'RoomCategory',
@@ -11,13 +17,16 @@ class Room(models.Model):
         help_text="Room category (managed in admin under Room Categories)"
     )
     description = models.TextField()
-    highlights = models.TextField(help_text="Comma-separated or line-separated list of room highlights")
+    highlights = models.TextField(blank=True, null=True, help_text="Comma-separated or line-separated list of room highlights")
     tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, default=None, help_text="Optional tax percentage for this room listing")
-    room_size = models.IntegerField(help_text="Size in sq. ft. or sq. meters")
+    room_size = models.IntegerField(null=True, blank=True, help_text="Size in sq. ft. or sq. meters")
+    total_rooms = models.PositiveIntegerField(default=1, help_text="Total physical rooms available for this specific room listing")
     max_adults = models.IntegerField(default=2)
     max_children = models.IntegerField(default=0)
-    bed_type = models.CharField(max_length=100, default="King Size")
+    bed_type = models.CharField(max_length=100, blank=True, default="King Size")
     facilities = models.ManyToManyField('RoomFacility', related_name='rooms', blank=True)
+    included_addons = models.ManyToManyField('booking.Addon', blank=True, related_name='rooms', help_text="Included complimentary Add-on services (e.g. Free Breakfast, Airport Shuttle)")
+    allow_custom_addons = models.BooleanField(default=True, help_text="Allow guests to choose optional paid add-ons during room booking")
     virtual_tour_url = models.URLField(blank=True, null=True, help_text="Link to 3D virtual tour")
     video_url = models.URLField(blank=True, null=True, help_text="YouTube or Vimeo embed link")
     is_featured = models.BooleanField(default=False)
@@ -35,6 +44,7 @@ class Room(models.Model):
             matches = [p for p in self.active_currency_price if p.currency.iso_code == currency_code]
             self._active_price = matches[0] if matches else None
         else:
+            # pyrefly: ignore [missing-attribute]
             self._active_price = self.base_prices.filter(currency__iso_code=currency_code).first()
 
     @property
@@ -42,6 +52,7 @@ class Room(models.Model):
         active_price = getattr(self, '_active_price', None)
         if active_price:
             return active_price.base_price
+        # pyrefly: ignore [missing-attribute]
         first_price = self.base_prices.first()
         return first_price.base_price if first_price else None
 
@@ -50,6 +61,7 @@ class Room(models.Model):
         active_price = getattr(self, '_active_price', None)
         if active_price:
             return active_price.discount_price
+        # pyrefly: ignore [missing-attribute]
         first_price = self.base_prices.first()
         return first_price.discount_price if first_price else None
 
@@ -58,6 +70,7 @@ class Room(models.Model):
         active_price = getattr(self, '_active_price', None)
         if active_price:
             return active_price.currency
+        # pyrefly: ignore [missing-attribute]
         first_price = self.base_prices.first()
         return first_price.currency if first_price else None
 
@@ -79,6 +92,7 @@ class Room(models.Model):
         active_currency_code = getattr(self, '_active_currency_code', None)
         seasonal_qs = getattr(self, '_prefetched_objects_cache', {}).get('seasonal_prices', None)
         if seasonal_qs is None:
+            # pyrefly: ignore [missing-attribute]
             seasonal_qs = list(self.seasonal_prices.filter(is_active=True).select_related('currency'))
         for sp in seasonal_qs:
             if sp.start_date <= today <= sp.end_date and sp.is_active:
@@ -104,11 +118,8 @@ class Room(models.Model):
     def price_with_tax(self):
         price = self.final_price
         tax_pct = self.tax_percentage or 0
+        # pyrefly: ignore [unsupported-operation]
         return price + (price * (tax_pct / 100))
-
-    @property
-    def total_rooms(self):
-        return self.category.total_rooms if self.category else 0
 
     @property
     def adults_range(self):
@@ -117,4 +128,11 @@ class Room(models.Model):
     @property
     def children_range(self):
         return range(0, max(0, self.max_children) + 1)
+
+    @property
+    def added_base_prices(self):
+        """Returns only base prices greater than 0."""
+        # pyrefly: ignore [missing-attribute]
+        return [p for p in self.base_prices.all() if p.base_price and p.base_price > 0]
+
 

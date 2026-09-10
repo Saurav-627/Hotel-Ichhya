@@ -15,8 +15,8 @@ class RoomImageInline(TabularInline):
 
 @admin.register(RoomCategory)
 class RoomCategoryAdmin(ModelAdmin):
-    list_display = ('name', 'total_rooms', 'slug', 'order', 'is_published')
-    list_editable = ('total_rooms', 'order', 'is_published')
+    list_display = ('name', 'slug', 'order', 'is_published')
+    list_editable = ('order', 'is_published')
     prepopulated_fields = {'slug': ('name',)}
 
 from .models.room_base_price import RoomBasePrice
@@ -35,10 +35,11 @@ class RoomPriceInline(TabularInline):
 
 @admin.register(Room)
 class RoomAdmin(ModelAdmin):
-    list_display = ('title', 'category', 'base_price_display', 'tax_amount', 'price_with_tax_display', 'inventory_rooms', 'is_published', 'is_featured')
+    list_display = ('title', 'room_number', 'category', 'base_price_display', 'tax_amount', 'price_with_tax_display', 'total_rooms', 'is_published', 'is_featured')
     list_filter = ('category', 'is_published', 'is_featured', 'facilities')
-    search_fields = ('title', 'description', 'highlights')
+    search_fields = ('title', 'room_number', 'description', 'highlights')
     prepopulated_fields = {'slug': ('title',)}
+    filter_horizontal = ('facilities', 'included_addons')
     inlines = [RoomBasePriceInline, RoomImageInline, RoomPolicyInline, RoomPriceInline]
     actions = ['duplicate_room']
 
@@ -86,21 +87,25 @@ class RoomAdmin(ModelAdmin):
 
             room.facilities.set(original_room.facilities.all())
 
+            # pyrefly: ignore [missing-attribute]
             for img in original_room.images.all():
                 img.pk = None
                 img.room = room
                 img.save()
 
+            # pyrefly: ignore [missing-attribute]
             for policy in original_room.policies.all():
                 policy.pk = None
                 policy.room = room
                 policy.save()
 
+            # pyrefly: ignore [missing-attribute]
             for price in original_room.seasonal_prices.all():
                 price.pk = None
                 price.room = room
                 price.save()
 
+            # pyrefly: ignore [missing-attribute]
             for cp in original_room.base_prices.all():
                 cp.pk = None
                 cp.room = room

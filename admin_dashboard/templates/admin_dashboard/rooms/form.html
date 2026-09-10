@@ -84,15 +84,25 @@
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Title -->
-            <div class="md:col-span-2">
-                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Room Title / Name <span class="text-rose-500">*</span></label>
+            <div>
+                <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-wider mb-2">Room Title / Name <span class="text-rose-500">*</span></label>
                 {{ form.title }}
                 {{ form.title.errors }}
             </div>
             
+            <!-- Room Number -->
+            <div>
+                <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-wider mb-2">
+                    Room Number / Code
+                    <span class="normal-case font-normal text-neutral-400 ml-1">(e.g. 101, 102, Villa A)</span>
+                </label>
+                {{ form.room_number }}
+                {{ form.room_number.errors }}
+            </div>
+
             <!-- Slug (auto-generated from title) -->
             <div>
-                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
+                <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-wider mb-2">
                     Slug URL Path
                     <span class="normal-case font-normal text-neutral-400 ml-1">(auto-generated from title)</span>
                 </label>
@@ -102,31 +112,30 @@
 
             <!-- Category -->
             <div>
-                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Category <span class="text-rose-500">*</span></label>
+                <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-wider mb-2">Category <span class="text-rose-500">*</span></label>
                 {{ form.category }}
                 {{ form.category.errors }}
             </div>
             <!-- Tax Percentage -->
             <div>
-                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Tax Percentage (%)</label>
+                <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-wider mb-2">Tax Percentage (%)</label>
                 {{ form.tax_percentage }}
                 {{ form.tax_percentage.errors }}
             </div>
 
-            <!-- Inventory Rooms — read-only, driven by category selection -->
+            <!-- Total Physical Rooms Inventory (on this room) -->
             <div>
-                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Total Room Units Inventory</label>
-                <div id="inventory-display"
-                     class="flex items-center gap-3 px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900/50 text-sm font-medium text-neutral-700 dark:text-neutral-300 min-h-[42px]">
-                    <i class="fa-solid fa-layer-group text-luxuryGold-500 text-xs"></i>
-                    <span id="inventory-value" class="text-neutral-400 italic">Select a category to see inventory</span>
-                </div>
+                <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <span>Total Physical Rooms Inventory <span class="text-rose-500">*</span></span>
+                    <span class="text-[10px] text-neutral-400 font-normal">Available Units</span>
+                </label>
+                {{ form.total_rooms }}
+                {{ form.total_rooms.errors }}
+                <p class="text-[11px] text-neutral-400 mt-1">Total physical units of this room available for booking.</p>
             </div>
 
             <script>
             document.addEventListener('DOMContentLoaded', function () {
-                const categoryMap = {{ category_inventory_map|safe }};
-
                 // ── Slug auto-generation from title ──────────────────────────
                 const titleInput = document.getElementById('id_title');
                 const slugInput  = document.getElementById('id_slug');
@@ -149,41 +158,19 @@
                         userEditedSlug = this.value.length > 0;
                     });
                 }
-
-                // ── Inventory display from category ──────────────────────────
-                const categorySelect   = document.getElementById('id_category');
-                const inventoryValue   = document.getElementById('inventory-value');
-
-                if (categorySelect && inventoryValue) {
-                    function updateInventory() {
-                        const id = categorySelect.value;
-                        if (id && categoryMap[id] !== undefined) {
-                            inventoryValue.textContent = categoryMap[id] + ' unit(s)';
-                            inventoryValue.classList.remove('italic', 'text-neutral-400');
-                            inventoryValue.classList.add('font-semibold', 'text-neutral-800', 'dark:text-neutral-100');
-                        } else {
-                            inventoryValue.textContent = 'Select a category to see inventory';
-                            inventoryValue.classList.add('italic', 'text-neutral-400');
-                            inventoryValue.classList.remove('font-semibold', 'text-neutral-800', 'dark:text-neutral-100');
-                        }
-                    }
-
-                    categorySelect.addEventListener('change', updateInventory);
-                    updateInventory(); // run on load for edit mode
-                }
             });
             </script>
 
             <!-- Amenities/Highlights -->
             <div class="md:col-span-2">
-                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Highlights (Highlights text) <span class="text-rose-500">*</span></label>
+                <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-wider mb-2">Highlights (One per line)</label>
                 {{ form.highlights }}
                 {{ form.highlights.errors }}
             </div>
 
             <!-- Description -->
             <div class="md:col-span-2">
-                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Description Detail <span class="text-rose-500">*</span></label>
+                <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-wider mb-2">Description Detail <span class="text-rose-500">*</span></label>
                 {{ form.description }}
                 {{ form.description.errors }}
             </div>
@@ -193,24 +180,82 @@
                 <div class="flex items-center gap-3">
                     <label class="relative inline-flex items-center cursor-pointer">
                         {{ form.is_published }}
-                        <div class="w-11 h-6 bg-neutral-200 rounded-full peer peer-focus:outline-none peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-luxuryGold-500"></div>
+                        <div class="w-11 h-6 bg-neutral-200 dark:bg-neutral-700 rounded-full peer peer-focus:outline-none peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-luxuryGold-500"></div>
                     </label>
-                    <span class="text-sm font-semibold text-neutral-700">Publish Visibility (Live on website)</span>
+                    <span class="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Publish Visibility (Live on website)</span>
                 </div>
                 <div class="flex items-center gap-3">
                     <label class="relative inline-flex items-center cursor-pointer">
                         {{ form.is_featured }}
-                        <div class="w-11 h-6 bg-neutral-200 rounded-full peer peer-focus:outline-none peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-luxuryGold-500"></div>
+                        <div class="w-11 h-6 bg-neutral-200 dark:bg-neutral-700 rounded-full peer peer-focus:outline-none peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-luxuryGold-500"></div>
                     </label>
-                    <span class="text-sm font-semibold text-neutral-700">Mark as Featured Type</span>
+                    <span class="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Mark as Featured Type</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        {{ form.allow_custom_addons }}
+                        <div class="w-11 h-6 bg-neutral-200 dark:bg-neutral-700 rounded-full peer peer-focus:outline-none peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-luxuryGold-500"></div>
+                    </label>
+                    <div>
+                        <span class="text-sm font-semibold text-neutral-700 dark:text-neutral-300 block">Allow Optional Guest Add-on Services</span>
+                        <span class="text-[11px] text-neutral-400">If enabled, guests can choose extra paid add-ons during booking</span>
+                    </div>
                 </div>
             </div>
 
             <!-- Facilities -->
             <div class="md:col-span-2">
-                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Select Amenities / Facilities</label>
+                <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-wider mb-2">Select Amenities / Facilities</label>
                 {{ form.facilities }}
                 {{ form.facilities.errors }}
+            </div>
+
+            <!-- Included Complimentary Add-ons -->
+            <div class="md:col-span-2 pt-4 border-t border-neutral-200 dark:border-neutral-800">
+                <div class="flex items-center justify-between mb-1.5 flex-wrap gap-2">
+                    <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-concierge-bell text-luxuryGold-500"></i> Included Complimentary Add-on Services (Inclusions)
+                    </label>
+                    <div class="flex items-center gap-2 text-xs">
+                        <button type="button" 
+                                onclick="document.querySelectorAll('input[name=included_addons]').forEach(el => el.checked = false)" 
+                                class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-semibold transition cursor-pointer flex items-center gap-1">
+                            <i class="fa-solid fa-xmark text-[11px]"></i> Deselect / Clear All
+                        </button>
+                        <button type="button" 
+                                onclick="document.querySelectorAll('input[name=included_addons]').forEach(el => el.checked = true)" 
+                                class="px-2.5 py-1 rounded-lg bg-luxuryGold-500/10 hover:bg-luxuryGold-500/20 text-luxuryGold-500 font-semibold transition cursor-pointer flex items-center gap-1">
+                            <i class="fa-solid fa-check text-[11px]"></i> Select All
+                        </button>
+                    </div>
+                </div>
+                <p class="text-[11px] text-neutral-400 mb-3">Click on any add-on checkbox to select or deselect it. To remove all inclusions, simply click "Deselect / Clear All".</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-60 overflow-y-auto p-3 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30">
+                    {% for addon in form.fields.included_addons.queryset %}
+                    <label class="flex items-start gap-2.5 p-3 rounded-xl border border-neutral-200 dark:border-neutral-700/60 bg-white/70 dark:bg-neutral-800/70 hover:border-luxuryGold-400 dark:hover:border-luxuryGold-500 transition cursor-pointer text-xs">
+                        <input type="checkbox" name="included_addons" value="{{ addon.id }}" 
+                               {% if addon in form.instance.included_addons.all or addon.id in form.included_addons.value or addon.id|stringformat:'s' in form.included_addons.value %}checked{% endif %} 
+                               class="mt-0.5 rounded border-neutral-300 text-luxuryGold-500 focus:ring-luxuryGold-400 shrink-0">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center justify-between gap-1">
+                                <span class="font-bold text-neutral-900 dark:text-neutral-100 truncate">{{ addon.name }}</span>
+                                <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 shrink-0">Free</span>
+                            </div>
+                            {% if addon.description %}
+                            <p class="text-[10px] text-neutral-500 dark:text-neutral-400 truncate mt-0.5">{{ addon.description }}</p>
+                            {% endif %}
+                        </div>
+                    </label>
+                    {% empty %}
+                    <div class="col-span-3 text-center py-4 text-xs text-neutral-400">
+                        No add-on services available. Add services in Add-on Management first.
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if form.included_addons.errors %}
+                <p class="text-xs text-rose-500 mt-1">{{ form.included_addons.errors.0 }}</p>
+                {% endif %}
             </div>
             
         </div>

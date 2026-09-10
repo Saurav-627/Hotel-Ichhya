@@ -1,10 +1,11 @@
 import os
-import yaml
 from datetime import timedelta
-from django.core.management.base import BaseCommand
-from django.contrib.auth import get_user_model
-from django.utils import timezone
+
+import yaml
 from django.apps import apps
+from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -37,6 +38,7 @@ GLOBAL_MODEL_REGISTRY = {
     "testimonials": ("testimonials", "Testimonial", ["guest_name", "source"], False),
     "branches": ("contact", "Branch", ["name"], False),
     "coupons": ("booking", "Coupon", ["code"], False),
+    "addons": ("booking", "Addon", ["name"], False),
 
     # About Page & Leadership
     "about_page": ("about", "AboutPage", None, True),
@@ -64,13 +66,14 @@ def prepare_item_data(key, item, valid_data):
 
 
 def post_process_item(key, obj, item):
-    """Applies post-creation/update relationship logic (e.g. PaymentProcessor Currency links, EventVenue Base Prices)."""
+    """Applies post-creation/update relationship logic (e.g. PaymentProcessor Currency links, EventVenue Base Prices, Addon Prices)."""
     if key == "payment_processors":
         currencies_list = item.get("currencies") or item.get("payment_currencies") or []
         if currencies_list:
             from payments.models.payment_processor import PaymentProcessorCurrency
             from settings_manager.models.currency import Currency
             for ccode in currencies_list:
+                # pyrefly: ignore [missing-attribute]
                 curr = Currency.objects.get_queryset().set_active_test(enabled=False).filter(iso_code=ccode).first()
                 if curr:
                     PaymentProcessorCurrency.objects.get_or_create(
@@ -84,6 +87,7 @@ def post_process_item(key, obj, item):
             from settings_manager.models.currency import Currency
             for p_data in prices_data:
                 ccode = p_data.get("currency")
+                # pyrefly: ignore [missing-attribute]
                 c_obj = Currency.objects.get_queryset().set_active_test(enabled=False).filter(iso_code=ccode).first()
                 if c_obj:
                     VenueBasePrice.objects.update_or_create(
@@ -100,6 +104,7 @@ def post_process_item(key, obj, item):
                 ccode = ms.get("currency")
                 min_spend_val = ms.get("min_spend")
                 if ccode and min_spend_val is not None:
+                    # pyrefly: ignore [missing-attribute]
                     curr = Currency.objects.get_queryset().set_active_test(enabled=False).filter(iso_code=ccode).first()
                     if curr:
                         CouponMinSpend.objects.update_or_create(
@@ -107,14 +112,31 @@ def post_process_item(key, obj, item):
                             currency=curr,
                             defaults={'min_spend': min_spend_val}
                         )
-
+    elif key == "addons":
+        prices_data = item.get("prices") or []
+        if prices_data:
+            from booking.models.addon import AddonPrice
+            from settings_manager.models.currency import Currency
+            for pr in prices_data:
+                ccode = pr.get("currency")
+                price_val = pr.get("price")
+                if ccode and price_val is not None:
+                    # pyrefly: ignore [missing-attribute]
+                    curr = Currency.objects.get_queryset().set_active_test(enabled=False).filter(iso_code=ccode).first()
+                    if curr:
+                        AddonPrice.objects.update_or_create(
+                            addon=obj,
+                            currency=curr,
+                            defaults={"price": price_val}
+                        )
 
 
 class Command(BaseCommand):
     help = (
         "Single Unified Data Importer for Hotel Ichchha. "
-        "Imports data from modular YAML files in core/records or specified file. "
-        "If data exists: SKIPS. If --update: UPDATES. If missing: CREATES."
+        "Imports data from YAML files (core/records/). "
+        "If a model already contains data: SKIPS the model to preserve admin edits. "
+        "Use --update to update matching records, or --force to force re-importing all items."
     )
 
     def add_arguments(self, parser):
@@ -136,11 +158,18 @@ class Command(BaseCommand):
             default=False,
             help="If set, update existing records instead of skipping them.",
         )
+        parser.add_argument(
+            "--force",
+            action="store_true",
+            default=False,
+            help="If set, force import records from YAML even if data already exists in database.",
+        )
 
     def handle(self, *args, **options):
         file_path = options.get("file")
         folder_path = options.get("folder")
         do_update = options.get("update", False)
+        do_force = options.get("force", False)
 
         files_to_process = []
         if file_path:
@@ -150,12 +179,13 @@ class Command(BaseCommand):
                 folder_files = [
                     os.path.join(folder_path, f)
                     for f in sorted(os.listdir(folder_path))
-                    if f.endswith(".yaml") or f.endswith(".yml")
+                    if f.endswith((".yaml", ".yml"))
                 ]
                 files_to_process.extend(folder_files)
 
         # -- 1. Ensure Superuser Admin
         if not User.objects.filter(username="admin").exists():
+            # pyrefly: ignore [missing-attribute]
             User.objects.create_superuser(
                 "admin", "admin@hotelichchha.com", "admin123",
                 phone="+977-9855012345", is_hotel_admin=True, is_guest=False
@@ -204,7 +234,7 @@ class Command(BaseCommand):
 
                     existing = model.objects.first()
                     if existing:
-                        if do_update:
+                        if do_update or do_force:
                             for k, v in valid_data.items():
                                 setattr(existing, k, v)
                             existing.save()
@@ -220,6 +250,16 @@ class Command(BaseCommand):
                 # COLLECTION MODELS
                 else:
                     if not isinstance(raw_data, list):
+                        continue
+
+                    # If table already contains records and neither --update nor --force is specified, skip model
+                    existing_count = model.objects.count()
+                    if existing_count > 0 and not do_update and not do_force:
+                        self.stdout.write(
+                            self.style.WARNING(
+                                f"  - {model_name} already contains {existing_count} record(s). Skipping to preserve database customizations."
+                            )
+                        )
                         continue
 
                     count_created = 0
@@ -239,13 +279,14 @@ class Command(BaseCommand):
                         elif model_name == "PaymentProcessor" and "code" in item:
                             existing = model._base_manager.filter(code=item["code"]).first()
                         else:
+                            # pyrefly: ignore [not-iterable]
                             lookup_kwargs = {field: item.get(field) for field in lookup_fields if item.get(field) is not None}
                             if not lookup_kwargs:
                                 continue
                             existing = model.objects.filter(**lookup_kwargs).first()
 
                         if existing:
-                            if do_update:
+                            if do_update or do_force:
                                 for k, v in valid_data.items():
                                     setattr(existing, k, v)
                                 if hasattr(existing, 'is_active'):
@@ -279,77 +320,108 @@ class Command(BaseCommand):
                 from rooms.models.room_seasonal_price import RoomSeasonalPrice
                 from settings_manager.models.currency import Currency
 
-                if do_update:
-                    Room.objects.all().delete()
-
-                for room_data in data.get("rooms", []):
-                    slug = room_data.get("slug")
-                    if not slug:
-                        continue
-                    facility_names = room_data.pop("facilities", [])
-                    images = room_data.pop("images", [])
-                    policies = room_data.pop("policies", [])
-                    seasonal_prices = room_data.pop("seasonal_prices", [])
-                    prices_data = room_data.pop("prices", [])
-
-                    category_slug = room_data.get("category")
-                    if category_slug:
-                        cat_obj = RoomCategory.objects.filter(slug=category_slug).first()
-                        room_data["category"] = cat_obj
-
-                    valid_room_fields = filter_model_fields(Room, room_data)
-
-                    room_obj, created = Room.objects.get_or_create(
-                        slug=slug,
-                        defaults=valid_room_fields
+                existing_room_count = Room.objects.count()
+                if existing_room_count > 0 and not do_update and not do_force:
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"  - Room already contains {existing_room_count} record(s). Skipping to preserve database customizations."
+                        )
                     )
+                else:
+                    count_created = 0
+                    count_updated = 0
+                    count_skipped = 0
 
-                    for p_data in prices_data:
-                        ccode = p_data.get("currency")
-                        c_obj = Currency.objects.filter(iso_code=ccode).first()
-                        if c_obj:
-                            RoomBasePrice.objects.update_or_create(
+                    for room_data in data.get("rooms", []):
+                        slug = room_data.get("slug")
+                        if not slug:
+                            continue
+                        facility_names = room_data.pop("facilities", [])
+                        images = room_data.pop("images", [])
+                        policies = room_data.pop("policies", [])
+                        seasonal_prices = room_data.pop("seasonal_prices", [])
+                        prices_data = room_data.pop("prices", [])
+                        included_addons = room_data.pop("included_addons", [])
+
+                        category_slug = room_data.get("category")
+                        if category_slug:
+                            cat_obj = RoomCategory.objects.filter(slug=category_slug).first()
+                            room_data["category"] = cat_obj
+
+                        valid_room_fields = filter_model_fields(Room, room_data)
+
+                        existing = Room.objects.filter(slug=slug).first()
+                        if existing:
+                            if do_update or do_force:
+                                for k, v in valid_room_fields.items():
+                                    setattr(existing, k, v)
+                                existing.save()
+                                room_obj = existing
+                                count_updated += 1
+                            else:
+                                count_skipped += 1
+                                continue
+                        else:
+                            valid_room_fields["slug"] = slug
+                            room_obj = Room.objects.create(**valid_room_fields)
+                            count_created += 1
+
+                        for p_data in prices_data:
+                            ccode = p_data.get("currency")
+                            # pyrefly: ignore [missing-attribute]
+                            c_obj = Currency.objects.get_queryset().set_active_test(enabled=False).filter(iso_code=ccode).first() or Currency.objects.filter(iso_code=ccode).first()
+                            if c_obj:
+                                RoomBasePrice.objects.update_or_create(
+                                    room=room_obj,
+                                    currency=c_obj,
+                                    defaults={
+                                        'base_price': p_data.get("base_price"),
+                                        'discount_price': p_data.get("discount_price")
+                                    }
+                                )
+
+                        for fname in facility_names:
+                            fac = RoomFacility.objects.filter(name=fname).first()
+                            if fac:
+                                room_obj.facilities.add(fac)
+
+                        if included_addons:
+                            from booking.models.addon import Addon
+                            addons_qs = Addon.objects.filter(name__in=included_addons)
+                            room_obj.included_addons.set(addons_qs)
+
+                        for img in images:
+                            img_path = img.get("image")
+                            if img_path:
+                                RoomImage.objects.get_or_create(
+                                    room=room_obj,
+                                    image=img_path,
+                                    defaults={"is_primary": img.get("is_primary", False), "alt_text": img.get("alt_text", "")}
+                                )
+
+                        for pol in policies:
+                            RoomPolicy.objects.get_or_create(
                                 room=room_obj,
-                                currency=c_obj,
+                                title=pol.get("title"),
+                                defaults={"description": pol.get("description")}
+                            )
+
+                        for prc in seasonal_prices:
+                            RoomSeasonalPrice.objects.get_or_create(
+                                room=room_obj,
+                                name=prc.get("name"),
+                                start_date=prc.get("start_date"),
+                                end_date=prc.get("end_date"),
                                 defaults={
-                                    'base_price': p_data.get("base_price"),
-                                    'discount_price': p_data.get("discount_price")
+                                    "price_override": prc.get("price_override"),
+                                    "is_active": prc.get("is_active", True)
                                 }
                             )
 
-                    for fname in facility_names:
-                        fac = RoomFacility.objects.filter(name=fname).first()
-                        if fac:
-                            room_obj.facilities.add(fac)
-
-                    for img in images:
-                        img_path = img.get("image")
-                        if img_path:
-                            RoomImage.objects.get_or_create(
-                                room=room_obj,
-                                image=img_path,
-                                defaults={"is_primary": img.get("is_primary", False), "alt_text": img.get("alt_text", "")}
-                            )
-
-                    for pol in policies:
-                        RoomPolicy.objects.get_or_create(
-                            room=room_obj,
-                            title=pol.get("title"),
-                            defaults={"description": pol.get("description")}
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            f"  - Processed Room: {count_created} created, {count_updated} updated, {count_skipped} skipped."
                         )
-
-                    for prc in seasonal_prices:
-                        RoomSeasonalPrice.objects.get_or_create(
-                            room=room_obj,
-                            name=prc.get("name"),
-                            start_date=prc.get("start_date"),
-                            end_date=prc.get("end_date"),
-                            defaults={
-                                "price_override": prc.get("price_override"),
-                                "is_active": prc.get("is_active", True)
-                            }
-                        )
-
-                    self.stdout.write(self.style.SUCCESS(f"  - Processed room: {room_obj.title}"))
+                    )
 
         self.stdout.write(self.style.SUCCESS("\nAll data import tasks completed successfully!"))

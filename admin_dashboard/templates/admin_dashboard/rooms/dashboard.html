@@ -11,16 +11,16 @@
 {% block page_actions %}
 <div class="flex items-center gap-3">
     {% if active_tab == 'categories' %}
-    <a href="{% url 'admin_dashboard:room_category_create' %}" class="px-4 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-lg text-sm transition">
-        <i class="fa-solid fa-plus mr-1.5"></i> Add Category
+    <a href="{% url 'admin_dashboard:room_category_create' %}" class="px-4 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-xl text-sm transition shadow-sm flex items-center gap-2">
+        <i class="fa-solid fa-plus"></i> Add Category
     </a>
     {% elif active_tab == 'facilities' %}
-    <a href="{% url 'admin_dashboard:room_facility_create' %}" class="px-4 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-lg text-sm transition">
-        <i class="fa-solid fa-plus mr-1.5"></i> Add Facility
+    <a href="{% url 'admin_dashboard:room_facility_create' %}" class="px-4 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-xl text-sm transition shadow-sm flex items-center gap-2">
+        <i class="fa-solid fa-plus"></i> Add Facility
     </a>
     {% else %}
-    <a href="{% url 'admin_dashboard:room_create' %}" class="px-4 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-lg text-sm transition">
-        <i class="fa-solid fa-plus mr-1.5"></i> Add Room Type
+    <a href="{% url 'admin_dashboard:room_create' %}" class="px-4 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-xl text-sm transition shadow-sm flex items-center gap-2">
+        <i class="fa-solid fa-plus"></i> Add Room Type
     </a>
     {% endif %}
 </div>
@@ -31,15 +31,15 @@
 <div class="flex items-center gap-2 border-b border-neutral-200 dark:border-neutral-800 mb-8">
     <a href="?tab=rooms" 
        class="px-5 py-3 border-b-2 font-semibold text-sm transition-all duration-200 {% if active_tab == 'rooms' %}border-luxuryGold-500 text-luxuryGold-500{% else %}border-transparent text-neutral-400 hover:text-neutral-200{% endif %}">
-        Rooms (Inventory types)
+        <i class="fa-solid fa-bed mr-1.5"></i> Rooms (Inventory types)
     </a>
     <a href="?tab=categories" 
        class="px-5 py-3 border-b-2 font-semibold text-sm transition-all duration-200 {% if active_tab == 'categories' %}border-luxuryGold-500 text-luxuryGold-500{% else %}border-transparent text-neutral-400 hover:text-neutral-200{% endif %}">
-        Room Categories
+        <i class="fa-solid fa-layer-group mr-1.5"></i> Room Categories
     </a>
     <a href="?tab=facilities" 
        class="px-5 py-3 border-b-2 font-semibold text-sm transition-all duration-200 {% if active_tab == 'facilities' %}border-luxuryGold-500 text-luxuryGold-500{% else %}border-transparent text-neutral-400 hover:text-neutral-200{% endif %}">
-        Room Facilities
+        <i class="fa-solid fa-wifi mr-1.5"></i> Room Facilities
     </a>
 </div>
 
@@ -48,24 +48,125 @@
 
     {% if active_tab == 'rooms' %}
     <!-- Rooms inventory content -->
-    
-    <!-- Bulk options panel -->
-    <div x-data="{ checkedCount: 0 }" class="custom-card rounded-2xl p-4 bg-white/50 dark:bg-neutral-900/50 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div class="text-sm font-medium text-neutral-500">
-            Bulk Operations: Select rooms in table to perform updates
-        </div>
-        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+
+    <!-- Search and Filter Panel -->
+    <div class="custom-card rounded-2xl p-5 bg-white/50 dark:bg-neutral-900/50">
+        <form method="get" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+            <input type="hidden" name="tab" value="rooms">
             
+            <!-- Search query -->
+            <div class="lg:col-span-2">
+                <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Search Rooms</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-neutral-400 text-xs">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" name="search" value="{{ search_query }}"
+                           class="w-full pl-9 pr-9 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:border-luxuryGold-500 text-xs shadow-sm transition"
+                           placeholder="Search room name, room number (#101), or slug..." autocomplete="off">
+                    {% if search_query %}
+                    <a href="?tab=rooms{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_featured %}&featured={{ selected_featured }}{% endif %}" 
+                       class="absolute inset-y-0 right-3 flex items-center text-neutral-400 hover:text-rose-500 text-xs" title="Clear query">
+                        <i class="fa-solid fa-xmark"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Category Filter -->
+            <div>
+                <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Category</label>
+                <select name="category"
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:border-luxuryGold-500 text-xs shadow-sm cursor-pointer transition">
+                    <option value="">All Categories</option>
+                    {% for cat in all_categories %}
+                    <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Status Filter -->
+            <div>
+                <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Status</label>
+                <select name="status"
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:border-luxuryGold-500 text-xs shadow-sm cursor-pointer transition">
+                    <option value="">All Statuses</option>
+                    <option value="published" {% if selected_status == 'published' %}selected{% endif %}>Published</option>
+                    <option value="draft" {% if selected_status == 'draft' %}selected{% endif %}>Draft</option>
+                </select>
+            </div>
+
+            <!-- Actions Buttons -->
+            <div class="flex items-center gap-2">
+                <button type="submit" 
+                        class="flex-1 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-filter"></i> Apply
+                </button>
+                {% if has_active_filters %}
+                <a href="?tab=rooms" 
+                   class="px-3.5 py-2.5 border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-semibold rounded-xl text-xs transition text-center" title="Reset all filters">
+                    Reset
+                </a>
+                {% endif %}
+            </div>
+        </form>
+
+        {% if has_active_filters %}
+        <!-- Active Filter Chips -->
+        <div class="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-neutral-200 dark:border-neutral-800/80 text-xs">
+            <span class="text-neutral-400 font-medium">Active Filters:</span>
+            {% if search_query %}
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-luxuryGold-500/10 text-luxuryGold-600 dark:text-luxuryGold-400 border border-luxuryGold-500/30">
+                <span>Query: "<strong>{{ search_query }}</strong>"</span>
+                <a href="?tab=rooms{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_featured %}&featured={{ selected_featured }}{% endif %}" class="hover:text-rose-500"><i class="fa-solid fa-xmark text-[10px]"></i></a>
+            </span>
+            {% endif %}
+            {% if selected_category %}
+            {% for cat in all_categories %}
+                {% if selected_category == cat.id|stringformat:"s" %}
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-luxuryGold-500/10 text-luxuryGold-600 dark:text-luxuryGold-400 border border-luxuryGold-500/30">
+                    <span>Category: <strong>{{ cat.name }}</strong></span>
+                    <a href="?tab=rooms{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_featured %}&featured={{ selected_featured }}{% endif %}" class="hover:text-rose-500"><i class="fa-solid fa-xmark text-[10px]"></i></a>
+                </span>
+                {% endif %}
+            {% endfor %}
+            {% endif %}
+            {% if selected_status %}
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-luxuryGold-500/10 text-luxuryGold-600 dark:text-luxuryGold-400 border border-luxuryGold-500/30">
+                <span>Status: <strong>{{ selected_status|title }}</strong></span>
+                <a href="?tab=rooms{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_featured %}&featured={{ selected_featured }}{% endif %}" class="hover:text-rose-500"><i class="fa-solid fa-xmark text-[10px]"></i></a>
+            </span>
+            {% endif %}
+            <a href="?tab=rooms" class="text-neutral-500 hover:text-rose-500 text-xs ml-1 underline">Clear all</a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Bulk Operations Toolbar -->
+    <div class="custom-card rounded-2xl p-4 bg-white/50 dark:bg-neutral-900/50 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-luxuryGold-500/10 text-luxuryGold-500 flex items-center justify-center text-sm font-bold">
+                <i class="fa-solid fa-list-check"></i>
+            </div>
+            <div>
+                <span class="text-xs font-bold text-neutral-800 dark:text-neutral-200">Bulk Operations</span>
+                <p class="text-[11px] text-neutral-500">
+                    <span id="selected-count" class="font-bold text-luxuryGold-500">0</span> rooms selected
+                </p>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
             <!-- Bulk Price Form -->
             <form action="{% url 'admin_dashboard:room_bulk_price' %}" method="post" id="bulk-price-form" class="m-0 flex items-center gap-2">
                 {% csrf_token %}
                 <input type="hidden" name="selected_rooms" id="bulk-price-selected-rooms">
-                <select name="adjustment_type" class="px-2.5 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-xs">
+                <select name="adjustment_type" class="px-2.5 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-xs">
                     <option value="percentage">Adjust By %</option>
                     <option value="fixed">Adjust By Fixed Amount</option>
                 </select>
                 <input type="number" name="adjustment_value" placeholder="Value (+/-)" step="0.01" required
-                       class="w-24 px-2.5 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-xs">
+                       class="w-24 px-2.5 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-xs">
                 <button type="button" onclick="submitBulk('bulk-price-form')" 
                         class="px-3.5 py-1.5 bg-neutral-900 dark:bg-neutral-850 hover:bg-neutral-800 border border-luxuryGold-500/20 text-luxuryGold-400 rounded-lg text-xs font-bold transition">
                     Update Pricing
@@ -78,7 +179,7 @@
             <form action="{% url 'admin_dashboard:room_bulk_publish' %}" method="post" id="bulk-publish-form" class="m-0 flex items-center gap-2">
                 {% csrf_token %}
                 <input type="hidden" name="selected_rooms" id="bulk-publish-selected-rooms">
-                <select name="bulk_action" class="px-2.5 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-xs">
+                <select name="bulk_action" class="px-2.5 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-xs">
                     <option value="publish">Publish</option>
                     <option value="unpublish">Unpublish</option>
                 </select>
@@ -87,178 +188,338 @@
                     Toggle Visibility
                 </button>
             </form>
-            
         </div>
     </div>
 
     <!-- Table of rooms -->
     <div class="custom-card rounded-2xl overflow-hidden shadow-sm">
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="text-xs uppercase text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30">
-                    <th class="px-6 py-4 w-10 text-center">
-                        <input type="checkbox" id="select-all-rooms" onchange="toggleAllCheckboxes(this)" class="rounded border-neutral-700 text-luxuryGold-500 focus:ring-luxuryGold-500">
-                    </th>
-                    <th class="px-6 py-4 font-semibold">Room Type / Title</th>
-                    <th class="px-6 py-4 font-semibold">Category</th>
-                    <th class="px-6 py-4 font-semibold">Base Price</th>
-                    <th class="px-6 py-4 font-semibold">Inventory Rooms</th>
-                    <th class="px-6 py-4 font-semibold">Featured</th>
-                    <th class="px-6 py-4 font-semibold">Status</th>
-                    <th class="px-6 py-4 text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-neutral-200 dark:divide-neutral-800 text-sm">
-                {% for room in rooms %}
-                <tr class="hover:bg-neutral-50/30 dark:hover:bg-neutral-900/10 transition duration-150">
-                    <td class="px-6 py-4 text-center">
-                        <input type="checkbox" name="room_checkbox" value="{{ room.id }}" class="room-selector rounded border-neutral-700 text-luxuryGold-500 focus:ring-luxuryGold-500">
-                    </td>
-                    <td class="px-6 py-4 font-bold text-neutral-900 dark:text-neutral-200">
-                        {{ room.title }}
-                        <span class="text-xs text-neutral-500 block font-normal">{{ room.slug }}</span>
-                    </td>
-                    <td class="px-6 py-4 text-neutral-600 dark:text-neutral-400 font-medium">{{ room.category.name }}</td>
-                    <td class="px-6 py-4 text-neutral-900 dark:text-neutral-100 font-semibold">
-                        {% for cp in room.base_prices.all %}
-                        <span class="block text-xs">{{ cp.currency.iso_code }} {{ cp.base_price }}</span>
-                        {% empty %}
-                        <span class="text-neutral-400 text-xs italic">No price set</span>
-                        {% endfor %}
-                    </td>
-                    <td class="px-6 py-4 text-neutral-600 dark:text-neutral-400 font-medium">{{ room.total_rooms }}</td>
-                    <td class="px-6 py-4">
-                        {% if room.is_featured %}
-                        <span class="text-emerald-500"><i class="fa-solid fa-circle-check"></i> Featured</span>
-                        {% else %}
-                        <span class="text-neutral-500"><i class="fa-regular fa-circle"></i> Standard</span>
-                        {% endif %}
-                    </td>
-                    <td class="px-6 py-4">
-                        {% if room.is_published %}
-                        <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-semibold text-xs">Published</span>
-                        {% else %}
-                        <span class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-500 font-semibold text-xs">Draft</span>
-                        {% endif %}
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        <div class="flex items-center justify-end gap-3 text-sm">
-                            <a href="{% url 'admin_dashboard:room_edit' room.id %}" class="text-neutral-400 hover:text-luxuryGold-500" title="Edit">
-                                <i class="fa-solid fa-pen-to-square"></i>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="text-xs uppercase text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30">
+                        <th class="px-6 py-4 w-10 text-center">
+                            <input type="checkbox" id="select-all-rooms" onchange="toggleAllCheckboxes(this)" class="rounded border-neutral-300 dark:border-neutral-700 text-luxuryGold-500 focus:ring-luxuryGold-500">
+                        </th>
+                        <th class="px-6 py-4 font-semibold">Room No.</th>
+                        <th class="px-6 py-4 font-semibold">Room Type / Title</th>
+                        <th class="px-6 py-4 font-semibold">Category</th>
+                        <th class="px-6 py-4 font-semibold">Base Price</th>
+                        <th class="px-6 py-4 font-semibold">Inventory Rooms</th>
+                        <th class="px-6 py-4 font-semibold">Featured</th>
+                        <th class="px-6 py-4 font-semibold">Status</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-neutral-200 dark:divide-neutral-800 text-sm">
+                    {% for room in rooms %}
+                    <tr class="hover:bg-neutral-50/30 dark:hover:bg-neutral-900/10 transition duration-150">
+                        <td class="px-6 py-4 text-center">
+                            <input type="checkbox" name="room_checkbox" value="{{ room.id }}" onchange="updateSelectedCount()" class="room-selector rounded border-neutral-300 dark:border-neutral-700 text-luxuryGold-500 focus:ring-luxuryGold-500">
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if room.room_number %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold font-mono bg-luxuryGold-500/10 text-luxuryGold-400 border border-luxuryGold-500/30">
+                                #{{ room.room_number }}
+                            </span>
+                            {% else %}
+                            <span class="text-xs text-neutral-500 italic">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <a href="{% url 'admin_dashboard:room_edit' room.id %}" class="font-bold text-neutral-900 dark:text-neutral-200 hover:text-luxuryGold-500 transition">
+                                {{ room.title }}
                             </a>
-                            <a href="{% url 'admin_dashboard:room_delete' room.id %}" class="text-neutral-400 hover:text-rose-500" title="Delete">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="8" class="px-6 py-12 text-center text-sm text-neutral-500">
-                        No rooms configured yet. Click "Add Room Type" to create one.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                            <span class="text-xs text-neutral-500 block font-normal">{{ room.slug }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-neutral-600 dark:text-neutral-400 font-medium">{{ room.category.name }}</td>
+                        <td class="px-6 py-4 text-neutral-900 dark:text-neutral-100 font-semibold">
+                            {% for cp in room.added_base_prices %}
+                            <span class="block text-xs">{{ cp.currency.iso_code }} {{ cp.base_price }}</span>
+                            {% empty %}
+                            <span class="text-neutral-400 text-xs italic">No price set</span>
+                            {% endfor %}
+                        </td>
+                        <td class="px-6 py-4 text-neutral-600 dark:text-neutral-400 font-medium">{{ room.total_rooms }}</td>
+                        <td class="px-6 py-4">
+                            {% if room.is_featured %}
+                            <span class="text-emerald-500 font-semibold text-xs inline-flex items-center gap-1.5"><i class="fa-solid fa-circle-check"></i> Featured</span>
+                            {% else %}
+                            <span class="text-neutral-500 text-xs inline-flex items-center gap-1.5"><i class="fa-regular fa-circle"></i> Standard</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if room.is_published %}
+                            <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 font-semibold text-xs border border-emerald-500/20">Published</span>
+                            {% else %}
+                            <span class="px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-500 font-semibold text-xs border border-rose-500/20">Draft</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-3 text-sm">
+                                <a href="{% url 'admin_dashboard:room_edit' room.id %}" class="p-1.5 text-neutral-400 hover:text-luxuryGold-500 transition" title="Edit Room">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                                <a href="{% url 'admin_dashboard:room_delete' room.id %}" class="p-1.5 text-neutral-400 hover:text-rose-500 transition" title="Delete Room">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="px-6 py-12 text-center text-sm text-neutral-500">
+                            {% if has_active_filters %}
+                            <div class="flex flex-col items-center justify-center gap-2">
+                                <i class="fa-solid fa-magnifying-glass text-2xl text-neutral-400 mb-1"></i>
+                                <p>No rooms match your filter criteria.</p>
+                                <a href="?tab=rooms" class="text-luxuryGold-500 font-semibold underline text-xs">Clear all filters</a>
+                            </div>
+                            {% else %}
+                            <div class="flex flex-col items-center justify-center gap-2">
+                                <i class="fa-solid fa-bed text-2xl text-neutral-400 mb-1"></i>
+                                <p>No rooms configured yet.</p>
+                                <a href="{% url 'admin_dashboard:room_create' %}" class="text-luxuryGold-500 font-semibold underline text-xs">Click here to add your first room</a>
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Rooms Pagination -->
+        {% if rooms.has_other_pages %}
+        <div class="px-6 py-4 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between text-xs text-neutral-500 bg-neutral-50/20 dark:bg-neutral-900/10">
+            <div>
+                Showing Page <span class="font-bold text-neutral-700 dark:text-neutral-300">{{ rooms.number }}</span> of <span class="font-bold text-neutral-700 dark:text-neutral-300">{{ rooms.paginator.num_pages }}</span> ({{ rooms.paginator.count }} total rooms)
+            </div>
+            <div class="flex items-center gap-2">
+                {% if rooms.has_previous %}
+                <a href="?tab=rooms&page={{ rooms.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_featured %}&featured={{ selected_featured }}{% endif %}" 
+                   class="px-3 py-1.5 border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-semibold transition">
+                    &larr; Previous
+                </a>
+                {% endif %}
+                {% if rooms.has_next %}
+                <a href="?tab=rooms&page={{ rooms.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_featured %}&featured={{ selected_featured }}{% endif %}" 
+                   class="px-3 py-1.5 border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-semibold transition">
+                    Next &rarr;
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </div>
     
     {% elif active_tab == 'categories' %}
     <!-- Room Categories tab -->
+
+    <!-- Category Search Bar -->
+    <div class="custom-card rounded-2xl p-4 bg-white/50 dark:bg-neutral-900/50">
+        <form method="get" class="flex items-center gap-3">
+            <input type="hidden" name="tab" value="categories">
+            <div class="relative flex-1 sm:max-w-md">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-neutral-400 text-xs">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" name="search" value="{{ search_query }}"
+                       class="w-full pl-9 pr-9 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:border-luxuryGold-500 text-xs shadow-sm transition"
+                       placeholder="Search category name or slug...">
+                {% if search_query %}
+                <a href="?tab=categories" class="absolute inset-y-0 right-3 flex items-center text-neutral-400 hover:text-rose-500 text-xs" title="Clear search">
+                    <i class="fa-solid fa-xmark"></i>
+                </a>
+                {% endif %}
+            </div>
+            <button type="submit" class="px-4 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-xl text-xs transition shadow-sm cursor-pointer">
+                Search
+            </button>
+            {% if search_query %}
+            <a href="?tab=categories" class="px-3.5 py-2.5 border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400 rounded-xl text-xs font-semibold transition">
+                Reset
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
     <div class="custom-card rounded-2xl overflow-hidden shadow-sm">
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="text-xs uppercase text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30">
-                    <th class="px-6 py-4 font-semibold">Category Name</th>
-                    <th class="px-6 py-4 font-semibold">Slug Identifier</th>
-                    <th class="px-6 py-4 font-semibold">Ordering Sequence</th>
-                    <th class="px-6 py-4 font-semibold">Total Capacity Count</th>
-                    <th class="px-6 py-4 font-semibold">Is Visible</th>
-                    <th class="px-6 py-4 text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-neutral-200 dark:divide-neutral-800 text-sm">
-                {% for cat in categories %}
-                <tr class="hover:bg-neutral-50/30 dark:hover:bg-neutral-900/10 transition duration-150">
-                    <td class="px-6 py-4 font-bold text-neutral-900 dark:text-neutral-200">{{ cat.name }}</td>
-                    <td class="px-6 py-4 text-neutral-600 dark:text-neutral-400">{{ cat.slug }}</td>
-                    <td class="px-6 py-4 text-neutral-600 dark:text-neutral-400 font-semibold">{{ cat.order }}</td>
-                    <td class="px-6 py-4 text-neutral-600 dark:text-neutral-400 font-semibold">{{ cat.total_rooms }}</td>
-                    <td class="px-6 py-4">
-                        {% if cat.is_published %}
-                        <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-semibold text-xs">Active</span>
-                        {% else %}
-                        <span class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-500 font-semibold text-xs">Hidden</span>
-                        {% endif %}
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        <div class="flex items-center justify-end gap-3 text-sm">
-                            <a href="{% url 'admin_dashboard:room_category_edit' cat.id %}" class="text-neutral-400 hover:text-luxuryGold-500" title="Edit">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                            </a>
-                            <a href="{% url 'admin_dashboard:room_category_delete' cat.id %}" class="text-neutral-400 hover:text-rose-500" title="Delete">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="px-6 py-12 text-center text-sm text-neutral-500">
-                        No categories created. Click "Add Category" to initialize.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="text-xs uppercase text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30">
+                        <th class="px-6 py-4 font-semibold">Category Name</th>
+                        <th class="px-6 py-4 font-semibold">Slug Identifier</th>
+                        <th class="px-6 py-4 font-semibold">Ordering Sequence</th>
+                        <th class="px-6 py-4 font-semibold">Is Visible</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-neutral-200 dark:divide-neutral-800 text-sm">
+                    {% for cat in categories %}
+                    <tr class="hover:bg-neutral-50/30 dark:hover:bg-neutral-900/10 transition duration-150">
+                        <td class="px-6 py-4 font-bold text-neutral-900 dark:text-neutral-200">{{ cat.name }}</td>
+                        <td class="px-6 py-4 text-neutral-600 dark:text-neutral-400">{{ cat.slug }}</td>
+                        <td class="px-6 py-4 text-neutral-600 dark:text-neutral-400 font-semibold">{{ cat.order }}</td>
+                        <td class="px-6 py-4">
+                            {% if cat.is_published %}
+                            <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 font-semibold text-xs border border-emerald-500/20">Active</span>
+                            {% else %}
+                            <span class="px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-500 font-semibold text-xs border border-rose-500/20">Hidden</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-3 text-sm">
+                                <a href="{% url 'admin_dashboard:room_category_edit' cat.id %}" class="p-1.5 text-neutral-400 hover:text-luxuryGold-500 transition" title="Edit Category">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                                <a href="{% url 'admin_dashboard:room_category_delete' cat.id %}" class="p-1.5 text-neutral-400 hover:text-rose-500 transition" title="Delete Category">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-sm text-neutral-500">
+                            {% if search_query %}
+                            No categories match search query "{{ search_query }}". <a href="?tab=categories" class="text-luxuryGold-500 underline font-semibold ml-1">Clear search</a>
+                            {% else %}
+                            No categories created. Click "Add Category" to initialize.
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if categories.has_other_pages %}
+        <div class="px-6 py-4 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between text-xs text-neutral-500 bg-neutral-50/20 dark:bg-neutral-900/10">
+            <div>
+                Showing Page <span class="font-bold text-neutral-700 dark:text-neutral-300">{{ categories.number }}</span> of <span class="font-bold text-neutral-700 dark:text-neutral-300">{{ categories.paginator.num_pages }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+                {% if categories.has_previous %}
+                <a href="?tab=categories&page={{ categories.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                   class="px-3 py-1.5 border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-semibold transition">
+                    &larr; Previous
+                </a>
+                {% endif %}
+                {% if categories.has_next %}
+                <a href="?tab=categories&page={{ categories.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                   class="px-3 py-1.5 border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-semibold transition">
+                    Next &rarr;
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 
     {% elif active_tab == 'facilities' %}
     <!-- Room Facilities tab -->
+
+    <!-- Facility Search Bar -->
+    <div class="custom-card rounded-2xl p-4 bg-white/50 dark:bg-neutral-900/50">
+        <form method="get" class="flex items-center gap-3">
+            <input type="hidden" name="tab" value="facilities">
+            <div class="relative flex-1 sm:max-w-md">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-neutral-400 text-xs">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" name="search" value="{{ search_query }}"
+                       class="w-full pl-9 pr-9 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:border-luxuryGold-500 text-xs shadow-sm transition"
+                       placeholder="Search facility name or icon...">
+                {% if search_query %}
+                <a href="?tab=facilities" class="absolute inset-y-0 right-3 flex items-center text-neutral-400 hover:text-rose-500 text-xs" title="Clear search">
+                    <i class="fa-solid fa-xmark"></i>
+                </a>
+                {% endif %}
+            </div>
+            <button type="submit" class="px-4 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-xl text-xs transition shadow-sm cursor-pointer">
+                Search
+            </button>
+            {% if search_query %}
+            <a href="?tab=facilities" class="px-3.5 py-2.5 border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400 rounded-xl text-xs font-semibold transition">
+                Reset
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
     <div class="custom-card rounded-2xl overflow-hidden shadow-sm">
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="text-xs uppercase text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30">
-                    <th class="px-6 py-4 font-semibold">Facility Name</th>
-                    <th class="px-6 py-4 font-semibold">Icon Identifier</th>
-                    <th class="px-6 py-4 font-semibold">Featured Badge</th>
-                    <th class="px-6 py-4 text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-neutral-200 dark:divide-neutral-800 text-sm">
-                {% for fac in facilities %}
-                <tr class="hover:bg-neutral-50/30 dark:hover:bg-neutral-900/10 transition duration-150">
-                    <td class="px-6 py-4 font-bold text-neutral-900 dark:text-neutral-200">{{ fac.name }}</td>
-                    <td class="px-6 py-4 text-neutral-600 dark:text-neutral-400 font-medium">
-                        <i class="{{ fac.icon_class }} text-base text-luxuryGold-500 mr-2"></i> {{ fac.icon_class }}
-                    </td>
-                    <td class="px-6 py-4">
-                        {% if fac.is_featured %}
-                        <span class="text-emerald-500"><i class="fa-solid fa-circle-check"></i> Featured</span>
-                        {% else %}
-                        <span class="text-neutral-500"><i class="fa-regular fa-circle"></i> Standard</span>
-                        {% endif %}
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        <div class="flex items-center justify-end gap-3 text-sm">
-                            <a href="{% url 'admin_dashboard:room_facility_edit' fac.id %}" class="text-neutral-400 hover:text-luxuryGold-500" title="Edit">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                            </a>
-                            <a href="{% url 'admin_dashboard:room_facility_delete' fac.id %}" class="text-neutral-400 hover:text-rose-500" title="Delete">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="px-6 py-12 text-center text-sm text-neutral-500">
-                        No facilities added. Click "Add Facility" to expand options.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="text-xs uppercase text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30">
+                        <th class="px-6 py-4 font-semibold">Facility Name</th>
+                        <th class="px-6 py-4 font-semibold">Icon Identifier</th>
+                        <th class="px-6 py-4 font-semibold">Featured Badge</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-neutral-200 dark:divide-neutral-800 text-sm">
+                    {% for fac in facilities %}
+                    <tr class="hover:bg-neutral-50/30 dark:hover:bg-neutral-900/10 transition duration-150">
+                        <td class="px-6 py-4 font-bold text-neutral-900 dark:text-neutral-200">{{ fac.name }}</td>
+                        <td class="px-6 py-4 text-neutral-600 dark:text-neutral-400 font-medium">
+                            <i class="{{ fac.icon_class }} text-base text-luxuryGold-500 mr-2"></i> {{ fac.icon_class }}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if fac.is_featured %}
+                            <span class="text-emerald-500 font-semibold text-xs inline-flex items-center gap-1.5"><i class="fa-solid fa-circle-check"></i> Featured</span>
+                            {% else %}
+                            <span class="text-neutral-500 text-xs inline-flex items-center gap-1.5"><i class="fa-regular fa-circle"></i> Standard</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-3 text-sm">
+                                <a href="{% url 'admin_dashboard:room_facility_edit' fac.id %}" class="p-1.5 text-neutral-400 hover:text-luxuryGold-500 transition" title="Edit Facility">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                                <a href="{% url 'admin_dashboard:room_facility_delete' fac.id %}" class="p-1.5 text-neutral-400 hover:text-rose-500 transition" title="Delete Facility">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-12 text-center text-sm text-neutral-500">
+                            {% if search_query %}
+                            No facilities match search query "{{ search_query }}". <a href="?tab=facilities" class="text-luxuryGold-500 underline font-semibold ml-1">Clear search</a>
+                            {% else %}
+                            No facilities added. Click "Add Facility" to expand options.
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if facilities.has_other_pages %}
+        <div class="px-6 py-4 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between text-xs text-neutral-500 bg-neutral-50/20 dark:bg-neutral-900/10">
+            <div>
+                Showing Page <span class="font-bold text-neutral-700 dark:text-neutral-300">{{ facilities.number }}</span> of <span class="font-bold text-neutral-700 dark:text-neutral-300">{{ facilities.paginator.num_pages }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+                {% if facilities.has_previous %}
+                <a href="?tab=facilities&page={{ facilities.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                   class="px-3 py-1.5 border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-semibold transition">
+                    &larr; Previous
+                </a>
+                {% endif %}
+                {% if facilities.has_next %}
+                <a href="?tab=facilities&page={{ facilities.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                   class="px-3 py-1.5 border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-semibold transition">
+                    Next &rarr;
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 
     {% endif %}
@@ -266,9 +527,18 @@
 </div>
 
 <script>
+    function updateSelectedCount() {
+        const count = document.querySelectorAll('.room-selector:checked').length;
+        const countBadge = document.getElementById('selected-count');
+        if (countBadge) {
+            countBadge.innerText = count;
+        }
+    }
+
     function toggleAllCheckboxes(source) {
         let checkboxes = document.querySelectorAll('.room-selector');
         checkboxes.forEach(c => c.checked = source.checked);
+        updateSelectedCount();
     }
 
     function getCheckedIds() {

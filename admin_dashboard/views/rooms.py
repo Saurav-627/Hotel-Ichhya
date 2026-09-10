@@ -41,13 +41,51 @@ RoomBasePriceFormSet = inlineformset_factory(
 )
 
 class RoomDashboardView(StaffRequiredMixin, View):
+    permission_required = 'rooms.view_room'
     def get(self, request):
         from django.core.paginator import Paginator
-        rooms_qs = Room.objects.all().select_related('category').prefetch_related('base_prices__currency')
-        categories_qs = RoomCategory.objects.all()
-        facilities_qs = RoomFacility.objects.all()
+        from django.db.models import Q
+        rooms_qs = Room.objects.all().select_related('category').prefetch_related('base_prices__currency').order_by('-is_featured', 'room_number', 'title')
+        categories_qs = RoomCategory.objects.all().order_by('order', 'name')
+        facilities_qs = RoomFacility.objects.all().order_by('id')
         active_tab = request.GET.get('tab', 'rooms')
+        search_query = request.GET.get('search', '').strip()
+        selected_category = request.GET.get('category', '').strip()
+        selected_status = request.GET.get('status', '').strip()
+        selected_featured = request.GET.get('featured', '').strip()
         page_number = request.GET.get('page', 1)
+
+        if active_tab == 'rooms':
+            if search_query:
+                rooms_qs = rooms_qs.filter(
+                    Q(title__icontains=search_query) |
+                    Q(room_number__icontains=search_query) |
+                    Q(slug__icontains=search_query)
+                )
+            if selected_category:
+                rooms_qs = rooms_qs.filter(category_id=selected_category)
+            if selected_status:
+                if selected_status == 'published':
+                    rooms_qs = rooms_qs.filter(is_published=True)
+                elif selected_status == 'draft':
+                    rooms_qs = rooms_qs.filter(is_published=False)
+            if selected_featured:
+                if selected_featured == 'featured':
+                    rooms_qs = rooms_qs.filter(is_featured=True)
+                elif selected_featured == 'standard':
+                    rooms_qs = rooms_qs.filter(is_featured=False)
+        elif active_tab == 'categories':
+            if search_query:
+                categories_qs = categories_qs.filter(
+                    Q(name__icontains=search_query) |
+                    Q(slug__icontains=search_query)
+                )
+        elif active_tab == 'facilities':
+            if search_query:
+                facilities_qs = facilities_qs.filter(
+                    Q(name__icontains=search_query) |
+                    Q(icon_class__icontains=search_query)
+                )
 
         rooms_paginator = Paginator(rooms_qs, 10)
         rooms_page = rooms_paginator.get_page(page_number if active_tab == 'rooms' else 1)
@@ -58,11 +96,20 @@ class RoomDashboardView(StaffRequiredMixin, View):
         facilities_paginator = Paginator(facilities_qs, 15)
         facilities_page = facilities_paginator.get_page(page_number if active_tab == 'facilities' else 1)
 
+        all_categories = RoomCategory.objects.all().order_by('name')
+
         return render(request, 'admin_dashboard/rooms/dashboard.html', {
             'rooms': rooms_page,
             'categories': categories_page,
             'facilities': facilities_page,
+            'all_categories': all_categories,
             'active_tab': active_tab,
+            'search_query': search_query,
+            'selected_category': selected_category,
+            'selected_status': selected_status,
+            'selected_featured': selected_featured,
+            'has_active_filters': bool(search_query or selected_category or selected_status or selected_featured),
+            'total_rooms_count': rooms_qs.count() if active_tab == 'rooms' else Room.objects.count(),
         })
 
 def get_category_inventory_map():
@@ -261,6 +308,7 @@ class RoomSeasonalPriceDeleteView(StaffRequiredMixin, DeleteView):
 
 # Calendar and Availability View
 class RoomAvailabilityCalendarView(StaffRequiredMixin, View):
+    permission_required = 'rooms.view_room'
     def get(self, request):
         today = timezone.localdate() if hasattr(timezone, 'localdate') else datetime.date.today()
         year = int(request.GET.get('year', today.year))
@@ -278,29 +326,26 @@ class RoomAvailabilityCalendarView(StaffRequiredMixin, View):
             days_in_month.append(curr_day)
             curr_day += datetime.timedelta(days=1)
             
-        # pyrefly: ignore [missing-attribute]
         rooms = Room.objects.all().select_related('category')
         
+        from django.db.models import Sum
+        occupancies = RoomAvailability.objects.filter(
+            date__gte=first_day_of_month,
+            date__lte=last_day_of_month
+        ).values('room_id', 'date').annotate(total_booked=Sum('rooms_booked'))
+
+        occ_map = {(occ['room_id'], occ['date']): occ['total_booked'] for occ in occupancies}
+
         # Build grid data: room_id -> { date -> { booked_count, is_available } }
         grid = {}
         for r in rooms:
             grid[r.id] = {}
             for d in days_in_month:
-                # Find if there is a room availability record
-                # pyrefly: ignore [missing-attribute]
-                avail = RoomAvailability.objects.filter(room=r, date=d).first()
-                if avail:
-                    grid[r.id][d] = {
-                        'rooms_booked': avail.rooms_booked,
-                        'is_available': avail.is_available,
-                        'booking_uid': avail.booking.booking_uid if avail.booking else None
-                    }
-                else:
-                    grid[r.id][d] = {
-                        'rooms_booked': 0,
-                        'is_available': True,
-                        'booking_uid': None
-                    }
+                total_booked = occ_map.get((r.id, d), 0)
+                grid[r.id][d] = {
+                    'rooms_booked': total_booked,
+                    'is_available': total_booked < r.total_rooms,
+                }
                     
         # Context dates
         prev_month = month - 1 if month > 1 else 12

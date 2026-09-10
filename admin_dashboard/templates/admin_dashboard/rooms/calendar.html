@@ -37,7 +37,7 @@
             <thead>
                 <tr class="text-xs uppercase text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30">
                     <th class="px-4 py-3 font-semibold w-48 border-r border-neutral-200 dark:border-neutral-800 sticky left-0 bg-white dark:bg-neutral-900 z-10">
-                        Room Type
+                        Room/No
                     </th>
                     {% for day in days_in_month %}
                     <th class="px-2 py-3 text-center font-semibold text-xs border-r border-neutral-200 dark:border-neutral-800 w-10">
@@ -52,10 +52,15 @@
                 <tr class="hover:bg-neutral-50/30 dark:hover:bg-neutral-900/10">
                     <!-- Room Title header column -->
                     <td class="px-4 py-3 border-r border-neutral-200 dark:border-neutral-800 sticky left-0 bg-white dark:bg-neutral-950 font-bold text-neutral-900 dark:text-neutral-200 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.02)]">
-                        <div class="truncate w-40" title="{{ room.title }}">
-                            {{ room.title }}
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="truncate max-w-[140px]" title="{{ room.title }}">{{ room.title }}</span>
+                             {% if room.room_number %}
+                            <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-bold font-mono bg-luxuryGold-500/10 text-luxuryGold-400 border border-luxuryGold-500/30">
+                                #{{ room.room_number }}
+                            </span>
+                            {% endif %}
                         </div>
-                        <span class="text-[10px] text-neutral-500 font-normal">Cap: {{ room.total_rooms }} rooms</span>
+                        <span class="text-[10px] text-neutral-500 font-normal block mt-0.5">Cap: {{ room.total_rooms }} room{{ room.total_rooms|pluralize }} ({{ room.category.name }})</span>
                     </td>
                     
                     <!-- Date values -->

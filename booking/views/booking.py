@@ -11,7 +11,6 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-from admin_dashboard.models.notification import create_admin_notification
 from core.services.email_service import send_booking_invoice_email
 from rooms.models.room import Room
 from rooms.models.room_availability import RoomAvailability
@@ -65,7 +64,7 @@ def create_booking(request, room_id):
     available_rooms = room.total_rooms
     check_date = check_in
     while check_date < check_out:
-        booked_count = RoomAvailability.objects.filter(room__category=room.category, date=check_date).aggregate(
+        booked_count = RoomAvailability.objects.filter(room=room, date=check_date).aggregate(
             total=Sum('rooms_booked')
         )['total'] or 0
         remaining = room.total_rooms - booked_count
@@ -87,10 +86,12 @@ def create_booking(request, room_id):
     
     # Seasonal rate override
     seasonal = (
+        # pyrefly: ignore [missing-attribute]
         room.seasonal_prices.filter(
             start_date__lte=check_out, end_date__gte=check_in, is_active=True,
             currency__iso_code=selected_currency
         ).order_by('-start_date').first()
+        # pyrefly: ignore [missing-attribute]
         or room.seasonal_prices.filter(
             start_date__lte=check_out, end_date__gte=check_in, is_active=True,
             currency__isnull=True
@@ -99,6 +100,7 @@ def create_booking(request, room_id):
     if seasonal:
         daily_price = seasonal.price_override
 
+    # pyrefly: ignore [unsupported-operation]
     room_subtotal = daily_price * nights * num_rooms
 
     # Process selected add-ons
@@ -202,19 +204,7 @@ def create_booking(request, room_id):
     if coupon:
         coupon.redeem()
 
-
-    # Trigger Admin Real-Time Notification
-    try:
-        create_admin_notification(
-            notification_type='booking_created',
-            title=f"New Room Booking [{booking.booking_uid}]",
-            message=f"{booking.guest_name} reserved {room.title} ({booking.currency_code} {booking.total}) for {booking.nights} night(s).",
-            link_url=reverse('admin_dashboard:booking_detail', kwargs={'pk': booking.pk})
-        )
-    except Exception as e:
-        logger.error(f"Failed to create booking notification: {e}")
-
-    # Note: Invoice email is deferred until payment succeeds in payment_callback
+    # Note: Invoice email and admin notifications are dispatched upon successful payment confirmation
 
     return redirect('booking:checkout_page', booking_uid=booking.booking_uid)
 

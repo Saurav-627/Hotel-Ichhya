@@ -91,7 +91,7 @@ class RoomListView(ListView):
                         check_date = check_in
                         while check_date < check_out:
                             booked_count = RoomAvailability.objects.filter(
-                                room__category=room.category,
+                                room=room,
                                 date=check_date
                             ).aggregate(total=Sum('rooms_booked'))['total'] or 0
                             remaining = room.total_rooms - booked_count
@@ -143,7 +143,7 @@ class RoomDetailView(DetailView):
         from django.db.models import Prefetch
         from rooms.models.room_base_price import RoomBasePrice
         return super().get_queryset().filter(is_published=True).prefetch_related(
-            'images', 'facilities', 'policies', 'seasonal_prices__currency',
+            'images', 'facilities', 'policies', 'seasonal_prices__currency', 'included_addons',
             Prefetch(
                 'base_prices',
                 queryset=RoomBasePrice.objects.filter(currency__iso_code=selected_currency),
@@ -165,13 +165,26 @@ class RoomDetailView(DetailView):
         except Exception:
             context['selected_currency_symbol'] = '$'
 
-        # Fetch Active Add-ons
-        from booking.models.addon import Addon
-        from django.db.models import Q
-        addons = list(Addon.objects.filter(is_active=True).filter(Q(applies_to='room') | Q(applies_to='both')).prefetch_related('prices__currency'))
-        for a in addons:
-            a.set_active_currency(selected_currency)
-        context['addons'] = addons
+        # Fetch Active Add-ons (excluding complimentary bundled inclusions if allowed)
+        from booking.models.addon import Addon, AddonPrice
+        from django.db.models import Prefetch
+        active_addons = []
+        if self.object and self.object.allow_custom_addons:
+            included_ids = list(self.object.included_addons.values_list('id', flat=True))
+            active_addons = list(
+                Addon.objects.filter(is_active=True, applies_to__in=['room', 'both'])
+                .exclude(id__in=included_ids)
+                .prefetch_related(
+                    Prefetch(
+                        'prices',
+                        queryset=AddonPrice.objects.filter(currency__iso_code=selected_currency),
+                        to_attr='active_currency_price'
+                    )
+                )
+            )
+            for a in active_addons:
+                a.set_active_currency(selected_currency)
+        context['addons'] = active_addons
 
         return context
 
@@ -205,7 +218,7 @@ def check_room_availability(request, room_id):
     available_rooms = room.total_rooms
     check_date = check_in
     while check_date < check_out:
-        booked_count = RoomAvailability.objects.filter(room__category=room.category, date=check_date).aggregate(
+        booked_count = RoomAvailability.objects.filter(room=room, date=check_date).aggregate(
             total=Sum('rooms_booked')
         )['total'] or 0
         remaining = room.total_rooms - booked_count
@@ -233,13 +246,13 @@ def get_room_booked_dates(request, room_id):
     
     # We aggregate total booked rooms grouped by date
     occupancies = RoomAvailability.objects.filter(
-        room__category=room.category,
+        room=room,
         date__gte=today
     ).values('date').annotate(total_booked=Sum('rooms_booked'))
     
     booked_dates = []
     for occ in occupancies:
-        # If total booked rooms matches or exceeds total rooms of this category
+        # If total booked rooms matches or exceeds total rooms of this room listing
         if occ['total_booked'] >= room.total_rooms:
             booked_dates.append(occ['date'].strftime('%Y-%m-%d'))
             

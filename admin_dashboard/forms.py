@@ -106,14 +106,28 @@ class AboutPreviewForm(TailwindFormMixin, forms.ModelForm):
 class RoomCategoryForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
         model = RoomCategory
-        fields = '__all__'
+        exclude = ('total_rooms',)
 
 from rooms.models.room_base_price import RoomBasePrice
 
 class RoomForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
         model = Room
-        exclude = ['created_at', 'updated_at']
+        exclude = ('created_at', 'updated_at')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from booking.models.addon import Addon
+        if 'room_number' in self.fields:
+            self.fields['room_number'].required = False
+            self.fields['room_number'].widget.attrs.update({'placeholder': 'e.g. 101, 102, Villa A'})
+        self.fields['highlights'].required = False
+        self.fields['room_size'].required = False
+        self.fields['bed_type'].required = False
+        if 'included_addons' in self.fields:
+            # pyrefly: ignore [missing-attribute]
+            self.fields['included_addons'].queryset = Addon.objects.filter(applies_to__in=['room', 'both'])
+            self.fields['included_addons'].required = False
 
 class RoomBasePriceForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
@@ -124,12 +138,16 @@ class RoomBasePriceForm(TailwindFormMixin, forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['currency'].required = False
         self.fields['base_price'].required = False
+        # pyrefly: ignore [missing-attribute]
         self.fields['currency'].queryset = Currency.objects.filter(is_published=True).order_by('sequence', 'id')
+        # pyrefly: ignore [missing-attribute]
         self.fields['currency'].empty_label = "— Select Currency —"
 
     def clean(self):
         cleaned_data = super().clean()
+        # pyrefly: ignore [missing-attribute]
         currency = cleaned_data.get('currency')
+        # pyrefly: ignore [missing-attribute]
         base_price = cleaned_data.get('base_price')
 
         # If one is provided, both must be provided
@@ -185,7 +203,9 @@ class RoomPriceForm(TailwindFormMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # pyrefly: ignore [missing-attribute]
         self.fields['currency'].queryset = Currency.objects.filter(is_published=True).order_by('sequence', 'id')
+        # pyrefly: ignore [missing-attribute]
         self.fields['currency'].empty_label = "— All Currencies (wildcard) —"
         self.fields['currency'].required = False
 
@@ -217,7 +237,9 @@ class CouponMinSpendForm(TailwindFormMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # pyrefly: ignore [missing-attribute]
         self.fields['currency'].queryset = Currency.objects.filter(is_published=True).order_by('sequence', 'id')
+        # pyrefly: ignore [missing-attribute]
         self.fields['currency'].empty_label = "— Select Currency —"
 
 
@@ -284,7 +306,9 @@ class VenueBasePriceForm(TailwindFormMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # pyrefly: ignore [missing-attribute]
         self.fields['currency'].queryset = Currency.objects.filter(is_published=True).order_by('sequence', 'id')
+        # pyrefly: ignore [missing-attribute]
         self.fields['currency'].empty_label = "— Select Currency —"
 
 VenueBasePriceFormSet = forms.inlineformset_factory(
@@ -375,6 +399,7 @@ class PaymentProcessorForm(TailwindFormMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # pyrefly: ignore [missing-attribute]
         self.fields['payment_currencies'].queryset = Currency.objects.all().order_by('sequence', 'id')
         if self.instance and self.instance.pk:
             self.fields['payment_currencies'].initial = self.instance.payment_currencies.all()
@@ -386,6 +411,7 @@ class PaymentProcessorForm(TailwindFormMixin, forms.ModelForm):
         else:
             original_save_m2m = self.save_m2m
             def new_save_m2m():
+                # pyrefly: ignore [bad-argument-type]
                 original_save_m2m()
                 self.save_currencies(processor)
             self.save_m2m = new_save_m2m
@@ -427,12 +453,16 @@ class AddonPriceForm(TailwindFormMixin, forms.ModelForm):
         self.fields['currency'].required = False
         self.fields['price'].required = False
         self.fields['price'].label = "Price"
+        # pyrefly: ignore [missing-attribute]
         self.fields['currency'].queryset = Currency.objects.filter(is_published=True).order_by('sequence', 'id')
+        # pyrefly: ignore [missing-attribute]
         self.fields['currency'].empty_label = "— Select Currency —"
 
     def clean(self):
         cleaned_data = super().clean()
+        # pyrefly: ignore [missing-attribute]
         currency = cleaned_data.get('currency')
+        # pyrefly: ignore [missing-attribute]
         price = cleaned_data.get('price')
 
         if currency and price is None:

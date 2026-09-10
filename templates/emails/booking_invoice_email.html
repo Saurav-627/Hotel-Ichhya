@@ -54,7 +54,7 @@
                                 {% if booking.room %}
                                 <tr>
                                     <td style="padding: 11px 16px; border-bottom: 1px solid #E7E5E4; color: #78716C;">Chamber / Suite</td>
-                                    <td style="padding: 11px 16px; border-bottom: 1px solid #E7E5E4; color: #1C1917; font-weight: 600;">{{ booking.room.title }} ({{ booking.num_rooms }} room{% if booking.num_rooms > 1 %}s{% endif %})</td>
+                                    <td style="padding: 11px 16px; border-bottom: 1px solid #E7E5E4; color: #1C1917; font-weight: 600;">{{ booking.room.title }}{% if booking.room.room_number %} (Room #{{ booking.room.room_number }}){% endif %} ({{ booking.num_rooms }} room{% if booking.num_rooms > 1 %}s{% endif %})</td>
                                 </tr>
                                 {% endif %}
                                 <tr>

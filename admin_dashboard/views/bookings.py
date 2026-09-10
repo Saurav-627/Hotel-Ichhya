@@ -97,6 +97,12 @@ class BookingUpdateStatusView(StaffRequiredMixin, View):
                 old_status = booking.status
                 booking.status = new_status
                 booking.save() # This triggers availability updates automatically in Booking model override
+                if new_status == 'confirmed' and old_status != 'confirmed':
+                    try:
+                        from core.services.email_service import send_booking_invoice_email
+                        send_booking_invoice_email(booking, request=request)
+                    except Exception:
+                        pass
                 messages.success(request, f"Booking status updated from {old_status} to {new_status.replace('_', ' ').capitalize()}.")
         else:
             messages.error(request, "Invalid action requested.")

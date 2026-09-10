@@ -10,7 +10,6 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.views.generic import TemplateView
 
-from admin_dashboard.models.notification import create_admin_notification
 from core.services.email_service import (
     send_newsletter_verification_email,
     send_newsletter_welcome_email,
@@ -112,17 +111,6 @@ def verify_newsletter(request, token):
         send_newsletter_welcome_email(subscriber.email, request=request)
     except Exception:
         logger.exception("Failed to send newsletter welcome email")
-
-    # Create Staff Admin Notification
-    try:
-        create_admin_notification(
-            notification_type='inquiry_received',
-            title='Verified Newsletter Subscriber',
-            message=f"New guest verified newsletter subscription: {subscriber.email}",
-            link_url=reverse('admin_dashboard:contact_dashboard') + "?tab=subscribers"
-        )
-    except Exception:
-        logger.exception("Failed to create newsletter admin notification")
 
     messages.success(request, "🎉 Your email has been verified successfully! Welcome to the Hotel Ichchha newsletter.")
     return redirect('/')

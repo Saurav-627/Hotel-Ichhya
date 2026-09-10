@@ -10,7 +10,8 @@
 
 {% block content %}
 <!-- Billing Summary widgets -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
+    <!-- Total Net Captures -->
     <div class="custom-card rounded-2xl p-5">
         <span class="text-xs text-neutral-400 font-semibold uppercase block">Total Net Captures</span>
         <div class="mt-2 space-y-1">
@@ -21,36 +22,22 @@
             {% endfor %}
         </div>
     </div>
+
+    <!-- Published Processor breakdown cards -->
+    {% for item in processor_stats %}
     <div class="custom-card rounded-2xl p-5">
-        <span class="text-xs text-neutral-400 font-semibold uppercase block">Stripe Collection</span>
+        <span class="text-xs text-neutral-400 font-semibold uppercase block">{{ item.processor.name }} Collection</span>
         <div class="mt-2 space-y-1">
-            {% for cur, val in stripe_collected.items %}
+            {% for cur, val in item.breakdown.items %}
                 <strong class="text-xl font-bold text-neutral-900 dark:text-neutral-100 block">{{ cur }} {{ val|floatformat:2 }}</strong>
             {% empty %}
-                <strong class="text-xl font-bold text-neutral-900 dark:text-neutral-100 block">NPR 0.00</strong>
+                <strong class="text-xl font-bold text-neutral-900 dark:text-neutral-100 block">0.00</strong>
             {% endfor %}
         </div>
     </div>
-    <div class="custom-card rounded-2xl p-5">
-        <span class="text-xs text-neutral-400 font-semibold uppercase block">eSewa Collection</span>
-        <div class="mt-2 space-y-1">
-            {% for cur, val in esewa_collected.items %}
-                <strong class="text-xl font-bold text-neutral-900 dark:text-neutral-100 block">{{ cur }} {{ val|floatformat:2 }}</strong>
-            {% empty %}
-                <strong class="text-xl font-bold text-neutral-900 dark:text-neutral-100 block">NPR 0.00</strong>
-            {% endfor %}
-        </div>
-    </div>
-    <div class="custom-card rounded-2xl p-5">
-        <span class="text-xs text-neutral-400 font-semibold uppercase block">Khalti Collection</span>
-        <div class="mt-2 space-y-1">
-            {% for cur, val in khalti_collected.items %}
-                <strong class="text-xl font-bold text-neutral-900 dark:text-neutral-100 block">{{ cur }} {{ val|floatformat:2 }}</strong>
-            {% empty %}
-                <strong class="text-xl font-bold text-neutral-900 dark:text-neutral-100 block">NPR 0.00</strong>
-            {% endfor %}
-        </div>
-    </div>
+    {% endfor %}
+
+    <!-- Refund Logs -->
     <div class="custom-card rounded-2xl p-5 border-rose-500/10">
         <span class="text-xs text-rose-500 font-semibold uppercase block">Refund Logs</span>
         <div class="mt-2 space-y-1">
@@ -64,45 +51,91 @@
 </div>
 
 <!-- Filter logs panel -->
-<div class="custom-card rounded-2xl p-6 mb-8 bg-white/50 dark:bg-neutral-900/50">
-    <form method="get" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+<div class="custom-card rounded-2xl p-5 mb-8 bg-white/50 dark:bg-neutral-900/50">
+    <form method="get" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
         <!-- Search query -->
         <div>
             <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Search Transaction / Guest</label>
             <div class="relative">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-neutral-500">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-neutral-500 text-xs">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </span>
                 <input type="text" name="search" value="{{ search_query }}"
-                       class="w-full pl-9 pr-4 py-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:border-luxuryGold-500 text-sm"
-                       placeholder="Txn ID, Name, Guest Phone...">
+                       class="w-full pl-9 pr-9 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:border-luxuryGold-500 text-xs shadow-sm transition"
+                       placeholder="Txn ID, Name, Phone or UID..." autocomplete="off">
+                {% if search_query %}
+                <a href="?{% if selected_gateway %}gateway={{ selected_gateway }}&{% endif %}{% if selected_status %}status={{ selected_status }}{% endif %}" 
+                   class="absolute inset-y-0 right-3 flex items-center text-neutral-400 hover:text-rose-500 text-xs" title="Clear query">
+                    <i class="fa-solid fa-xmark"></i>
+                </a>
+                {% endif %}
             </div>
         </div>
 
-        <!-- Filter by gateway -->
+        <!-- Filter by gateway (only published processors) -->
         <div>
-            <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Gateway</label>
+            <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Payment Gateway</label>
             <select name="gateway"
-                    class="w-full px-4 py-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:border-luxuryGold-500 text-sm cursor-pointer">
-                <option value="">All Gateways</option>
-                {% for gw in gateways %}
-                <option value="{{ gw }}" {% if selected_gateway == gw %}selected{% endif %}>{{ gw|upper }}</option>
+                    class="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:border-luxuryGold-500 text-xs shadow-sm cursor-pointer transition">
+                <option value="">All Published Gateways</option>
+                {% for proc in published_processors %}
+                <option value="{{ proc.code }}" {% if selected_gateway|lower == proc.code|lower %}selected{% endif %}>{{ proc.name }} ({{ proc.code|upper }})</option>
                 {% endfor %}
             </select>
         </div>
 
-        <!-- Apply / Reset -->
-        <div class="flex items-end gap-2">
+        <!-- Filter by status -->
+        <div>
+            <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Payment Status</label>
+            <select name="status"
+                    class="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:border-luxuryGold-500 text-xs shadow-sm cursor-pointer transition">
+                <option value="">All Statuses</option>
+                {% for code, label in status_choices %}
+                <option value="{{ code }}" {% if selected_status == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-2">
             <button type="submit" 
-                    class="flex-1 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-lg text-sm transition">
-                Search Transactions
+                    class="flex-1 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-filter"></i> Apply
             </button>
+            {% if has_active_filters %}
             <a href="{% url 'admin_dashboard:payment_list' %}" 
-               class="px-4 py-2.5 border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400 rounded-lg text-sm text-center transition">
+               class="px-3.5 py-2.5 border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-semibold rounded-xl text-xs transition text-center" title="Reset all filters">
                 Reset
             </a>
+            {% endif %}
         </div>
     </form>
+
+    {% if has_active_filters %}
+    <!-- Active Filter Chips -->
+    <div class="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-neutral-200 dark:border-neutral-800/80 text-xs">
+        <span class="text-neutral-400 font-medium">Active Filters:</span>
+        {% if search_query %}
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-luxuryGold-500/10 text-luxuryGold-600 dark:text-luxuryGold-400 border border-luxuryGold-500/30">
+            <span>Query: "<strong>{{ search_query }}</strong>"</span>
+            <a href="?{% if selected_gateway %}gateway={{ selected_gateway }}&{% endif %}{% if selected_status %}status={{ selected_status }}{% endif %}" class="hover:text-rose-500"><i class="fa-solid fa-xmark text-[10px]"></i></a>
+        </span>
+        {% endif %}
+        {% if selected_gateway %}
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-luxuryGold-500/10 text-luxuryGold-600 dark:text-luxuryGold-400 border border-luxuryGold-500/30">
+            <span>Gateway: <strong>{{ selected_gateway|upper }}</strong></span>
+            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if selected_status %}status={{ selected_status }}{% endif %}" class="hover:text-rose-500"><i class="fa-solid fa-xmark text-[10px]"></i></a>
+        </span>
+        {% endif %}
+        {% if selected_status %}
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-luxuryGold-500/10 text-luxuryGold-600 dark:text-luxuryGold-400 border border-luxuryGold-500/30">
+            <span>Status: <strong>{{ selected_status|title }}</strong></span>
+            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if selected_gateway %}gateway={{ selected_gateway }}{% endif %}" class="hover:text-rose-500"><i class="fa-solid fa-xmark text-[10px]"></i></a>
+        </span>
+        {% endif %}
+        <a href="{% url 'admin_dashboard:payment_list' %}" class="text-neutral-500 hover:text-rose-500 text-xs ml-1 underline">Clear all</a>
+    </div>
+    {% endif %}
 </div>
 
 <!-- Transactions Table card -->
@@ -124,34 +157,36 @@
                 {% for p in payments %}
                 <tr class="hover:bg-neutral-50/30 dark:hover:bg-neutral-900/10 transition duration-150">
                     <td class="px-6 py-4 font-mono font-bold text-neutral-850 dark:text-neutral-300">
-                        {{ p.transaction_id }}
+                        {{ p.transaction_id|default:"—" }}
                     </td>
                     <td class="px-6 py-4">
                         {% if p.booking %}
-                        <a href="{% url 'admin_dashboard:booking_detail' p.booking.id %}" class="font-semibold text-neutral-900 dark:text-neutral-200 hover:text-luxuryGold-500">
+                        <a href="{% url 'admin_dashboard:booking_detail' p.booking.id %}" class="font-semibold text-neutral-900 dark:text-neutral-200 hover:text-luxuryGold-500 transition">
                             {{ p.booking.guest_name }}
                         </a>
                         <span class="text-xs text-neutral-500 block">{{ p.booking.booking_uid }}</span>
                         {% else %}
-                        <span class="text-neutral-500">No associated booking</span>
+                        <span class="text-neutral-500 italic">No associated booking</span>
                         {% endif %}
                     </td>
                     <td class="px-6 py-4 text-neutral-600 dark:text-neutral-400 font-medium uppercase text-xs">
-                        {{ p.gateway }}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-neutral-100 dark:bg-neutral-800 font-semibold">
+                            {{ p.gateway }}
+                        </span>
                     </td>
                     <td class="px-6 py-4">
                         <div class="space-y-0.5 text-xs text-neutral-500">
                             <span class="block">Excl. Tax: {{ p.currency.iso_code|default:p.booking.room.currency.iso_code }} {{ p.amount_ex_tax|floatformat:2 }}</span>
                             <span class="block">Tax: {{ p.currency.iso_code|default:p.booking.room.currency.iso_code }} {{ p.tax_amount|floatformat:2 }}</span>
-                            <strong class="block text-sm font-bold text-neutral-900">Total: {{ p.currency.iso_code|default:p.booking.room.currency.iso_code }} {{ p.amount|floatformat:2 }}</strong>
+                            <strong class="block text-sm font-bold text-neutral-900 dark:text-neutral-100">Total: {{ p.currency.iso_code|default:p.booking.room.currency.iso_code }} {{ p.amount|floatformat:2 }}</strong>
                         </div>
                     </td>
                     <td class="px-6 py-4">
                         <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider
-                                     {% if p.status == 'success' %}bg-emerald-500/10 text-emerald-500
-                                     {% elif p.status == 'pending' %}bg-amber-500/10 text-amber-500
-                                     {% elif p.status == 'failed' %}bg-rose-500/10 text-rose-500
-                                     {% else %}bg-neutral-500/10 text-neutral-400{% endif %}">
+                                     {% if p.status == 'success' %}bg-emerald-500/10 text-emerald-500 border border-emerald-500/20
+                                     {% elif p.status == 'pending' %}bg-amber-500/10 text-amber-500 border border-amber-500/20
+                                     {% elif p.status == 'failed' %}bg-rose-500/10 text-rose-500 border border-rose-500/20
+                                     {% else %}bg-neutral-500/10 text-neutral-400 border border-neutral-500/20{% endif %}">
                             {{ p.get_status_display }}
                         </span>
                     </td>
@@ -160,15 +195,26 @@
                     </td>
                     <td class="px-6 py-4 text-right">
                         <a href="{% url 'admin_dashboard:payment_detail' p.id %}" 
-                           class="text-xs font-bold text-luxuryGold-500 hover:text-luxuryGold-400">
-                            Inspect Logs <i class="fa-solid fa-angle-right"></i>
+                           class="text-xs font-bold text-luxuryGold-500 hover:text-luxuryGold-400 transition inline-flex items-center gap-1">
+                            Inspect Logs <i class="fa-solid fa-angle-right text-[10px]"></i>
                         </a>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
                     <td colspan="7" class="px-6 py-12 text-center text-sm text-neutral-500">
-                        No transactions registered matching search parameters.
+                        {% if has_active_filters %}
+                        <div class="flex flex-col items-center justify-center gap-2">
+                            <i class="fa-solid fa-magnifying-glass text-2xl text-neutral-400 mb-1"></i>
+                            <p>No transactions found matching your search and filter criteria.</p>
+                            <a href="{% url 'admin_dashboard:payment_list' %}" class="text-luxuryGold-500 font-semibold underline text-xs">Clear all filters</a>
+                        </div>
+                        {% else %}
+                        <div class="flex flex-col items-center justify-center gap-2">
+                            <i class="fa-solid fa-receipt text-2xl text-neutral-400 mb-1"></i>
+                            <p>No payment transactions registered yet.</p>
+                        </div>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -178,21 +224,21 @@
     
     <!-- Pagination -->
     {% if is_paginated %}
-    <div class="px-6 py-4 custom-border border-t flex items-center justify-between text-sm text-neutral-500">
+    <div class="px-6 py-4 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between text-xs text-neutral-500 bg-neutral-50/20 dark:bg-neutral-900/10">
         <div>
-            Showing Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            Showing Page <span class="font-bold text-neutral-700 dark:text-neutral-300">{{ page_obj.number }}</span> of <span class="font-bold text-neutral-700 dark:text-neutral-300">{{ page_obj.paginator.num_pages }}</span> ({{ page_obj.paginator.count }} total records)
         </div>
         <div class="flex items-center gap-2">
             {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_gateway %}&gateway={{ selected_gateway }}{% endif %}" 
-               class="px-3 py-1.5 border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
-                Previous
+            <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_gateway %}&gateway={{ selected_gateway }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}" 
+               class="px-3 py-1.5 border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-semibold transition">
+                &larr; Previous
             </a>
             {% endif %}
             {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_gateway %}&gateway={{ selected_gateway }}{% endif %}" 
-               class="px-3 py-1.5 border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
-                Next
+            <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_gateway %}&gateway={{ selected_gateway }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}" 
+               class="px-3 py-1.5 border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-semibold transition">
+                Next &rarr;
             </a>
             {% endif %}
         </div>

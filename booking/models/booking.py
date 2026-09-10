@@ -79,6 +79,7 @@ class Booking(models.Model):
     def addons_total(self):
         from decimal import Decimal
         from django.db.models import Sum
+        # pyrefly: ignore [missing-attribute]
         return self.booking_addons.aggregate(total=Sum('total_price'))['total'] or Decimal('0.00')
 
     @property
@@ -89,6 +90,7 @@ class Booking(models.Model):
         from decimal import Decimal
         from django.db.models import Sum
         
+        # pyrefly: ignore [missing-attribute]
         addons_sum = self.booking_addons.aggregate(total=Sum('total_price'))['total'] or Decimal('0.00')
         combined_subtotal = self.subtotal + addons_sum
         taxable = combined_subtotal - self.discount
@@ -122,16 +124,19 @@ class Booking(models.Model):
         )
 
     def has_room_availability(self):
+        if not self.room or not self.check_in or not self.check_out:
+            return True
         from django.db.models import Sum
         from rooms.models.room_availability import RoomAvailability
         import datetime
 
+        total_rooms = self.room.total_rooms if self.room.total_rooms and self.room.total_rooms > 0 else 1
         check_date = self.check_in
         while check_date < self.check_out:
-            booked_count = RoomAvailability.objects.filter(room__category=self.room.category, date=check_date).aggregate(
+            booked_count = RoomAvailability.objects.filter(room=self.room, date=check_date).aggregate(
                 total=Sum('rooms_booked')
             )['total'] or 0
-            if booked_count + self.num_rooms > self.room.total_rooms:
+            if booked_count + self.num_rooms > total_rooms:
                 return False
             check_date += datetime.timedelta(days=1)
         return True
@@ -144,6 +149,7 @@ class Booking(models.Model):
         
         if self.is_reserved:
             # Delete and recreate so each booking-night is represented once with its room count.
+            # pyrefly: ignore [missing-attribute]
             self.room_dates.all().delete()
             current_date = self.check_in
             while current_date < self.check_out:
@@ -156,9 +162,12 @@ class Booking(models.Model):
                 )
                 current_date += datetime.timedelta(days=1)
         else:
+            # pyrefly: ignore [missing-attribute]
             self.room_dates.all().delete()
 
-    def delete(self, *args, **kwargs):
+    def delete(self, using=None, keep_parents=False):
+        # pyrefly: ignore [missing-attribute]
         self.room_dates.all().delete()
-        super().delete(*args, **kwargs)
+        return super().delete(using=using, keep_parents=keep_parents)
+
 
