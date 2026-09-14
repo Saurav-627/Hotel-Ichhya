@@ -1,0 +1,61 @@
+event_types:
+  - name: Luxury Weddings & Receptions
+    slug: luxury-weddings
+    icon: fa-ring
+    is_featured: true
+    is_active: true
+    display_order: 1
+    description: "Opulent wedding celebrations and lavish banquets crafted with royal hospitality, exquisite decor, and bespoke multi-cuisine menus."
+    venues:
+      - Janaki Hall
+  - name: Corporate Conferences & Summits
+    slug: corporate-conferences
+    icon: fa-handshake
+    is_featured: false
+    is_active: true
+    display_order: 2
+    description: "State-of-the-art conference facilities with cutting-edge audiovisual systems, seamless connectivity, and executive catering."
+    venues:
+      - Janaki Hall
+      - Jyamire Hall
+  - name: Gala Dinners & Banquets
+    slug: gala-dinners
+    icon: fa-champagne-glasses
+    is_featured: false
+    is_active: true
+    display_order: 3
+    description: "Unforgettable evening galas, corporate milestone celebrations, and award nights hosted in grand architectural style."
+    venues:
+      - Janaki Hall
+      - Jyamire Hall
+  - name: Workshops & Seminars
+    slug: workshops-seminars
+    icon: fa-chalkboard-user
+    is_featured: false
+    is_active: true
+    display_order: 4
+    description: "Focused professional training sessions, educational symposiums, and dynamic workshops equipped with modern presentation gear."
+    venues:
+      - Janaki Hall
+      - Jyamire Hall
+      - Balmiki Hall
+  - name: Boardroom & Executive Meetings
+    slug: executive-meetings
+    icon: fa-briefcase
+    is_featured: false
+    is_active: true
+    display_order: 5
+    description: "High-level deliberations in private, confidential, ergonomic, and fully-equipped executive boardroom settings."
+    venues:
+      - Narayani Hall
+      - Balmiki Hall
+  - name: Birthdays & Social Celebrations
+    slug: social-celebrations
+    icon: fa-cake-candles
+    is_featured: false
+    is_active: true
+    display_order: 6
+    description: "Joyous birthday celebrations, anniversaries, and family reunions with personalized party decor and festive menus."
+    venues:
+      - Janaki Hall
+      - Jyamire Hall

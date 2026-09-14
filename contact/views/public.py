@@ -16,6 +16,7 @@ from core.services.email_service import (
 )
 
 from ..models.branch import Branch
+from ..models.inquiry_category import InquiryCategory
 from ..models.newsletter import NewsletterSubscriber
 
 logger = logging.getLogger(__name__)
@@ -27,6 +28,7 @@ class ContactView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['branches'] = Branch.objects.filter(is_published=True).order_by('-is_main')
+        context['categories'] = InquiryCategory.objects.filter(is_active=True).order_by('display_order', 'name')
         return context
 
 

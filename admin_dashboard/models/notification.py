@@ -11,6 +11,8 @@ class Notification(models.Model):
         ('payment_success', 'Payment Received'),
         ('booking_confirmed', 'Booking Confirmed'),
         ('inquiry_received', 'Contact Inquiry Received'),
+        ('event_inquiry_received', 'Event Inquiry Received'),
+        ('dining_reservation_created', 'Dining Reservation Created'),
     )
 
     notification_type = models.CharField(

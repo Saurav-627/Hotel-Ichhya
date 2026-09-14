@@ -54,4 +54,12 @@ class HomeView(TemplateView):
         context['facilities'] = RoomFacility.objects.filter(is_featured=True)
         context['testimonials'] = Testimonial.objects.filter(is_featured=True, is_published=True)[:5]
         context['attractions'] = Attraction.objects.filter(is_active=True).order_by('order')[:6]
+
+        # Events & Banquets Spotlight in Hero Section
+        from conference.models import EventType
+        featured_events = list(EventType.objects.filter(is_featured=True, is_active=True).order_by('display_order'))
+        if not featured_events:
+            featured_events = list(EventType.objects.filter(is_active=True).order_by('display_order')[:1])
+        context['featured_events'] = featured_events
+
         return context

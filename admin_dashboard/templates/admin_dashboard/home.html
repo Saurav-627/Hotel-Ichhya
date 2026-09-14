@@ -104,18 +104,18 @@
     </div>
 
     <!-- Dining Bookings -->
-    <div class="custom-card rounded-2xl p-5 flex items-center justify-between">
+    <a href="{% url 'admin_dashboard:dining_dashboard' %}?tab=reservations" class="custom-card rounded-2xl p-5 flex items-center justify-between hover:border-luxuryGold-500/40 transition group">
         <div>
             <p class="text-xs text-neutral-400 uppercase font-semibold">Dining Bookings Today</p>
             <p class="text-xl font-bold text-neutral-900 dark:text-neutral-100 mt-1">{{ dining_reservations_today_count }}</p>
         </div>
-        <div class="h-10 w-10 bg-pink-500/10 text-pink-500 rounded-lg flex items-center justify-center">
+        <div class="h-10 w-10 bg-pink-500/10 text-pink-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition">
             <i class="fa-solid fa-utensils"></i>
         </div>
-    </div>
+    </a>
 
-    <!-- Event/Contact inquiries -->
-    <a href="{% url 'admin_dashboard:contact_dashboard' %}?tab=inquiries" class="custom-card rounded-2xl p-5 flex items-center justify-between hover:border-luxuryGold-500/40 transition group">
+    <!-- Event/Contact/Dining inquiries -->
+    <a href="{% if unread_dining_count > 0 and unread_contact_count == 0 and unread_event_count == 0 %}{% url 'admin_dashboard:dining_dashboard' %}?tab=reservations{% elif unread_event_count > 0 and unread_contact_count == 0 %}{% url 'admin_dashboard:conference_dashboard' %}?tab=inquiries{% else %}{% url 'admin_dashboard:contact_dashboard' %}?tab=inquiries{% endif %}" class="custom-card rounded-2xl p-5 flex items-center justify-between hover:border-luxuryGold-500/40 transition group">
         <div>
             <p class="text-xs text-neutral-400 uppercase font-semibold">New Unread Inquiries</p>
             <p class="text-xl font-bold text-neutral-900 dark:text-neutral-100 mt-1">{{ unread_inquiries_count }}</p>
@@ -500,9 +500,10 @@
                 <div class="relative">
                     <!-- Dot status icon -->
                     <span class="absolute -left-[31px] top-1.5 h-4.5 w-4.5 rounded-full border border-neutral-200 dark:border-neutral-950 flex items-center justify-center text-[10px] shadow-sm
-                                 {% if act.type == 'booking' %}bg-blue-500 text-white{% elif act.type == 'payment' %}bg-emerald-500 text-white{% else %}bg-purple-500 text-white{% endif %}">
+                                 {% if act.type == 'booking' %}bg-blue-500 text-white{% elif act.type == 'payment' %}bg-emerald-500 text-white{% elif act.type == 'dining' %}bg-pink-500 text-white{% else %}bg-purple-500 text-white{% endif %}">
                         {% if act.type == 'booking' %}<i class="fa-solid fa-check"></i>
                         {% elif act.type == 'payment' %}<i class="fa-solid fa-dollar-sign"></i>
+                        {% elif act.type == 'dining' %}<i class="fa-solid fa-utensils"></i>
                         {% else %}<i class="fa-solid fa-envelope"></i>{% endif %}
                     </span>
                     

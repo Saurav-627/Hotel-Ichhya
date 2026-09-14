@@ -7,7 +7,7 @@ class EventVenue(models.Model):
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     description = models.TextField()
     capacity = models.IntegerField(help_text="Max seating/floating capacity")
-    layout_options = models.TextField(help_text="e.g. Theatre: 300, Classroom: 150, Banquet: 200")
+    layout_options = models.TextField(blank=True, default="", help_text="e.g. Theatre: 300, Classroom: 150, Banquet: 200")
     base_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, help_text="Legacy fallback price")
     image = models.ImageField(
         upload_to=UploadTo('conference'),
@@ -16,6 +16,28 @@ class EventVenue(models.Model):
         validators=[ValidateFileSize(2)]
     )
     is_active = models.BooleanField(default=True)
+    is_featured = models.BooleanField(default=False, help_text="Feature this hall on homepage")
+    event_types = models.ManyToManyField(
+        'conference.EventType',
+        blank=True,
+        related_name='venues',
+        help_text="Select event categories / occasions hosted in this banquet venue hall"
+    )
+    available_addons = models.ManyToManyField(
+        'booking.Addon',
+        blank=True,
+        related_name='event_venues',
+        limit_choices_to={'applies_to__in': ['events', 'both']},
+        help_text="Select complimentary add-on services included with this venue package"
+    )
+    allow_custom_addons = models.BooleanField(
+        default=True,
+        help_text="Allow guests to select optional add-on services in the proposal inquiry form"
+    )
+
+    @property
+    def included_addons(self):
+        return self.available_addons.all()
 
     def set_active_currency(self, currency_code):
         self._active_currency_code = currency_code
@@ -47,6 +69,11 @@ class EventVenue(models.Model):
 
     @property
     def parsed_layouts(self):
+        # Prefer structured VenueLayout records if present
+        structured = list(self.layouts.filter(is_active=True).order_by('display_order', 'name'))
+        if structured:
+            return [{'id': l.id, 'name': l.name, 'value': f"{l.capacity} pax", 'capacity': l.capacity} for l in structured]
+
         if not self.layout_options:
             return []
         
@@ -72,6 +99,42 @@ class EventVenue(models.Model):
                 else:
                     results.append({'name': item, 'value': 'Available'})
         return results
+
+    @property
+    def suitable_event_slugs(self):
+        if self.pk and self.event_types.exists():
+            return list(self.event_types.filter(is_active=True).values_list('slug', flat=True))
+        slugs = []
+        layouts = [l['name'].lower() for l in self.parsed_layouts]
+        # Weddings & Receptions (Banquet / Round Table, or capacity >= 80)
+        if any(k in layouts for k in ['banquet', 'round table']) or self.capacity >= 80:
+            slugs.append('luxury-weddings')
+        # Conferences & Summits (Theatre / Classroom and capacity >= 40, or capacity >= 100)
+        if (any(k in layouts for k in ['theatre', 'classroom']) and self.capacity >= 40) or self.capacity >= 100:
+            slugs.append('corporate-conferences')
+        # Gala Dinners & Banquets (Banquet / Round Table, or capacity >= 60)
+        if any(k in layouts for k in ['banquet', 'round table']) or self.capacity >= 60:
+            slugs.append('gala-dinners')
+        # Workshops & Seminars (Classroom / U-Shape / Theatre / Board Room)
+        if any(k in layouts for k in ['classroom', 'u-shape', 'theatre', 'board room']):
+            slugs.append('workshops-seminars')
+        # Boardroom & Executive Meetings (Board Room / U-Shape / Classroom and capacity <= 60)
+        if any(k in layouts for k in ['board room', 'u-shape']) and self.capacity <= 60:
+            slugs.append('executive-meetings')
+        # Social Celebrations
+        if self.capacity >= 15:
+            slugs.append('social-celebrations')
+        return slugs
+
+    @property
+    def suitable_event_slugs_json(self):
+        import json
+        return json.dumps(self.suitable_event_slugs)
+
+    @property
+    def suitable_event_slugs_js(self):
+        quoted = [f"'{s}'" for s in self.suitable_event_slugs]
+        return f"[{', '.join(quoted)}]"
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -100,5 +163,9 @@ class EventVenue(models.Model):
             first_img = self.images.filter(image__isnull=False).exclude(image='').first()
             if first_img and first_img.image:
                 return first_img.image.url
-        return None
+        try:
+            from django.templatetags.static import static
+            return static('images/conference/default_venue.jpg')
+        except Exception:
+            return '/static/images/conference/default_venue.jpg'
 

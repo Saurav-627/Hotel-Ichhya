@@ -1,5 +1,6 @@
 from decimal import Decimal
 from django.test import TestCase
+from django.urls import reverse
 from django.contrib.auth import get_user_model
 
 from rooms.models.room import Room
@@ -72,3 +73,83 @@ class AdminDashboardRoomFormTests(TestCase):
         self.assertEqual(room.room_number, 'SUITE-501')
         self.assertEqual(room.total_rooms, 2)
         self.assertEqual(room.included_addons.count(), 2)
+
+
+class AdminNotificationNavigationTests(TestCase):
+    def setUp(self):
+        from django.test import Client
+        from conference.models import EventVenue, EventType
+        from admin_dashboard.models.notification import Notification
+
+        self.client = Client()
+        self.admin = User.objects.create_superuser(
+            username="admin_notif_tester",
+            email="notif@hotelichchha.com",
+            password="password123",
+            is_staff=True,
+            is_superuser=True
+        )
+        self.client.force_login(self.admin)
+        self.venue = EventVenue.objects.create(
+            name="Emerald Hall",
+            slug="emerald-hall",
+            capacity=200,
+            is_active=True
+        )
+        self.event_type = EventType.objects.create(
+            name="Conference Gala",
+            slug="conference-gala",
+            is_active=True
+        )
+        self.venue.event_types.add(self.event_type)
+
+    def test_event_inquiry_submission_creates_correct_notification_link(self):
+        from datetime import date, timedelta
+        from django.urls import reverse
+        from admin_dashboard.models.notification import Notification
+
+        url = reverse('conference:venue_detail', kwargs={'slug': self.venue.slug})
+        post_data = {
+            'name': 'Bikash Adhikari',
+            'email': 'bikash@example.com',
+            'phone': '9841999888',
+            'event_type': self.event_type.id,
+            'event_date': (date.today() + timedelta(days=14)).strftime('%Y-%m-%d'),
+            'guest_count': 80,
+            'notes': 'Looking for gala banquet setup.'
+        }
+        response = self.client.post(url, data=post_data, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        # Verify notification created
+        notif = Notification.objects.filter(title__contains='Bikash Adhikari').first()
+        self.assertIsNotNone(notif)
+        self.assertEqual(notif.notification_type, 'event_inquiry_received')
+        self.assertIn('/admin/conference/?tab=inquiries', notif.link_url)
+
+    def test_admin_header_displays_event_inquiry_banner_with_conference_link(self):
+        from datetime import date, timedelta
+        from conference.models import EventInquiry
+
+        # Create a pending event inquiry
+        EventInquiry.objects.create(
+            venue=self.venue,
+            event_type=self.event_type,
+            name="Aarav KC",
+            email="aarav@example.com",
+            phone="9851234567",
+            event_date=date.today() + timedelta(days=20),
+            guest_count=50,
+            status='pending'
+        )
+
+        response = self.client.get(reverse('admin_dashboard:home'))
+        self.assertEqual(response.status_code, 200)
+
+        # Context processor counts
+        self.assertGreater(response.context['unread_event_count'], 0)
+        self.assertEqual(response.context['unread_contact_count'], 0)
+
+        # HTML assertions: banner links to conference dashboard with ?tab=inquiries
+        self.assertContains(response, 'href="/admin/conference/?tab=inquiries"')
+        self.assertContains(response, 'New Event Inquiry')

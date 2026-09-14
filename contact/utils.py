@@ -75,15 +75,33 @@ def send_inquiry_notification_email(inquiry_type, inquiry_obj):
                 'logo_url': logo_url,
             })
         else:  # event
-            subject = f"[Event Inquiry] {inquiry_obj.venue.name} - {inquiry_obj.name}"
+            event_type_name = inquiry_obj.event_type.name if getattr(inquiry_obj, 'event_type', None) else "Event"
+            subject = f"[{event_type_name} Inquiry] {inquiry_obj.venue.name} - {inquiry_obj.name}"
+            
+            time_window = ""
+            if getattr(inquiry_obj, 'start_time', None) or getattr(inquiry_obj, 'end_time', None):
+                s = inquiry_obj.start_time.strftime('%H:%M') if inquiry_obj.start_time else "TBD"
+                e = inquiry_obj.end_time.strftime('%H:%M') if inquiry_obj.end_time else "TBD"
+                time_window = f" | Time: {s} - {e}"
+
+            layout_info = f" | Layout: {inquiry_obj.preferred_layout.name}" if getattr(inquiry_obj, 'preferred_layout', None) else ""
+            catering_info = "Yes" if getattr(inquiry_obj, 'catering_required', False) else "No"
+            addons_list = ", ".join([a.name for a in inquiry_obj.addons.all()]) if getattr(inquiry_obj, 'pk', None) and hasattr(inquiry_obj, 'addons') else ""
+
+            details_msg = f"Event Category: {event_type_name}\nCatering Required: {catering_info}"
+            if addons_list:
+                details_msg += f"\nAdd-on Services: {addons_list}"
+            if getattr(inquiry_obj, 'notes', None):
+                details_msg += f"\n\nClient Notes:\n{inquiry_obj.notes}"
+
             html_content = render_to_string('emails/inquiry_notification_email.html', {
-                'inquiry_type': 'Event & Banquets Inquiry',
+                'inquiry_type': f'{event_type_name} Proposal Request',
                 'name': inquiry_obj.name,
                 'email': inquiry_obj.email,
                 'phone': inquiry_obj.phone,
-                'category': f"Venue: {inquiry_obj.venue.name}",
-                'subject': f"Event Date: {inquiry_obj.event_date} ({inquiry_obj.guest_count} Guests)",
-                'message': inquiry_obj.notes or "No additional notes provided.",
+                'category': f"Venue: {inquiry_obj.venue.name}{layout_info}",
+                'subject': f"Event Date: {inquiry_obj.event_date}{time_window} ({inquiry_obj.guest_count} Guests)",
+                'message': details_msg,
                 'created_at': inquiry_obj.created_at,
                 'hotel_settings': settings,
                 'logo_url': logo_url,

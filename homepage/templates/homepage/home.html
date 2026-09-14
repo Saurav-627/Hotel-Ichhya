@@ -1,15 +1,17 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<!-- HERO SLIDESHOW SECTION -->
-<section class="relative h-[65vh] sm:h-[80vh] lg:h-[90vh] overflow-hidden" x-data="{ 
-    activeSlide: 0, 
-    slidesCount: {{ hero_slides|length|default:3 }},
-    next() { this.activeSlide = (this.activeSlide + 1) % this.slidesCount },
-    prev() { this.activeSlide = (this.activeSlide - 1 + this.slidesCount) % this.slidesCount }
-}" x-init="setInterval(() => next(), 8000)">
+<!-- HERO SLIDESHOW SECTION (PARTITIONED) -->
+<section class="relative min-h-[560px] sm:min-h-[600px] lg:min-h-[640px] overflow-hidden flex items-center" 
+         x-data="{ 
+             activeSlide: 0, 
+             slidesCount: {{ hero_slides|length|default:1 }},
+             next() { this.activeSlide = (this.activeSlide + 1) % this.slidesCount },
+             prev() { this.activeSlide = (this.activeSlide - 1 + this.slidesCount) % this.slidesCount }
+         }" 
+         x-init="if (slidesCount > 1) setInterval(() => next(), 8000)">
     
-    <!-- Hero Slides List -->
+    <!-- Hero Background Images List -->
     {% for slide in hero_slides %}
     <div x-show="activeSlide === {{ forloop.counter0 }}" 
          x-transition:enter="transition ease-out duration-1000"
@@ -22,68 +24,281 @@
          style="background-image: url('{% if slide.background_image %}{{ slide.background_image.url }}{% else %}https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1920{% endif %}'); display: none;">
         
         <!-- Overlay -->
-        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30" style="opacity: {{ slide.overlay_opacity|default:0.60 }};"></div>
-        
-        <!-- Hero Caption -->
-        <div class="absolute inset-0 flex items-center justify-center text-center p-4 z-10">
-            <div class="max-w-4xl space-y-4 sm:space-y-6">
-                <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-black/60 border border-luxuryGold-500/40 backdrop-blur-md">
-                    <span class="w-1.5 h-1.5 rounded-full bg-luxuryGold-400 animate-pulse"></span>
-                    <span class="text-xs sm:text-sm font-semibold uppercase tracking-widest text-luxuryGold-300 whitespace-nowrap">
-                        {{ slide.subtitle }}
-                    </span>
-                </div>
-                <h1 class="animate__animated animate__fadeInUp font-luxury-title text-3xl sm:text-6xl lg:text-7xl font-bold text-white leading-tight drop-shadow-2xl">
-                    {{ slide.title }}
-                </h1>
-                
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-4 sm:pt-6 animate__animated animate__zoomIn">
-                    {% if slide.cta_text %}
-                    <a href="{{ slide.cta_url }}" 
-                       class="w-full sm:w-auto px-7 sm:px-9 py-3 sm:py-3.5 text-xs font-bold uppercase tracking-widest rounded-full border border-luxuryGold-400 bg-luxuryGold-500 text-black hover:bg-luxuryGold-400 transition-all duration-300 shadow-xl gold-glow text-center whitespace-nowrap">
-                        {{ slide.cta_text }}
-                    </a>
-                    {% endif %}
-                    {% if slide.cta2_text %}
-                    <a href="{{ slide.cta2_url }}" 
-                       class="w-full sm:w-auto px-7 sm:px-9 py-3 sm:py-3.5 text-xs font-bold uppercase tracking-widest rounded-full border border-white/80 text-white hover:bg-white hover:text-black transition-all duration-300 text-center whitespace-nowrap backdrop-blur-sm">
-                        {{ slide.cta2_text }}
-                    </a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/35" style="opacity: {{ slide.overlay_opacity|default:0.65 }};"></div>
     </div>
     {% empty %}
-    <!-- Default Fallback Slide if no database record exists -->
     <div class="absolute inset-0 w-full h-full bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1920');">
-        <div class="absolute inset-0 bg-black/60"></div>
-        <div class="absolute inset-0 flex items-center justify-center text-center p-4 z-10">
-            <div class="max-w-4xl space-y-4 sm:space-y-6">
-                <span class="text-xs sm:text-sm font-semibold uppercase tracking-widest text-luxuryGold-300 whitespace-nowrap">Welcome to Paradise</span>
-                <h1 class="font-luxury-title text-3xl sm:text-6xl lg:text-7xl font-bold text-white">Experience Elite Sanctuary</h1>
-                <p class="text-xs sm:text-base text-white/80 max-w-xl mx-auto">Unparalleled luxury and state-of-the-art service in Bara, Nepal.</p>
-                <div class="pt-4 sm:pt-6">
-                    <a href="{% url 'rooms:room_list' %}" class="inline-block px-8 py-3.5 text-xs font-bold uppercase tracking-widest rounded-full bg-luxuryGold-500 text-black hover:bg-luxuryGold-400 gold-glow transition-all whitespace-nowrap">Explore Rooms</a>
-                </div>
-            </div>
-        </div>
+        <div class="absolute inset-0 bg-black/65"></div>
     </div>
     {% endfor %}
 
-    <!-- Carousel Controls -->
+    <!-- Partitioned Foreground Grid: Left (Hotel) + Right (Featured Event Spotlight) -->
+    <div class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 sm:pt-10 sm:pb-20 lg:pt-12 lg:pb-24">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+
+            <!-- LEFT PARTITION: Hotel Explore & Headings (7 cols) -->
+            <div class="lg:col-span-7 space-y-5 sm:space-y-6 text-center lg:text-left">
+                {% for slide in hero_slides %}
+                <div x-show="activeSlide === {{ forloop.counter0 }}" 
+                     x-transition:enter="transition ease-out duration-600"
+                     x-transition:enter-start="opacity-0 translate-y-3"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     class="space-y-4 sm:space-y-5"
+                     style="display: none;">
+                    
+                    <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-black/60 border border-luxuryGold-500/40 backdrop-blur-md shadow-lg">
+                        <span class="text-luxuryGold-400 text-xs tracking-widest font-bold">★★★★★</span>
+                        <span class="text-xs sm:text-sm font-semibold uppercase tracking-widest text-luxuryGold-300 whitespace-nowrap">
+                            {{ slide.subtitle|default:"Hotel Ichchha" }} • 5-Star Luxury Resort
+                        </span>
+                    </div>
+
+                    <h1 class="font-luxury-title text-3xl sm:text-5xl lg:text-5xl xl:text-6xl font-bold text-white leading-[1.12] drop-shadow-2xl">
+                        {{ slide.title }}
+                    </h1>
+
+                    <p class="text-base sm:text-lg text-neutral-200 max-w-2xl leading-relaxed font-normal drop-shadow">
+                        Immerse yourself in authentic Nepalese hospitality, opulent suites, exquisite fine dining, and grand event halls in Simara.
+                    </p>
+                    
+                    <!-- Luxury Highlights Bar -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 max-w-2xl">
+                        <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 border border-white/15 backdrop-blur-md">
+                            <i class="fa-solid fa-bed text-luxuryGold-400 text-sm"></i>
+                            <span class="text-xs font-semibold text-white truncate">100+ Suites</span>
+                        </div>
+                        <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 border border-white/15 backdrop-blur-md">
+                            <i class="fa-solid fa-champagne-glasses text-luxuryGold-400 text-sm"></i>
+                            <span class="text-xs font-semibold text-white truncate">4 Banquets</span>
+                        </div>
+                        <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 border border-white/15 backdrop-blur-md">
+                            <i class="fa-solid fa-utensils text-luxuryGold-400 text-sm"></i>
+                            <span class="text-xs font-semibold text-white truncate">Fine Dining</span>
+                        </div>
+                        <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 border border-white/15 backdrop-blur-md">
+                            <i class="fa-solid fa-water-ladder text-luxuryGold-400 text-sm"></i>
+                            <span class="text-xs font-semibold text-white truncate">Pool &amp; Spa</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-3.5 pt-2">
+                        <a href="{{ slide.cta_url|default:'/rooms/' }}" 
+                           class="px-8 sm:px-10 py-3.5 sm:py-4 text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl border border-luxuryGold-400 bg-luxuryGold-500 text-neutral-950 hover:bg-luxuryGold-400 transition-all duration-300 shadow-xl gold-glow text-center whitespace-nowrap flex items-center gap-2.5">
+                            <span>{{ slide.cta_text|default:"Book Your Stay" }}</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </a>
+                        <a href="{% url 'conference:venue_list' %}" 
+                           class="px-7 sm:px-9 py-3.5 sm:py-4 text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl border border-white/70 text-white hover:bg-white hover:text-black transition-all duration-300 text-center whitespace-nowrap backdrop-blur-sm flex items-center gap-2">
+                            <span>{{ slide.cta2_text|default:"Banquet Venues" }}</span>
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="space-y-4 sm:space-y-5">
+                    <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-black/60 border border-luxuryGold-500/40 backdrop-blur-md shadow-lg">
+                        <span class="text-luxuryGold-400 text-xs tracking-widest font-bold">★★★★★</span>
+                        <span class="text-xs sm:text-sm font-semibold uppercase tracking-widest text-luxuryGold-300 whitespace-nowrap">Welcome to Paradise • 5-Star Resort</span>
+                    </div>
+                    <h1 class="font-luxury-title text-3xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">Experience Elite Sanctuary</h1>
+                    <p class="text-base sm:text-lg text-neutral-200 max-w-2xl">Unparalleled luxury and state-of-the-art service in Bara, Nepal.</p>
+                    <div class="pt-2 flex flex-wrap gap-3.5">
+                        <a href="{% url 'rooms:room_list' %}" class="inline-flex items-center gap-2 px-8 py-3.5 text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl bg-luxuryGold-500 text-neutral-950 hover:bg-luxuryGold-400 gold-glow transition-all whitespace-nowrap shadow-xl">
+                            <span>Explore Rooms</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </a>
+                        <a href="{% url 'conference:venue_list' %}" class="inline-flex items-center gap-2 px-7 py-3.5 text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl border border-white/70 text-white hover:bg-white hover:text-black transition-all whitespace-nowrap">
+                            <span>Explore Venues</span>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- RIGHT PARTITION: Event Branding Spotlight (5 cols) -->
+            {% if featured_events %}
+            <div class="lg:col-span-5 w-full"
+                 x-data="{
+                     activeEvent: 0,
+                     totalEvents: {{ featured_events|length }},
+                     touchStartX: 0,
+                     touchStartY: 0,
+                     timer: null,
+                     nextEvent() { 
+                         this.activeEvent = (this.activeEvent + 1) % this.totalEvents;
+                         this.restartAutoSwipe();
+                     },
+                     prevEvent() { 
+                         this.activeEvent = (this.activeEvent - 1 + this.totalEvents) % this.totalEvents;
+                         this.restartAutoSwipe();
+                     },
+                     goToEvent(idx) {
+                         this.activeEvent = idx;
+                         this.restartAutoSwipe();
+                     },
+                     handleTouchStart(e) { 
+                         this.touchStartX = e.touches[0].clientX;
+                         this.touchStartY = e.touches[0].clientY;
+                     },
+                     handleTouchEnd(e) { 
+                         const diffX = this.touchStartX - e.changedTouches[0].clientX;
+                         const diffY = this.touchStartY - e.changedTouches[0].clientY;
+                         if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+                             if (diffX > 0) this.nextEvent();
+                             else this.prevEvent();
+                         }
+                     },
+                     startAutoSwipe() {
+                         this.stopAutoSwipe();
+                         if (this.totalEvents > 1) {
+                             this.timer = setInterval(() => this.nextEvent(), 5000);
+                         }
+                     },
+                     stopAutoSwipe() {
+                         if (this.timer) {
+                             clearInterval(this.timer);
+                             this.timer = null;
+                         }
+                     },
+                     restartAutoSwipe() {
+                         this.stopAutoSwipe();
+                         this.startAutoSwipe();
+                     }
+                 }"
+                 x-init="startAutoSwipe()"
+                 @mouseenter="stopAutoSwipe()"
+                 @mouseleave="startAutoSwipe()"
+                 @touchstart.passive="handleTouchStart($event)"
+                 @touchend.passive="handleTouchEnd($event)">
+
+                <!-- Luxury Glassmorphism Spotlight Card with Authentic Visual Banner -->
+                <div class="relative rounded-3xl border-2 border-luxuryGold-500/50 bg-black/90 backdrop-blur-2xl shadow-2xl overflow-hidden group">
+                    <!-- Ambient gold glow effect -->
+                    <div class="absolute -top-14 -right-14 w-48 h-48 bg-luxuryGold-500/25 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="absolute -bottom-14 -left-14 w-48 h-48 bg-luxuryGold-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+                    <!-- Eyebrow Bar over Photo (Fixed Header across slides) -->
+                    <div class="absolute top-3.5 inset-x-4 flex items-center justify-between z-20 pointer-events-none">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/75 border border-luxuryGold-500/50 backdrop-blur-md shadow pointer-events-auto">
+                            <span class="flex h-2 w-2 relative">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-luxuryGold-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-luxuryGold-500"></span>
+                            </span>
+                            <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-luxuryGold-300">
+                                Upcoming &amp; Featured Occasion
+                            </span>
+                        </div>
+
+                        <!-- Mini Navigation Controls (Shown if multiple featured events) -->
+                        <template x-if="totalEvents > 1">
+                            <div class="flex items-center gap-1.5 bg-black/75 px-2.5 py-1 rounded-full border border-white/20 backdrop-blur-md pointer-events-auto">
+                                <span class="text-[11px] text-neutral-300 font-mono select-none" x-text="(activeEvent + 1) + '/' + totalEvents"></span>
+                                <button @click="prevEvent()" type="button" class="w-5 h-5 rounded-full border border-white/30 bg-white/10 hover:bg-luxuryGold-500 hover:text-black text-white flex items-center justify-center text-[9px] transition cursor-pointer" title="Previous event">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                                <button @click="nextEvent()" type="button" class="w-5 h-5 rounded-full border border-white/30 bg-white/10 hover:bg-luxuryGold-500 hover:text-black text-white flex items-center justify-center text-[9px] transition cursor-pointer" title="Next event">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Horizontal Carousel Track -->
+                    <div class="overflow-hidden w-full">
+                        <div class="flex transition-transform duration-500 ease-out will-change-transform"
+                             :style="'transform: translateX(-' + (activeEvent * 100) + '%)'">
+                            {% for ev in featured_events %}
+                            <div class="w-full shrink-0 flex flex-col justify-between">
+                                <!-- Visual Image Header Banner -->
+                                <div class="relative h-44 sm:h-48 w-full bg-cover bg-center overflow-hidden"
+                                     style="background-image: url('{{ ev.showcase_image_url }}');">
+                                    <!-- Rich gradient overlay for high contrast -->
+                                    <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/50 to-black/60"></div>
+
+                                    <!-- Event Title & Icon over Bottom of Banner -->
+                                    <div class="absolute bottom-3.5 inset-x-4 flex items-end gap-3 z-10">
+                                        <div class="w-12 h-12 rounded-xl bg-luxuryGold-500 text-neutral-950 flex items-center justify-center text-xl shrink-0 shadow-lg shadow-luxuryGold-900/50 font-bold">
+                                            <i class="fa-solid {{ ev.fontawesome_icon|default:ev.icon|default:'fa-calendar-check' }}"></i>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <span class="text-[10px] font-bold uppercase tracking-widest text-luxuryGold-300 block mb-0.5">Hotel Ichchha Signature</span>
+                                            <h3 class="font-luxury-title text-lg sm:text-xl lg:text-2xl font-bold text-white truncate drop-shadow-md">
+                                                {{ ev.name }}
+                                            </h3>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card Body Content -->
+                                <div class="p-4 sm:p-5 space-y-3.5 relative z-10 flex-1 flex flex-col justify-between">
+                                    <!-- Event Description -->
+                                    <p class="text-xs sm:text-sm text-neutral-200 leading-relaxed line-clamp-2 font-normal">
+                                        {{ ev.description }}
+                                    </p>
+
+                                    <!-- Highlights Cards (Proper, legible dimensions and clear hierarchy) -->
+                                    <div class="grid grid-cols-3 gap-2 pt-0.5">
+                                        <div class="p-2.5 rounded-xl bg-white/5 border border-luxuryGold-500/25 text-center space-y-1">
+                                            <i class="fa-solid fa-users text-luxuryGold-400 text-sm block"></i>
+                                            <span class="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">Capacity</span>
+                                            <span class="text-xs font-bold text-white block truncate">Up to {{ ev.max_capacity }} Pax</span>
+                                        </div>
+                                        <div class="p-2.5 rounded-xl bg-white/5 border border-luxuryGold-500/25 text-center space-y-1">
+                                            <i class="fa-solid fa-landmark text-luxuryGold-400 text-sm block"></i>
+                                            <span class="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">Venues</span>
+                                            <span class="text-xs font-bold text-white block truncate">{{ ev.matching_venues_count|default:4 }} Grand Halls</span>
+                                        </div>
+                                        <div class="p-2.5 rounded-xl bg-white/5 border border-luxuryGold-500/25 text-center space-y-1">
+                                            <i class="fa-solid fa-wand-magic-sparkles text-luxuryGold-400 text-sm block"></i>
+                                            <span class="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">Service</span>
+                                            <span class="text-xs font-bold text-white block truncate">Full Staging &amp; AV</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action CTA -->
+                                    <div class="pt-1">
+                                        <a href="{% url 'conference:venue_list' %}?occasion={{ ev.slug }}" 
+                                           class="w-full py-3.5 px-5 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider text-center bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 transition-all duration-300 shadow-xl gold-glow flex items-center justify-center gap-2">
+                                            <span>Explore Venues &amp; Inquire</span>
+                                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Auto-swipe progress dots (shown if multiple) -->
+                    <template x-if="totalEvents > 1">
+                        <div class="flex items-center justify-center gap-2 pb-3.5 pt-1 relative z-10">
+                            {% for ev in featured_events %}
+                            <button @click="goToEvent({{ forloop.counter0 }})" 
+                                    class="h-1.5 rounded-full transition-all duration-300 cursor-pointer"
+                                    :class="activeEvent === {{ forloop.counter0 }} ? 'w-6 bg-luxuryGold-500' : 'w-1.5 bg-white/30 hover:bg-white/60'"
+                                    title="Go to slide {{ forloop.counter }}"></button>
+                            {% endfor %}
+                        </div>
+                    </template>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- Background Slider Controls (Subtle Desktop Arrows) -->
     {% if hero_slides %}
-    <button @click="prev()" class="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 p-2.5 sm:p-3.5 rounded-full border border-white/30 bg-black/50 hover:bg-black/80 text-white transition-all backdrop-blur-md cursor-pointer">
-        <i class="fa-solid fa-chevron-left text-xs sm:text-base"></i>
+    <button @click="prev()" class="hidden sm:flex absolute left-3 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full border border-white/30 bg-black/40 hover:bg-black/70 text-white transition-all backdrop-blur-md cursor-pointer items-center justify-center">
+        <i class="fa-solid fa-chevron-left text-xs"></i>
     </button>
-    <button @click="next()" class="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 p-2.5 sm:p-3.5 rounded-full border border-white/30 bg-black/50 hover:bg-black/80 text-white transition-all backdrop-blur-md cursor-pointer">
-        <i class="fa-solid fa-chevron-right text-xs sm:text-base"></i>
+    <button @click="next()" class="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full border border-white/30 bg-black/40 hover:bg-black/70 text-white transition-all backdrop-blur-md cursor-pointer items-center justify-center">
+        <i class="fa-solid fa-chevron-right text-xs"></i>
     </button>
     {% endif %}
 </section>
 
 <!-- REAL-TIME BOOKING SEARCH WIDGET -->
-<section class="relative hidden md:block max-w-6xl mx-auto px-4 -mt-10 sm:-mt-16 z-30 animate__animated animate__fadeInUp">
+<section class="relative hidden md:block max-w-6xl mx-auto px-4 -mt-10 sm:-mt-14 z-30 animate__animated animate__fadeInUp">
     <div class="rounded-2xl p-4 sm:p-8 border shadow-2xl backdrop-blur-xl"
          :class="{
              'bg-white/95 border-gray-200': currentTheme === 'light',
@@ -303,7 +518,7 @@
             <div class="text-2xl sm:text-3xl text-luxuryGold-500">
                 <i class="{{ fac.icon_class|default:'fa-solid fa-star' }}"></i>
             </div>
-            <h4 class="font-semibold text-xs sm:text-sm whitespace-nowrap">{{ fac.name }}</h4>
+            <h4 class="font-semibold text-xs sm:text-sm">{{ fac.name }}</h4>
         </div>
         {% empty %}
         <!-- Default Fallback Facilities -->
@@ -426,7 +641,6 @@
     </div>
 </section>
 {% endif %}
-
 <!-- TESTIMONIALS SECTION -->
 <section class="py-12 sm:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden" x-data="{ 
     activeIndex: 0, 

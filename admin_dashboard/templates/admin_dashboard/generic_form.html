@@ -14,9 +14,24 @@
         <form method="post" enctype="multipart/form-data" class="space-y-6">
             {% csrf_token %}
             
-            {% if form.non_field_errors %}
-            <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm">
-                {{ form.non_field_errors }}
+            {% if form.errors or price_formset.errors or layout_formset.errors or image_formset.errors or form.non_field_errors or price_formset.non_form_errors or layout_formset.non_form_errors or image_formset.non_form_errors %}
+            <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-sm flex items-start gap-3">
+                <i class="fa-solid fa-circle-exclamation text-base mt-0.5 shrink-0"></i>
+                <div class="space-y-1">
+                    <p class="font-bold">Please correct the highlighted errors below before saving:</p>
+                    {% if form.non_field_errors %}
+                        <div class="text-xs">{{ form.non_field_errors }}</div>
+                    {% endif %}
+                    {% if price_formset.non_form_errors %}
+                        <div class="text-xs font-semibold">Pricing: {{ price_formset.non_form_errors }}</div>
+                    {% endif %}
+                    {% if layout_formset.non_form_errors %}
+                        <div class="text-xs font-semibold">Seating Layouts: {{ layout_formset.non_form_errors }}</div>
+                    {% endif %}
+                    {% if image_formset.non_form_errors %}
+                        <div class="text-xs font-semibold">Image Gallery: {{ image_formset.non_form_errors }}</div>
+                    {% endif %}
+                </div>
             </div>
             {% endif %}
 
@@ -72,11 +87,20 @@
             {% if price_formset %}
             <!-- Multi-Currency Base Prices Formset -->
             <div class="p-6 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-950/20 mt-6 space-y-4">
-                <h3 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif pb-2 border-b border-neutral-200 dark:border-neutral-800">
-                    Multi-Currency Base Prices
-                </h3>
+                <div class="flex items-center justify-between pb-2 border-b border-neutral-200 dark:border-neutral-800">
+                    <h3 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif">
+                        <i class="fa-solid fa-money-bill-wave text-luxuryGold-500 mr-2"></i>Multi-Currency Base Prices
+                    </h3>
+                    <span class="text-xs font-semibold text-rose-500 bg-rose-500/10 px-2.5 py-0.5 rounded-full">At least 1 required</span>
+                </div>
                 <p class="text-xs text-neutral-500 mb-4">Add or edit starting rental rates for each available currency.</p>
                 
+                {% if price_formset.non_form_errors %}
+                <div class="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-500 text-xs">
+                    {{ price_formset.non_form_errors }}
+                </div>
+                {% endif %}
+
                 {{ price_formset.management_form }}
                 <div class="space-y-4">
                     {% for p_form in price_formset %}
@@ -110,13 +134,75 @@
             </div>
             {% endif %}
 
+            {% if layout_formset %}
+            <!-- Venue Layouts Formset -->
+            <div class="p-6 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-950/20 mt-6 space-y-4">
+                <div class="flex items-center justify-between pb-2 border-b border-neutral-200 dark:border-neutral-800">
+                    <h3 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif">
+                        <i class="fa-solid fa-shapes text-luxuryGold-500 mr-2"></i>Seating Layout Configurations
+                    </h3>
+                    <span class="text-xs font-sans font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider bg-neutral-200/60 dark:bg-neutral-800 px-2.5 py-0.5 rounded-full">Optional</span>
+                </div>
+                <p class="text-xs text-neutral-500 mb-4">Define structured seating formats and capacities (e.g. Theatre: 400, Banquet: 250, Classroom: 150). Leave blank if not applicable.</p>
+
+                {% if layout_formset.non_form_errors %}
+                <div class="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-500 text-xs">
+                    {{ layout_formset.non_form_errors }}
+                </div>
+                {% endif %}
+
+                {{ layout_formset.management_form }}
+                <div class="space-y-3">
+                    {% for l_form in layout_formset %}
+                    <div class="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 space-y-3">
+                        {{ l_form.id }}
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Layout Name</label>
+                                {{ l_form.name }}
+                                {% if l_form.name.errors %}<div class="text-rose-500 text-xs mt-1 font-medium">{{ l_form.name.errors }}</div>{% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">Capacity (Pax)</label>
+                                {{ l_form.capacity }}
+                                {% if l_form.capacity.errors %}<div class="text-rose-500 text-xs mt-1 font-medium">{{ l_form.capacity.errors }}</div>{% endif %}
+                            </div>
+                            <div class="flex items-center gap-4 py-2">
+                                <label class="relative inline-flex items-center gap-2 cursor-pointer">
+                                    {{ l_form.is_active }}
+                                    <div class="w-9 h-5 bg-neutral-200 rounded-full peer peer-focus:outline-none peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-luxuryGold-500"></div>
+                                    <span class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Active</span>
+                                </label>
+                                {% if layout_formset.can_delete and l_form.instance.pk %}
+                                <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-rose-500">
+                                    {{ l_form.DELETE }}
+                                    <span>Delete</span>
+                                </label>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
             {% if image_formset %}
             <!-- Image Gallery Formset -->
             <div class="p-6 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-950/20 mt-6 space-y-4">
-                <h3 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif pb-2 border-b border-neutral-200 dark:border-neutral-800">
-                    <i class="fa-solid fa-images text-luxuryGold-500 mr-2"></i>Image Gallery
-                </h3>
+                <div class="flex items-center justify-between pb-2 border-b border-neutral-200 dark:border-neutral-800">
+                    <h3 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif">
+                        <i class="fa-solid fa-images text-luxuryGold-500 mr-2"></i>Image Gallery
+                    </h3>
+                    <span class="text-xs font-sans font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider bg-neutral-200/60 dark:bg-neutral-800 px-2.5 py-0.5 rounded-full">Optional</span>
+                </div>
                 <p class="text-xs text-neutral-500 mb-4">Upload multiple gallery images. These will display as an auto-sliding carousel on the public page.</p>
+
+                {% if image_formset.non_form_errors %}
+                <div class="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-500 text-xs">
+                    {{ image_formset.non_form_errors }}
+                </div>
+                {% endif %}
 
                 {{ image_formset.management_form }}
                 <div class="space-y-3">

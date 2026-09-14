@@ -207,6 +207,16 @@ class DashboardHomeView(StaffRequiredMixin, TemplateView):
                 'time': c.created_at,
                 'url': reverse('admin_dashboard:contact_dashboard') + "?tab=inquiries"
             })
+        recent_dining = DiningReservation.objects.select_related('venue').all().order_by('-created_at')[:5]
+        for d in recent_dining:
+            time_display = d.time.strftime('%I:%M %p') if hasattr(d.time, 'strftime') else str(d.time)
+            activities.append({
+                'type': 'dining',
+                'title': f"Dining reservation: {d.name}",
+                'desc': f"{d.venue.name} · {d.guests} guests · {d.date} at {time_display}",
+                'time': d.created_at,
+                'url': reverse('admin_dashboard:dining_dashboard') + "?tab=reservations"
+            })
             
         # Sort activities by time desc
         activities = sorted(activities, key=lambda x: x['time'], reverse=True)[:8]

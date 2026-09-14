@@ -142,11 +142,52 @@
                     <div class="text-center p-3 sm:p-4 rounded-xl border border-white/5 bg-black/10 flex flex-col items-center justify-center">
                         <i class="fa-solid fa-chair text-xl sm:text-2xl text-luxuryGold-500 mb-1.5"></i>
                         <h4 class="text-[10px] sm:text-xs font-bold uppercase tracking-wider opacity-60 break-words leading-tight">{{ layout.name }}</h4>
-                        <p class="text-xs sm:text-sm font-bold mt-1 text-luxuryGold-300 break-words leading-tight">{{ layout.value }}</p>
+                        <p class="text-xs sm:text-sm font-bold mt-1 text-luxuryGold-300 break-words leading-tight">
+                            {% if layout.capacity %}{{ layout.capacity }} pax{% else %}{{ layout.value }}{% endif %}
+                        </p>
                     </div>
                     {% endfor %}
                 </div>
             </div>
+
+            <!-- COMPLIMENTARY VENUE INCLUSIONS SECTION -->
+            {% if venue_inclusions %}
+            <div class="p-4 sm:p-6 rounded-2xl border space-y-4"
+                 :class="{ 'bg-gray-50 border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/10': currentTheme !== 'light' }">
+                <div class="flex items-center justify-between flex-wrap gap-2 border-b pb-3"
+                     :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 inline-flex items-center">
+                            <i class="fa-solid fa-gift mr-1.5 text-xs"></i> Package Inclusions
+                        </span>
+                        <h3 class="font-luxury-title text-base sm:text-lg font-bold">Included With This Venue</h3>
+                    </div>
+                    <span class="text-[11px] opacity-70">Complimentary with hall rental</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    {% for addon in venue_inclusions %}
+                    <div class="p-3 sm:p-3.5 rounded-xl border flex items-start gap-3 transition-colors duration-200"
+                         :class="{ 'bg-white border-gray-200 shadow-sm': currentTheme === 'light', 'bg-black/20 border-white/5 text-white': currentTheme !== 'light' }">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 text-sm">
+                            <i class="fa-solid {{ addon.icon|default:'fa-circle-check' }}"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between gap-1.5 flex-wrap">
+                                <h4 class="font-semibold text-xs sm:text-sm leading-snug break-words">{{ addon.name }}</h4>
+                                <span class="inline-flex items-center px-2 py-0.5 text-[9px] rounded-full font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 shrink-0">
+                                    Included Free
+                                </span>
+                            </div>
+                            {% if addon.description %}
+                            <p class="opacity-70 mt-1 leading-relaxed text-[11px]">{{ addon.description }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
         </div>
 
         <!-- EVENT INQUIRY FORM (1 COL) -->
@@ -161,7 +202,7 @@
                     Request Proposal
                 </h3>
                 
-                <p class="text-xs opacity-75 mb-6">Plan your meetings, seminars, and weddings. Fill in details and get custom quotes.</p>
+                <p class="text-xs opacity-75 mb-6">Plan your meetings, seminars, and weddings. Fill in details and receive a customized banquet quote.</p>
 
                 <!-- Django messages rendering -->
                 {% if messages %}
@@ -180,14 +221,29 @@
                 {% endif %}
 
                 <!-- Inquiry Form -->
-                <form method="POST" action="." class="space-y-4 text-xs"
+                <form method="POST" action="." class="space-y-4 text-xs" novalidate
                       x-data="{
+                          isSubmitting: false,
                           name: '{{ form.name.value|default:'' }}',
                           email: '{{ form.email.value|default:'' }}',
                           phone: '{{ form.phone.value|default:'' }}',
                           eventDate: '{{ form.event_date.value|default:'' }}',
+                          startTime: '{{ form.start_time.value|default:'' }}',
+                          endTime: '{{ form.end_time.value|default:'' }}',
                           guestCount: '{{ form.guest_count.value|default:'' }}',
+                          selectedLayout: '{{ form.preferred_layout.value|default:'' }}',
                           maxCapacity: {{ venue.capacity }},
+                          layoutCapacities: {
+                              {% for l in venue_layouts %}
+                              '{{ l.id }}': {{ l.capacity }},
+                              {% endfor %}
+                          },
+                          get effectiveCapacity() {
+                              if (this.selectedLayout && this.layoutCapacities[this.selectedLayout]) {
+                                  return this.layoutCapacities[this.selectedLayout];
+                              }
+                              return this.maxCapacity;
+                          },
                           errors: {},
                           validateName() {
                               if (!this.name.trim()) {
@@ -237,10 +293,17 @@
                           validateGuestCount() {
                               if (!this.guestCount || parseInt(this.guestCount) < 1) {
                                   this.errors.guestCount = 'Guest count must be at least 1.';
-                              } else if (parseInt(this.guestCount) > this.maxCapacity) {
-                                  this.errors.guestCount = `Guest count cannot exceed hall capacity of ${this.maxCapacity} guests.`;
+                              } else if (parseInt(this.guestCount) > this.effectiveCapacity) {
+                                  this.errors.guestCount = `Guest count cannot exceed setup capacity of ${this.effectiveCapacity} guests.`;
                               } else {
                                   this.errors.guestCount = '';
+                              }
+                          },
+                          validateTimes() {
+                              if (this.startTime && this.endTime && this.startTime >= this.endTime) {
+                                  this.errors.endTime = 'End time must be after start time.';
+                              } else {
+                                  this.errors.endTime = '';
                               }
                           },
                           validateForm(e) {
@@ -249,10 +312,13 @@
                               this.validatePhone();
                               this.validateEventDate();
                               this.validateGuestCount();
+                              this.validateTimes();
                               if (Object.values(this.errors).some(err => err !== '')) {
                                   if (e) e.preventDefault();
+                                  this.isSubmitting = false;
                                   return false;
                               }
+                              this.isSubmitting = true;
                               return true;
                           }
                       }"
@@ -295,6 +361,17 @@
                         {% endif %}
                     </div>
 
+                    <!-- Event Type Selection (Only shown if venue has assigned event categories) -->
+                    {% if form.fields.event_type.queryset.exists %}
+                    <div>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Event Category</label>
+                        {{ form.event_type }}
+                        {% if form.event_type.errors %}
+                        <p class="text-red-500 text-[10px] mt-1">{{ form.event_type.errors.as_text }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Event Date *</label>
@@ -308,8 +385,8 @@
                         </div>
                         <div>
                             <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Guest Count *</label>
-                            <input type="number" name="guest_count" min="1" max="{{ venue.capacity }}" required x-model="guestCount" @blur="validateGuestCount()" @input="validateGuestCount()"
-                                   placeholder="Expected Guests (Max {{ venue.capacity }})"
+                            <input type="number" name="guest_count" min="1" required x-model="guestCount" @blur="validateGuestCount()" @input="validateGuestCount()"
+                                   :placeholder="'Expected Guests (Max ' + effectiveCapacity + ')'"
                                    class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-1 bg-transparent text-inherit transition-colors"
                                    :class="errors.guestCount ? 'border-red-500 text-red-500 focus:ring-red-500' : 'focus:ring-luxuryGold-500'">
                             <p x-show="errors.guestCount" x-text="errors.guestCount" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
@@ -318,6 +395,63 @@
                             {% endif %}
                         </div>
                     </div>
+
+                    <!-- Event Time Window -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Start Time</label>
+                            <input type="time" name="start_time" x-model="startTime" @change="validateTimes()"
+                                   class="w-full px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-1 focus:ring-luxuryGold-500 bg-transparent text-inherit cursor-pointer">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">End Time</label>
+                            <input type="time" name="end_time" x-model="endTime" @change="validateTimes()"
+                                   class="w-full px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-1 focus:ring-luxuryGold-500 bg-transparent text-inherit cursor-pointer">
+                            <p x-show="errors.endTime" x-text="errors.endTime" class="text-[11px] text-red-500 font-semibold mt-1"></p>
+                        </div>
+                    </div>
+
+                    <!-- Seating Layout Selection -->
+                    {% if venue_layouts %}
+                    <div>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Preferred Seating Setup</label>
+                        <select name="preferred_layout" x-model="selectedLayout" @change="validateGuestCount()"
+                                class="w-full px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-1 focus:ring-luxuryGold-500 bg-transparent text-inherit cursor-pointer">
+                            <option value="">— Select Layout Setup (Optional) —</option>
+                            {% for l in venue_layouts %}
+                            <option value="{{ l.id }}">{{ l.name }} (Capacity: {{ l.capacity }} pax)</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    <!-- Optional Services / Add-ons Checkboxes -->
+                    {% if venue.allow_custom_addons and event_services %}
+                    <div class="space-y-2 pt-2 border-t border-neutral-200/60 dark:border-neutral-800/60">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-[10px] font-semibold uppercase tracking-wider opacity-80">Optional Event Add-on Services</label>
+                            <span class="text-[9px] font-bold text-luxuryGold-500 uppercase tracking-wider">Customizable</span>
+                        </div>
+                        <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-1">
+                            {% for s in event_services %}
+                            <label class="flex items-center gap-2 p-2 rounded-lg border border-neutral-200/80 dark:border-neutral-800/80 hover:border-luxuryGold-500/50 transition-colors cursor-pointer text-[11px]">
+                                <input type="checkbox" name="addons" value="{{ s.id }}" class="rounded text-luxuryGold-500 focus:ring-luxuryGold-500">
+                                <div class="flex-1 flex items-center justify-between">
+                                    <span class="font-medium flex items-center gap-1.5">
+                                        <i class="fa-solid {{ s.icon|default:'fa-circle-check' }} text-luxuryGold-500 text-[10px]"></i>
+                                        {{ s.name }}
+                                    </span>
+                                    {% if s.current_price and s.current_price > 0 %}
+                                    <span class="text-[10px] text-luxuryGold-500 font-bold">+{{ s.currency.symbol|default:'$' }} {{ s.current_price|floatformat:0 }}</span>
+                                    {% elif s.base_price and s.base_price > 0 %}
+                                    <span class="text-[10px] text-luxuryGold-500 font-bold">+{{ s.base_price|floatformat:0 }}</span>
+                                    {% endif %}
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
 
                     <div class="flex items-center gap-2 py-1">
                         {{ form.catering_required }}
@@ -332,12 +466,21 @@
                         {% endif %}
                     </div>
 
-                    <button type="submit" class="w-full py-3.5 mt-4 rounded-lg text-xs font-bold uppercase tracking-wider text-center cursor-pointer shadow-md"
+                    <button type="submit" :disabled="isSubmitting"
+                            class="w-full py-3.5 mt-4 rounded-lg text-xs font-bold uppercase tracking-wider text-center flex items-center justify-center gap-2 shadow-md transition-all duration-200"
                             :class="{
                                 'bg-amber-800 text-white': currentTheme === 'light',
-                                'bg-luxuryGold-500 text-black gold-glow': currentTheme !== 'light'
+                                'bg-luxuryGold-500 text-black gold-glow': currentTheme !== 'light',
+                                'opacity-70 cursor-not-allowed': isSubmitting,
+                                'cursor-pointer hover:opacity-95': !isSubmitting
                             }">
-                        Submit Proposal Inquiry
+                        <span x-show="isSubmitting" class="inline-flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-circle-notch fa-spin"></i>
+                            <span>Submitting Inquiry...</span>
+                        </span>
+                        <span x-show="!isSubmitting">
+                            Submit Proposal Inquiry
+                        </span>
                     </button>
                 </form>
             </div>

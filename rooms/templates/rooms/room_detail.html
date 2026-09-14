@@ -115,28 +115,28 @@
             <!-- Complimentary Inclusions Section -->
             {% if room.included_addons.exists %}
             <div class="space-y-2 sm:space-y-3">
-                <div class="flex flex-col gap-1.5 sm:gap-2">
-                    <span class="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider sm:tracking-widest bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30 inline-flex items-center w-fit" style="font-size: 9px; line-height: 1.2;">
-                        <i class="fa-solid fa-gift mr-1" style="font-size: 8px;"></i> Complimentary Inclusions
+                <div class="flex flex-wrap gap-1.5 sm:gap-2 mb-1">
+                    <span class="px-2 py-0.5 rounded-full text-xs font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30 inline-flex items-center w-fit">
+                        <i class="fa-solid fa-gift mr-1"></i> Complimentary Inclusions
                     </span>
-                    <h3 class="font-luxury-title text-base sm:text-lg lg:text-xl font-semibold">Included With Your Stay</h3>
+                    <h3 class="font-luxury-title text-sm sm:text-lg font-semibold">Included With Your Stay</h3>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 lg:gap-3">
                     {% for addon in room.included_addons.all %}
                     <div class="p-2 sm:p-2.5 md:p-3 rounded-lg sm:rounded-xl border flex items-start gap-2.5 sm:gap-3 transition duration-200"
                          :class="{ 'bg-white border-gray-200 shadow-sm': currentTheme === 'light', 'bg-[#161412] border-amber-900/10 text-white': currentTheme !== 'light' }">
-                        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 flex items-center justify-center shrink-0 mt-0.5" style="font-size: 11px;">
+                        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 flex items-center justify-center shrink-0 mt-0.5"">
                             <i class="fa-solid {{ addon.icon|default:'fa-concierge-bell' }}"></i>
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center justify-between gap-1.5 flex-wrap">
-                                <h4 class="font-semibold text-xs sm:text-sm leading-snug break-words" style="font-size: 12px;">{{ addon.name }}</h4>
-                                <span class="inline-flex items-center px-1.5 py-0.5 rounded font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 shrink-0 whitespace-nowrap" style="font-size: 8px; line-height: 1; padding: 2px 5px;">
+                                <h4 class="font-semibold text-sm leading-snug break-words">{{ addon.name }}</h4>
+                                <span class="inline-flex items-center px-1.5 py-0.5 text-[10px] rounded font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 shrink-0 whitespace-nowrap">
                                     Included Free
                                 </span>
                             </div>
                             {% if addon.description %}
-                            <p class="opacity-75 mt-0.5 leading-snug" style="font-size: 10px;">{{ addon.description }}</p>
+                            <p class="opacity-75 mt-0.5 leading-snug text-xs">{{ addon.description }}</p>
                             {% endif %}
                         </div>
                     </div>
@@ -720,8 +720,9 @@
                         <span x-show="checkingAvailability" style="display: none;">Checking Availability...</span>
                     </button>
                 </form>
+            </div>
 
-                <!-- Guest Personal Details Modal -->
+            <!-- Guest Personal Details Modal -->
                 <template x-teleport="body">
                     <div x-show="showModal" 
                          x-effect="document.body.style.overflow = showModal ? 'hidden' : ''; if (window.lenis) { showModal ? window.lenis.stop() : window.lenis.start(); }"

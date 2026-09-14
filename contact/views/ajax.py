@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 from ..models.inquiry import ContactInquiry
+from ..models.inquiry_category import InquiryCategory
 
 @require_POST
 def submit_inquiry_ajax(request):
@@ -9,7 +10,7 @@ def submit_inquiry_ajax(request):
     phone = request.POST.get('phone', '')
     subject = request.POST.get('subject')
     message = request.POST.get('message')
-    category = request.POST.get('category', 'general')
+    category_raw = (request.POST.get('category') or '').strip()
 
     if not name or not email or not subject or not message:
         return HttpResponse(
@@ -36,6 +37,19 @@ def submit_inquiry_ajax(request):
                 '</div>'
             )
 
+    # Resolve category object
+    category_obj = None
+    if category_raw:
+        if category_raw.isdigit():
+            category_obj = InquiryCategory.objects.filter(id=int(category_raw)).first()
+        if not category_obj:
+            category_obj = InquiryCategory.objects.filter(slug=category_raw).first()
+        if not category_obj:
+            category_obj = InquiryCategory.objects.filter(name__iexact=category_raw).first()
+
+    if not category_obj:
+        category_obj = InquiryCategory.objects.filter(is_active=True).order_by('display_order').first()
+
     # Save inquiry to database
     inquiry = ContactInquiry.objects.create(
         name=name,
@@ -43,7 +57,7 @@ def submit_inquiry_ajax(request):
         phone=phone,
         subject=subject,
         message=message,
-        category=category
+        category=category_obj
     )
 
     try:

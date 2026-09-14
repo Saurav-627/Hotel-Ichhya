@@ -17,7 +17,12 @@
         <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-neutral-200 dark:border-neutral-800">
             <div>
                 <h3 class="text-lg font-bold text-neutral-900 dark:text-neutral-100 font-serif">{{ inquiry.subject }}</h3>
-                <p class="text-xs text-neutral-500 mt-0.5">Category: {{ inquiry.get_category_display }}</p>
+                <p class="text-xs text-neutral-500 mt-1 flex items-center gap-1.5">
+                    <span>Category:</span>
+                    <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-luxuryGold-500/10 text-luxuryGold-600 dark:text-luxuryGold-400 border border-luxuryGold-500/20">
+                        {{ inquiry.category.name|default:inquiry.get_category_display }}
+                    </span>
+                </p>
             </div>
             <div class="text-xs text-neutral-400 font-semibold">
                 Received: {{ inquiry.created_at|date:"F d, Y · H:i" }}

@@ -68,6 +68,7 @@ urlpatterns = [
     path('dining/venue/<int:pk>/edit/', dining.DiningVenueUpdateView.as_view(), name='dining_venue_edit'),
     path('dining/venue/<int:pk>/delete/', dining.DiningVenueDeleteView.as_view(), name='dining_venue_delete'),
     path('dining/reservation/<int:pk>/update-status/', dining.DiningReservationUpdateStatusView.as_view(), name='dining_reservation_update_status'),
+    path('dining/reservation/<int:pk>/detail-json/', dining.DiningReservationDetailJsonView.as_view(), name='dining_reservation_detail_json'),
     path('dining/reservation/<int:pk>/delete/', dining.DiningReservationDeleteView.as_view(), name='dining_reservation_delete'),
     path('dining/reservations/clear-all/', dining.ClearAllDiningReservationsView.as_view(), name='dining_reservation_clear_all'),
     
@@ -82,15 +83,24 @@ urlpatterns = [
     path('conference/venue/add/', conference.EventVenueCreateView.as_view(), name='event_venue_create'),
     path('conference/venue/<int:pk>/edit/', conference.EventVenueUpdateView.as_view(), name='event_venue_edit'),
     path('conference/venue/<int:pk>/delete/', conference.EventVenueDeleteView.as_view(), name='event_venue_delete'),
+    path('conference/inquiry/<int:pk>/detail-json/', conference.EventInquiryDetailJsonView.as_view(), name='event_inquiry_detail_json'),
     path('conference/inquiry/<int:pk>/update-status/', conference.EventInquiryUpdateStatusView.as_view(), name='event_inquiry_update_status'),
     path('conference/inquiry/<int:pk>/delete/', conference.EventInquiryDeleteView.as_view(), name='event_inquiry_delete'),
     path('conference/inquiries/clear-all/', conference.ClearAllEventInquiriesView.as_view(), name='event_inquiry_clear_all'),
+    
+    # Event Types / Categories
+    path('conference/event-type/add/', conference.EventTypeCreateView.as_view(), name='event_type_create'),
+    path('conference/event-type/<int:pk>/edit/', conference.EventTypeUpdateView.as_view(), name='event_type_edit'),
+    path('conference/event-type/<int:pk>/delete/', conference.EventTypeDeleteView.as_view(), name='event_type_delete'),
     
     # Contact
     path('contact/', contact.ContactDashboardView.as_view(), name='contact_dashboard'),
     path('contact/branch/add/', contact.BranchCreateView.as_view(), name='branch_create'),
     path('contact/branch/<int:pk>/edit/', contact.BranchUpdateView.as_view(), name='branch_edit'),
     path('contact/branch/<int:pk>/delete/', contact.BranchDeleteView.as_view(), name='branch_delete'),
+    path('contact/category/add/', contact.InquiryCategoryCreateView.as_view(), name='inquiry_category_create'),
+    path('contact/category/<int:pk>/edit/', contact.InquiryCategoryUpdateView.as_view(), name='inquiry_category_edit'),
+    path('contact/category/<int:pk>/delete/', contact.InquiryCategoryDeleteView.as_view(), name='inquiry_category_delete'),
     path('contact/inquiry/<int:pk>/', contact.ContactInquiryDetailView.as_view(), name='contact_inquiry_detail'),
     path('contact/inquiry/<int:pk>/delete/', contact.ContactInquiryDeleteView.as_view(), name='contact_inquiry_delete'),
     path('contact/inquiries/clear-all/', contact.ClearAllContactInquiriesView.as_view(), name='contact_inquiry_clear_all'),

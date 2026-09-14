@@ -39,11 +39,15 @@
         {% for notification in notifications %}
         <div class="p-5 flex items-start justify-between gap-4 transition hover:bg-neutral-50/50 dark:hover:bg-neutral-800/30 {% if not notification.is_read %}bg-luxuryGold-500/5 border-l-4 border-l-luxuryGold-500{% endif %}">
             <div class="flex items-start gap-4">
-                <div class="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 text-base {% if notification.notification_type == 'booking_created' %}bg-blue-500/10 text-blue-500{% elif notification.notification_type == 'payment_success' %}bg-emerald-500/10 text-emerald-500{% else %}bg-purple-500/10 text-purple-500{% endif %}">
+                <div class="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 text-base {% if notification.notification_type == 'booking_created' %}bg-blue-500/10 text-blue-500{% elif notification.notification_type == 'payment_success' %}bg-emerald-500/10 text-emerald-500{% elif notification.notification_type == 'event_inquiry_received' %}bg-purple-500/10 text-purple-500{% elif notification.notification_type == 'dining_reservation_created' %}bg-pink-500/10 text-pink-500{% else %}bg-amber-500/10 text-amber-500{% endif %}">
                     {% if notification.notification_type == 'booking_created' %}
                     <i class="fa-solid fa-calendar-plus"></i>
                     {% elif notification.notification_type == 'payment_success' %}
                     <i class="fa-solid fa-credit-card"></i>
+                    {% elif notification.notification_type == 'event_inquiry_received' %}
+                    <i class="fa-solid fa-champagne-glasses"></i>
+                    {% elif notification.notification_type == 'dining_reservation_created' %}
+                    <i class="fa-solid fa-utensils"></i>
                     {% else %}
                     <i class="fa-solid fa-envelope-open-text"></i>
                     {% endif %}

@@ -13,6 +13,7 @@ from rooms.models.room_policy import RoomPolicy
 from rooms.models.room_seasonal_price import RoomSeasonalPrice
 from booking.models.booking import Booking
 from booking.models.coupon import Coupon, CouponMinSpend
+from booking.models.addon import Addon, AddonPrice
 from dining.models.venue import DiningVenue
 from dining.models.reservation import DiningReservation
 from dining.models.venue_image import DiningVenueImage
@@ -22,8 +23,11 @@ from gallery.models.category import GalleryCategory
 from gallery.models.item import GalleryItem
 from conference.models.venue import EventVenue
 from conference.models.inquiry import EventInquiry
+from conference.models.event_type import EventType
+from conference.models.venue_layout import VenueLayout
 from contact.models.branch import Branch
 from contact.models.inquiry import ContactInquiry
+from contact.models.inquiry_category import InquiryCategory
 from blogs.models.post import BlogPost
 from nearby_places.models.attraction import Attraction
 from testimonials.models.testimonial import Testimonial
@@ -335,14 +339,107 @@ EventVenueImageFormSet = forms.inlineformset_factory(
     can_delete=True
 )
 
+class VenueLayoutForm(TailwindFormMixin, forms.ModelForm):
+    class Meta:
+        model = VenueLayout
+        fields = ('name', 'capacity', 'is_active')
+
+    def has_changed(self):
+        # Treat empty extra forms as unchanged even if is_active was toggled
+        if not self.instance.pk:
+            name = self.data.get(self.add_prefix('name'), '').strip()
+            capacity = self.data.get(self.add_prefix('capacity'), '').strip()
+            if not name and not capacity:
+                return False
+        return super().has_changed()
+
+VenueLayoutFormSet = forms.inlineformset_factory(
+    EventVenue,
+    VenueLayout,
+    form=VenueLayoutForm,
+    fields=('name', 'capacity', 'is_active'),
+    extra=2,
+    can_delete=True
+)
+
 class EventVenueForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
         model = EventVenue
-        fields = ['name', 'slug', 'description', 'capacity', 'layout_options', 'image', 'is_active']
-        help_texts = {
-            'layout_options': "Enter each layout style and capacity on a separate line. Format: 'Layout Name: Capacity' (e.g. 'Banquet: 200 pax' or 'Theatre: 300 pax' or 'Classroom: 150').",
-            'capacity': "Maximum total seating/floating capacity of the event venue."
+        fields = [
+            'name', 'slug', 'description', 'capacity', 'layout_options',
+            'image', 'is_featured', 'is_active', 'allow_custom_addons',
+            'event_types', 'available_addons'
+        ]
+        labels = {
+            'allow_custom_addons': "Show Add-ons Selection in UI (Allow Guests to Select Optional Add-ons)",
+            'available_addons': "Package Inclusions (Complimentary Included Add-ons)",
         }
+        widgets = {
+            'event_types': forms.CheckboxSelectMultiple,
+            'available_addons': forms.CheckboxSelectMultiple,
+        }
+        help_texts = {
+            'layout_options': "Optional. Enter each layout style and capacity on a separate line (e.g. 'Banquet: 200 pax'), or leave blank.",
+            'capacity': "Maximum total seating/floating capacity of the event venue.",
+            'is_featured': "Feature this venue in marketing showcases on the website homepage.",
+            'allow_custom_addons': "If ON, guests can choose optional paid add-on services on the venue page inquiry form. If OFF, optional add-ons selection is hidden.",
+            'event_types': "Select the event occasions / categories hosted in this hall.",
+            'available_addons': "Select add-on services bundled and included free as complimentary package inclusions with this banquet hall.",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'layout_options' in self.fields:
+            self.fields['layout_options'].required = False
+        if 'event_types' in self.fields:
+            self.fields['event_types'].queryset = EventType.objects.filter(is_active=True).order_by('display_order', 'name')
+            self.fields['event_types'].required = False
+        if 'available_addons' in self.fields:
+            self.fields['available_addons'].queryset = Addon.objects.filter(
+                applies_to__in=['events', 'both'], is_active=True
+            ).order_by('order', 'name')
+            self.fields['available_addons'].required = False
+
+class EventTypeForm(TailwindFormMixin, forms.ModelForm):
+    venues = forms.ModelMultipleChoiceField(
+        queryset=EventVenue.objects.filter(is_active=True).order_by('name'),
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        help_text="Select banquet halls that host this event category / occasion."
+    )
+
+    class Meta:
+        model = EventType
+        fields = ['name', 'slug', 'icon', 'venues', 'description', 'image', 'is_featured', 'is_active', 'display_order']
+        widgets = {
+            'venues': forms.CheckboxSelectMultiple,
+        }
+        help_texts = {
+            'icon': "FontAwesome class name (e.g., 'fa-ring', 'fa-handshake', 'fa-champagne-glasses', 'fa-cake-candles').",
+            'is_featured': "Showcase this event category prominently on the homepage branding/marketing section.",
+            'venues': "Select banquet halls and venues that host this event category.",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields['venues'].initial = self.instance.venues.all()
+
+    def save(self, commit=True):
+        instance = super().save(commit=commit)
+        def save_m2m_venues():
+            if 'venues' in self.cleaned_data:
+                instance.venues.set(self.cleaned_data['venues'])
+        if commit:
+            save_m2m_venues()
+        else:
+            old_save_m2m = getattr(self, 'save_m2m', None)
+            def new_save_m2m():
+                if old_save_m2m:
+                    old_save_m2m()
+                save_m2m_venues()
+            self.save_m2m = new_save_m2m
+        return instance
 
 class EventInquiryForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
@@ -353,6 +450,18 @@ class BranchForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
         model = Branch
         fields = '__all__'
+
+class InquiryCategoryForm(TailwindFormMixin, forms.ModelForm):
+    class Meta:
+        model = InquiryCategory
+        fields = ['name', 'slug', 'description', 'is_active', 'display_order']
+        help_texts = {
+            'name': "Name of the category (e.g. Room Booking, Fine Dining, Events).",
+            'slug': "Slug identifier (auto-generated if left blank).",
+            'description': "Brief note on what this inquiry category covers.",
+            'display_order': "Sequence order in dropdown selection list.",
+            'is_active': "Whether this category appears in the guest contact inquiry dropdown.",
+        }
 
 class ContactInquiryForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
@@ -432,9 +541,6 @@ class PaymentProcessorForm(TailwindFormMixin, forms.ModelForm):
 class BroadcastNewsletterForm(TailwindFormMixin, forms.Form):
     subject = forms.CharField(max_length=200, label="Email Subject Header", help_text="e.g. Secret Suite Rates & Exclusive Resort News")
     message = forms.CharField(widget=forms.Textarea(attrs={'rows': 8}), label="Campaign Message Content", help_text="HTML line breaks will be preserved.")
-
-
-from booking.models.addon import Addon, AddonPrice
 
 
 class AddonForm(TailwindFormMixin, forms.ModelForm):

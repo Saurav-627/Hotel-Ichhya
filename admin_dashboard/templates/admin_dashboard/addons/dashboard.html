@@ -23,11 +23,44 @@
                 <h4 class="text-base font-bold text-neutral-900 dark:text-neutral-100 font-serif">
                     Configured Add-on Services &amp; Multi-Currency Rates
                 </h4>
-                <p class="text-xs text-neutral-500 mt-1">These add-ons will appear as toggle switches in the guest reservation booking form.</p>
+                <p class="text-xs text-neutral-500 mt-1">Manage extra amenities and services for hotel room stays and banquet conferences.</p>
             </div>
             <a href="{% url 'admin_dashboard:addon_create' %}" class="px-3.5 py-2 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-lg text-xs transition">
                 <i class="fa-solid fa-plus mr-1"></i> Add Service
             </a>
+        </div>
+
+        <!-- Filter Tabs & Search Bar -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+            <div class="flex flex-wrap items-center gap-2">
+                <a href="{% url 'admin_dashboard:addon_dashboard' %}{% if search_query %}?q={{ search_query }}{% endif %}" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition {% if not applies_to_filter %}bg-luxuryGold-500 text-neutral-950 font-bold shadow-sm{% else %}bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700{% endif %}">
+                    All Services ({{ total_count }})
+                </a>
+                <a href="{% url 'admin_dashboard:addon_dashboard' %}?applies_to=room{% if search_query %}&q={{ search_query }}{% endif %}" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 {% if applies_to_filter == 'room' %}bg-luxuryGold-500 text-neutral-950 font-bold shadow-sm{% else %}bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700{% endif %}">
+                    <i class="fa-solid fa-bed text-[10px]"></i> Room Stays ({{ room_count }})
+                </a>
+                <a href="{% url 'admin_dashboard:addon_dashboard' %}?applies_to=events{% if search_query %}&q={{ search_query }}{% endif %}" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 {% if applies_to_filter == 'events' %}bg-luxuryGold-500 text-neutral-950 font-bold shadow-sm{% else %}bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700{% endif %}">
+                    <i class="fa-solid fa-champagne-glasses text-[10px]"></i> Events &amp; Banquets ({{ event_count }})
+                </a>
+                <a href="{% url 'admin_dashboard:addon_dashboard' %}?applies_to=both{% if search_query %}&q={{ search_query }}{% endif %}" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 {% if applies_to_filter == 'both' %}bg-luxuryGold-500 text-neutral-950 font-bold shadow-sm{% else %}bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700{% endif %}">
+                    <i class="fa-solid fa-layer-group text-[10px]"></i> Rooms &amp; Events ({{ both_count }})
+                </a>
+            </div>
+
+            <form method="get" class="relative max-w-xs w-full">
+                {% if applies_to_filter %}
+                <input type="hidden" name="applies_to" value="{{ applies_to_filter }}">
+                {% endif %}
+                <div class="flex items-center">
+                    <input type="text" name="q" value="{{ search_query }}" placeholder="Search add-on services..." autocomplete="off" class="w-full pl-9 pr-7 py-1.5 text-xs rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 focus:outline-none focus:ring-1 focus:ring-luxuryGold-500 text-neutral-800 dark:text-neutral-200">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 text-neutral-400 text-xs"></i>
+                </div>
+                {% if search_query %}
+                <a href="{% url 'admin_dashboard:addon_dashboard' %}{% if applies_to_filter %}?applies_to={{ applies_to_filter }}{% endif %}" class="absolute right-2.5 top-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 text-xs">
+                    <i class="fa-solid fa-xmark"></i>
+                </a>
+                {% endif %}
+            </form>
         </div>
 
         <div class="overflow-x-auto">
@@ -61,9 +94,19 @@
                             </div>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
-                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 inline-flex items-center shrink-0">
+                            {% if addon.applies_to == 'events' %}
+                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 inline-flex items-center shrink-0">
+                                <i class="fa-solid fa-champagne-glasses mr-1.5"></i> Events &amp; Conference
+                            </span>
+                            {% elif addon.applies_to == 'both' %}
+                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 inline-flex items-center shrink-0">
+                                <i class="fa-solid fa-layer-group mr-1.5"></i> Rooms &amp; Events
+                            </span>
+                            {% else %}
+                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 inline-flex items-center shrink-0">
                                 <i class="fa-solid fa-bed mr-1.5"></i> Room Stays
                             </span>
+                            {% endif %}
                         </td>
                         <td class="px-4 py-4 text-xs font-medium text-neutral-600 dark:text-neutral-300 whitespace-nowrap">
                             {{ addon.get_price_type_display }}

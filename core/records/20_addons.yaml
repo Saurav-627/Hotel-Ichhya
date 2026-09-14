@@ -1,0 +1,131 @@
+addons:
+  # Room Addons
+  - name: "Full Board Gourmet Dining (Breakfast, Lunch & Dinner)"
+    icon: "fa-utensils"
+    applies_to: "room"
+    price_type: "per_person"
+    is_active: true
+    order: 1
+    description: "Complete daily 3-course breakfast, lunch, and dinner buffet served at our signature fine dining restaurant."
+    prices:
+      - currency: "USD"
+        price: 35.00
+      - currency: "NPR"
+        price: 4500.00
+
+  - name: "Romantic Candlelight Poolside Dinner"
+    icon: "fa-wine-glass"
+    applies_to: "room"
+    price_type: "per_booking"
+    is_active: true
+    order: 2
+    description: "Intimate 4-course bespoke dinner by the illuminated pool deck with customized floral decor and champagne."
+    prices:
+      - currency: "USD"
+        price: 60.00
+      - currency: "NPR"
+        price: 8000.00
+
+  # Event & Conference Addons
+  - name: "Gourmet Multi-Cuisine Buffet"
+    icon: "fa-utensils"
+    applies_to: "events"
+    price_type: "per_person"
+    is_active: true
+    order: 3
+    description: "Multi-course banquet buffet featuring continental, oriental, and regional delicacies prepared by master chefs."
+    event_venues:
+      - Janaki Hall
+      - Jyamire Hall
+    prices:
+      - currency: "USD"
+        price: 12.00
+      - currency: "NPR"
+        price: 1500.00
+
+  - name: "Executive High Tea & Refreshments"
+    icon: "fa-mug-hot"
+    applies_to: "events"
+    price_type: "per_person"
+    is_active: true
+    order: 4
+    description: "Artisanal bakery selections, premium single-origin teas, freshly brewed coffee, and savory cocktail hors d'oeuvres."
+    event_venues:
+      - Janaki Hall
+      - Jyamire Hall
+      - Narayani Hall
+      - Balmiki Hall
+    prices:
+      - currency: "USD"
+        price: 5.00
+      - currency: "NPR"
+        price: 650.00
+
+  - name: "Premium Audio/Visual & Stage Tech"
+    icon: "fa-microphone-lines"
+    applies_to: "events"
+    price_type: "per_booking"
+    is_active: true
+    order: 5
+    description: "High-definition digital projectors, LED display backdrops, wireless collar & podium microphones, and acoustics technician."
+    event_venues:
+      - Janaki Hall
+      - Jyamire Hall
+      - Narayani Hall
+      - Balmiki Hall
+    prices:
+      - currency: "USD"
+        price: 90.00
+      - currency: "NPR"
+        price: 12000.00
+
+  - name: "Luxury Floral & Theme Stage Styling"
+    icon: "fa-wand-magic-sparkles"
+    applies_to: "events"
+    price_type: "per_booking"
+    is_active: true
+    order: 6
+    description: "Custom fresh flower arrangements, grand entrance archways, decorative backdrop fabrication, and mood lighting."
+    event_venues:
+      - Janaki Hall
+      - Jyamire Hall
+    prices:
+      - currency: "USD"
+        price: 190.00
+      - currency: "NPR"
+        price: 25000.00
+
+  - name: "Professional Event Photography & Video"
+    icon: "fa-camera"
+    applies_to: "events"
+    price_type: "per_booking"
+    is_active: true
+    order: 7
+    description: "Full-day professional high-resolution event photography, drone captures, and edited highlight cinematic reel."
+    event_venues:
+      - Janaki Hall
+      - Jyamire Hall
+    prices:
+      - currency: "USD"
+        price: 140.00
+      - currency: "NPR"
+        price: 18000.00
+
+  # Shared (Rooms & Events) Addons
+  - name: "VIP Chauffeur & Shuttle Logistics"
+    icon: "fa-car-side"
+    applies_to: "both"
+    price_type: "per_booking"
+    is_active: true
+    order: 8
+    description: "Seamless airport transfers, VIP luxury car coordination, and guest shuttle logistics."
+    event_venues:
+      - Janaki Hall
+      - Jyamire Hall
+      - Narayani Hall
+      - Balmiki Hall
+    prices:
+      - currency: "USD"
+        price: 60.00
+      - currency: "NPR"
+        price: 8000.00

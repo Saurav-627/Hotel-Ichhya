@@ -32,11 +32,13 @@ GLOBAL_MODEL_REGISTRY = {
     "dining_venues": ("dining", "DiningVenue", ["slug"], False),
     "recreation_activities": ("recreation", "RecreationActivity", ["slug"], False),
     "event_venues": ("conference", "EventVenue", ["name"], False),
+    "event_types": ("conference", "EventType", ["slug"], False),
 
     # Other Apps
     "attractions": ("nearby_places", "Attraction", ["name"], False),
     "testimonials": ("testimonials", "Testimonial", ["guest_name", "source"], False),
     "branches": ("contact", "Branch", ["name"], False),
+    "inquiry_categories": ("contact", "InquiryCategory", ["slug"], False),
     "coupons": ("booking", "Coupon", ["code"], False),
     "addons": ("booking", "Addon", ["name"], False),
 
@@ -95,6 +97,19 @@ def post_process_item(key, obj, item):
                         currency=c_obj,
                         defaults={'base_price': p_data.get("base_price")}
                     )
+        layouts_data = item.get("layouts") or []
+        if layouts_data:
+            from conference.models.venue_layout import VenueLayout
+            for l_data in layouts_data:
+                VenueLayout.objects.update_or_create(
+                    venue=obj,
+                    name=l_data.get("name"),
+                    defaults={
+                        'capacity': l_data.get("capacity", 0),
+                        'is_active': l_data.get("is_active", True),
+                        'display_order': l_data.get("display_order", 0),
+                    }
+                )
     elif key == "coupons":
         min_spends_data = item.get("min_spends") or []
         if min_spends_data:
@@ -129,6 +144,21 @@ def post_process_item(key, obj, item):
                             currency=curr,
                             defaults={"price": price_val}
                         )
+        venues_list = item.get("event_venues") or item.get("venues") or []
+        if venues_list:
+            from conference.models.venue import EventVenue
+            from django.db.models import Q
+            venues_qs = EventVenue.objects.filter(Q(name__in=venues_list) | Q(slug__in=venues_list))
+            if venues_qs.exists():
+                obj.event_venues.set(venues_qs)
+    elif key == "event_types":
+        venues_list = item.get("venues") or []
+        if venues_list:
+            from conference.models.venue import EventVenue
+            from django.db.models import Q
+            venues_qs = EventVenue.objects.filter(Q(name__in=venues_list) | Q(slug__in=venues_list))
+            if venues_qs.exists():
+                obj.venues.set(venues_qs)
 
 
 class Command(BaseCommand):
@@ -425,3 +455,4 @@ class Command(BaseCommand):
                     )
 
         self.stdout.write(self.style.SUCCESS("\nAll data import tasks completed successfully!"))
+

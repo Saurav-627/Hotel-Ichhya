@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth theme-light">
+<html lang="en" class="scroll-smooth theme-light h-full overflow-hidden">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -270,9 +270,14 @@
                 </a>
 
                 <!-- Dining -->
-                <a href="{% url 'admin_dashboard:dining_dashboard' %}" class="flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-luxuryGold-500/10 hover:text-luxuryGold-600 transition group {% if 'dining' in request.path %}bg-luxuryGold-500/10 text-luxuryGold-600 font-semibold{% else %}text-neutral-600{% endif %}">
-                    <div class="w-5 text-center"><i class="fa-solid fa-utensils text-lg"></i></div>
-                    <span x-show="sidebarOpen">Dining Venue</span>
+                <a href="{% url 'admin_dashboard:dining_dashboard' %}" class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-luxuryGold-500/10 hover:text-luxuryGold-600 transition group {% if 'dining' in request.path %}bg-luxuryGold-500/10 text-luxuryGold-600 font-semibold{% else %}text-neutral-600{% endif %}">
+                    <div class="flex items-center gap-4">
+                        <div class="w-5 text-center"><i class="fa-solid fa-utensils text-lg"></i></div>
+                        <span x-show="sidebarOpen">Dining &amp; Reservations</span>
+                    </div>
+                    {% if unread_dining_count > 0 %}
+                    <span x-show="sidebarOpen" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-pink-500 text-white shadow-sm">{{ unread_dining_count }}</span>
+                    {% endif %}
                 </a>
 
                 <!-- Recreation -->
@@ -395,9 +400,23 @@
                                 {% endif %}
                             </div>
 
-                            {% if unread_inquiries_count > 0 %}
-                            <a href="{% url 'admin_dashboard:contact_dashboard' %}?tab=inquiries" class="block px-4 py-2.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold border-b border-gray-100 flex items-center justify-between hover:bg-rose-500/20 transition">
-                                <span><i class="fa-solid fa-envelope-open-text mr-1.5"></i> {{ unread_inquiries_count }} New Guest Inquiry(ies)</span>
+                            {% if unread_event_count > 0 %}
+                            <a href="{% url 'admin_dashboard:conference_dashboard' %}?tab=inquiries" class="block px-4 py-2.5 bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs font-bold border-b border-gray-100 flex items-center justify-between hover:bg-purple-500/20 transition">
+                                <span><i class="fa-solid fa-champagne-glasses mr-1.5"></i> {{ unread_event_count }} New Event Inquiry(ies)</span>
+                                <span class="text-[10px] uppercase font-bold underline">Review &rarr;</span>
+                            </a>
+                            {% endif %}
+
+                            {% if unread_contact_count > 0 %}
+                            <a href="{% url 'admin_dashboard:contact_dashboard' %}?tab=inquiries" class="block px-4 py-2.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-bold border-b border-gray-100 flex items-center justify-between hover:bg-blue-500/20 transition">
+                                <span><i class="fa-solid fa-envelope-open-text mr-1.5"></i> {{ unread_contact_count }} New Contact Inquiry(ies)</span>
+                                <span class="text-[10px] uppercase font-bold underline">Review &rarr;</span>
+                            </a>
+                            {% endif %}
+
+                            {% if unread_dining_count > 0 %}
+                            <a href="{% url 'admin_dashboard:dining_dashboard' %}?tab=reservations" class="block px-4 py-2.5 bg-pink-500/10 text-pink-600 dark:text-pink-400 text-xs font-bold border-b border-gray-100 flex items-center justify-between hover:bg-pink-500/20 transition">
+                                <span><i class="fa-solid fa-utensils mr-1.5"></i> {{ unread_dining_count }} New Dining Reservation(s)</span>
                                 <span class="text-[10px] uppercase font-bold underline">Review &rarr;</span>
                             </a>
                             {% endif %}
@@ -407,9 +426,11 @@
                                 <a href="{% if note.link_url %}{{ note.link_url }}{% else %}{% url 'admin_dashboard:notification_list' %}{% endif %}"
                                    class="block px-4 py-3 transition-colors {% if not note.is_read %}bg-luxuryGold-500/10{% else %}hover:bg-gray-50{% endif %}">
                                     <div class="flex items-start gap-3">
-                                        <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold {% if note.notification_type == 'payment_success' %}bg-emerald-100 text-emerald-700{% elif note.notification_type == 'booking_created' %}bg-amber-100 text-amber-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                                        <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold {% if note.notification_type == 'payment_success' %}bg-emerald-100 text-emerald-700{% elif note.notification_type == 'booking_created' %}bg-amber-100 text-amber-700{% elif note.notification_type == 'event_inquiry_received' %}bg-purple-100 text-purple-700{% elif note.notification_type == 'dining_reservation_created' %}bg-pink-100 text-pink-700{% else %}bg-blue-100 text-blue-700{% endif %}">
                                             {% if note.notification_type == 'payment_success' %}<i class="fa-solid fa-file-invoice-dollar"></i>
                                             {% elif note.notification_type == 'booking_created' %}<i class="fa-solid fa-calendar-check"></i>
+                                            {% elif note.notification_type == 'event_inquiry_received' %}<i class="fa-solid fa-champagne-glasses"></i>
+                                            {% elif note.notification_type == 'dining_reservation_created' %}<i class="fa-solid fa-utensils"></i>
                                             {% else %}<i class="fa-solid fa-envelope"></i>{% endif %}
                                         </div>
                                         <div class="flex-1 min-w-0">

@@ -9,15 +9,22 @@
 {% block page_subtitle %}Configure service parameters, billing frequency, and multi-currency pricing.{% endblock %}
 
 {% block page_actions %}
+{% if return_to == 'conference' %}
+<a href="{% url 'admin_dashboard:conference_dashboard' %}?tab=services" class="px-4 py-2 rounded-xl text-xs font-bold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 transition">
+    <i class="fa-solid fa-arrow-left mr-1.5"></i> Back to Conference Services
+</a>
+{% else %}
 <a href="{% url 'admin_dashboard:addon_dashboard' %}" class="px-4 py-2 rounded-xl text-xs font-bold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 transition">
     <i class="fa-solid fa-arrow-left mr-1.5"></i> Back to Services List
 </a>
+{% endif %}
 {% endblock %}
 
 {% block content %}
 <div class="space-y-8 animate__animated animate__fadeIn">
     <form method="POST" class="space-y-8">
         {% csrf_token %}
+        <input type="hidden" name="return_to" value="{{ return_to|default:'' }}">
 
         <!-- Service Main Info Card -->
         <div class="custom-card rounded-2xl p-6 sm:p-8 bg-white/50 dark:bg-neutral-900/50 shadow-xl space-y-6">
@@ -180,9 +187,15 @@
 
         <!-- Submit Controls -->
         <div class="flex items-center justify-end gap-4 pt-4 border-t border-neutral-200 dark:border-neutral-800">
+            {% if return_to == 'conference' %}
+            <a href="{% url 'admin_dashboard:conference_dashboard' %}?tab=services" class="px-6 py-3 rounded-xl text-xs font-bold text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">
+                Cancel
+            </a>
+            {% else %}
             <a href="{% url 'admin_dashboard:addon_dashboard' %}" class="px-6 py-3 rounded-xl text-xs font-bold text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">
                 Cancel
             </a>
+            {% endif %}
             <button type="submit" class="px-8 py-3 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg cursor-pointer">
                 Save Add-on Service
             </button>

@@ -12,84 +12,309 @@
     </div>
 </section>
 
-<!-- VENUES LISTING CONTAINER -->
-<section class="py-8 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-start">
-        {% for venue in venues %}
-        <div x-data="{ expanded: false }"
-             class="rounded-2xl overflow-hidden border shadow-lg group hover:translate-y-[-4px] duration-500 flex flex-col animate__animated animate__fadeInUp"
-             :class="{
-                 'bg-white border-gray-200': currentTheme === 'light',
-                 'bg-[#161412] border-amber-900/20': currentTheme !== 'light'
-             }">
-            <!-- Cover Image (Clickable Link) -->
-            <a href="{% url 'conference:venue_detail' venue.slug %}" class="relative h-52 sm:h-64 lg:h-72 overflow-hidden block">
-                <img src="{% if venue.display_image_url %}{{ venue.display_image_url }}{% else %}https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=600{% endif %}" 
-                     alt="{{ venue.name }}" class="w-full h-full object-cover group-hover:scale-105 duration-700">
-                <span class="absolute top-4 right-4 z-10 px-3 sm:px-4 py-1 text-[11px] sm:text-xs font-semibold bg-black/75 text-luxuryGold-300 rounded-full backdrop-blur-sm">
-                    Capacity: {{ venue.capacity }} Pax
-                </span>
-            </a>
-            
-            <!-- Details -->
-            <div class="p-5 sm:p-6 flex-grow flex flex-col justify-between">
-                <div class="space-y-3 sm:space-y-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4">
-                        <a href="{% url 'conference:venue_detail' venue.slug %}" class="hover:text-luxuryGold-400 transition-colors">
-                            <h3 class="font-luxury-title text-xl sm:text-2xl font-bold tracking-wide">{{ venue.name }}</h3>
-                        </a>
-                        <span class="text-xs font-semibold text-luxuryGold-500 shrink-0">
-                            Starting: {{ venue.currency_symbol }} {{ venue.current_base_price|floatformat:0 }}
+<!-- MAIN INTERACTIVE FILTER & VENUES CONTAINER -->
+<div x-data="{
+    selectedOccasion: '{{ selected_occasion|default:'all' }}',
+    counts: {
+        'all': {{ venues|length }},
+        {% for et in event_types %}
+        '{{ et.slug }}': {{ et.matching_venues_count }},
+        {% endfor %}
+    },
+    init() {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const occ = urlParams.get('occasion');
+            if (occ && this.counts[occ] !== undefined) {
+                this.selectedOccasion = occ;
+            }
+        } catch (e) {}
+    },
+    selectOccasion(slug) {
+        this.selectedOccasion = slug;
+        try {
+            const url = new URL(window.location);
+            if (slug === 'all') {
+                url.searchParams.delete('occasion');
+            } else {
+                url.searchParams.set('occasion', slug);
+            }
+            window.history.replaceState({}, '', url);
+        } catch (e) {}
+    },
+    getCount() {
+        return this.counts[this.selectedOccasion] !== undefined ? this.counts[this.selectedOccasion] : {{ venues|length }};
+    }
+}">
+
+    <!-- INTERACTIVE OCCASIONS FILTER STRIP -->
+    {% if event_types %}
+    <section class="py-4 sm:py-5 border-b border-amber-900/15 transition-colors sticky top-[68px] z-30 backdrop-blur-md"
+             :class="{ 'bg-neutral-50/95 border-neutral-200': currentTheme === 'light', 'bg-[#12100e]/95 border-amber-900/20': currentTheme !== 'light' }">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                
+                <!-- Label & Match Counter -->
+                <div class="flex items-center gap-2.5 shrink-0">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-luxuryGold-500/20 text-luxuryGold-400 text-xs">
+                        <i class="fa-solid fa-filter"></i>
+                    </span>
+                    <div>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-luxuryGold-500 block leading-tight">
+                            Filter by Occasion
                         </span>
-                    </div>
-                    
-                    <div class="space-y-1.5">
-                        <p class="text-xs sm:text-sm opacity-85 leading-relaxed transition-all duration-300"
-                           :class="expanded ? 'line-clamp-none animate__animated animate__fadeIn' : 'line-clamp-3 overflow-hidden'"
-                           :style="expanded ? '' : '-webkit-line-clamp: 3; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;'">
-                            {{ venue.description }}
-                        </p>
-                        {% if venue.description|length > 100 %}
-                        <button @click="expanded = !expanded" 
-                                type="button"
-                                class="inline-flex items-center gap-1.5 text-xs font-semibold text-luxuryGold-500 hover:text-luxuryGold-400 transition-colors cursor-pointer focus:outline-none pt-1">
-                            <span x-text="expanded ? 'Show Less' : 'Show More'">Show More</span>
-                            <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300"
-                               :class="expanded ? 'rotate-180' : ''"></i>
-                        </button>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="space-y-2 text-xs opacity-75 pt-2 border-t border-amber-900/10">
-                        <p class="font-semibold text-luxuryGold-500 text-xs">
-                            <i class="fa-solid fa-shapes mr-1.5"></i>Layout Styles &amp; Capacities:
-                        </p>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs opacity-90">
-                            {% for layout in venue.parsed_layouts %}
-                                <span class="break-words"><i class="fa-solid fa-circle-check text-[9px] mr-1.5 opacity-60 text-luxuryGold-400"></i><strong>{{ layout.name }}:</strong> {{ layout.value }}</span>
-                            {% empty %}
-                                <span>No layout configurations specified.</span>
-                            {% endfor %}
-                        </div>
+                        <span class="text-[10px] opacity-60">
+                            <span x-text="getCount()">{{ venues|length }}</span> of {{ venues|length }} venues matched
+                        </span>
                     </div>
                 </div>
 
-                <!-- Single Clean CTA Button -->
-                <div class="pt-4 sm:pt-6 mt-4 sm:mt-6 border-t border-amber-900/10">
-                    <a href="{% url 'conference:venue_detail' venue.slug %}" 
-                       class="w-full py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-center flex items-center justify-center gap-2 transition-colors shadow-sm"
-                       :class="{ 'bg-amber-800 text-white hover:bg-amber-900': currentTheme === 'light', 'bg-luxuryGold-500 text-black hover:bg-luxuryGold-400': currentTheme !== 'light' }">
-                        <span>View Details &amp; Request Proposal</span>
-                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                    </a>
+                <!-- Interactive Occasion Filter Pills -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-1.5 pt-0.5 scrollbar-none">
+                    <!-- ALL VENUES BUTTON -->
+                    <button type="button"
+                            @click="selectOccasion('all')"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs whitespace-nowrap shrink-0 transition-all duration-300 font-medium cursor-pointer border"
+                            :class="selectedOccasion === 'all' 
+                                ? 'bg-luxuryGold-500 text-neutral-950 font-bold border-luxuryGold-400 shadow-md shadow-luxuryGold-500/20 scale-[1.02]' 
+                                : (currentTheme === 'light' ? 'bg-white border-neutral-200 text-neutral-700 hover:border-luxuryGold-500 hover:text-luxuryGold-700' : 'bg-neutral-900/90 border-neutral-800 text-neutral-300 hover:border-luxuryGold-500/50 hover:text-luxuryGold-400')">
+                        <i class="fa-solid fa-layer-group text-[11px]" :class="selectedOccasion === 'all' ? 'text-neutral-950' : 'text-luxuryGold-500'"></i>
+                        <span>All Venues &amp; Halls</span>
+                        <span class="text-[10px] px-1.5 py-0.2 rounded-full font-semibold" 
+                              :class="selectedOccasion === 'all' ? 'bg-black/20 text-neutral-900' : 'bg-white/10 text-neutral-400'">
+                            {{ venues|length }}
+                        </span>
+                    </button>
+
+                    <!-- INDIVIDUAL OCCASION BUTTONS -->
+                    {% for et in event_types %}
+                    <button type="button"
+                            @click="selectOccasion('{{ et.slug }}')"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs whitespace-nowrap shrink-0 transition-all duration-300 font-medium cursor-pointer border group"
+                            :class="selectedOccasion === '{{ et.slug }}' 
+                                ? 'bg-luxuryGold-500 text-neutral-950 font-bold border-luxuryGold-400 shadow-md shadow-luxuryGold-500/20 scale-[1.02]' 
+                                : (currentTheme === 'light' ? 'bg-white border-neutral-200 text-neutral-700 hover:border-luxuryGold-500 hover:text-luxuryGold-700' : 'bg-neutral-900/90 border-neutral-800 text-neutral-300 hover:border-luxuryGold-500/50 hover:text-luxuryGold-400')">
+                        <i class="fa-solid {{ et.fontawesome_icon|default:et.icon|default:'fa-star' }} text-[11px] transition-transform group-hover:scale-110"
+                           :class="selectedOccasion === '{{ et.slug }}' ? 'text-neutral-950' : 'text-luxuryGold-500'"></i>
+                        <span>{{ et.name }}</span>
+                        <span class="text-[10px] px-1.5 py-0.2 rounded-full font-semibold"
+                              :class="selectedOccasion === '{{ et.slug }}' ? 'bg-black/20 text-neutral-900' : 'bg-white/10 text-neutral-400'">
+                            {{ et.matching_venues_count }}
+                        </span>
+                    </button>
+                    {% endfor %}
                 </div>
+
             </div>
         </div>
-        {% empty %}
-        <div class="col-span-1 md:col-span-2 text-center py-16">
-            <p class="text-sm opacity-60">No event venue halls registered yet.</p>
+    </section>
+    {% endif %}
+
+    <!-- VENUES LISTING CONTAINER -->
+    <section class="py-8 sm:py-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- OCCASION SPOTLIGHT BANNER (Shown when a specific occasion is active) -->
+        {% for et in event_types %}
+        <div x-show="selectedOccasion === '{{ et.slug }}'"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 -translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             class="mb-8 p-5 sm:p-7 rounded-2xl border shadow-xl relative overflow-hidden"
+             :class="currentTheme === 'light' ? 'bg-gradient-to-r from-amber-50 via-white to-amber-50/50 border-amber-200' : 'bg-gradient-to-r from-[#1c1814] via-[#141210] to-[#12100e] border-luxuryGold-500/30'"
+             style="display: none;">
+            
+            <!-- Ambient gold glow -->
+            <div class="absolute -top-12 -right-12 w-36 h-36 bg-luxuryGold-500/15 rounded-full blur-2xl pointer-events-none"></div>
+
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
+                <div class="flex items-start sm:items-center gap-4">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden shrink-0 border border-luxuryGold-500/35 shadow-md relative group">
+                        <img src="{{ et.showcase_image_url }}" alt="{{ et.name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    </div>
+                    <div class="w-10 h-10 rounded-xl hidden sm:flex items-center justify-center text-lg shrink-0 bg-luxuryGold-500/20 text-luxuryGold-400 border border-luxuryGold-500/35 shadow-inner">
+                        <i class="fa-solid {{ et.fontawesome_icon|default:et.icon|default:'fa-calendar-check' }}"></i>
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-luxuryGold-500">
+                                Occasion Spotlight
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-luxuryGold-500/15 text-luxuryGold-400 border border-luxuryGold-500/25">
+                                <span class="w-1.5 h-1.5 rounded-full bg-luxuryGold-400 animate-pulse"></span>
+                                <span>{{ et.matching_venues_count }} Matching Halls</span>
+                            </span>
+                        </div>
+                        <h2 class="font-luxury-title text-xl sm:text-2xl lg:text-3xl font-bold">
+                            {{ et.name }}
+                        </h2>
+                        <p class="text-xs sm:text-sm opacity-80 max-w-2xl leading-relaxed">
+                            {{ et.description }}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Banner Action Buttons -->
+                <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0 pt-2 md:pt-0">
+                    <a href="{% url 'contact:contact_page' %}?subject={{ et.name|urlencode }}"
+                       class="px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 transition-all duration-300 shadow-md gold-glow flex items-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-envelope text-[11px]"></i>
+                        <span>Inquire for {{ et.name }}</span>
+                    </a>
+                    <button type="button"
+                            @click="selectOccasion('all')"
+                            class="px-3.5 py-2.5 rounded-xl text-xs font-semibold border transition-colors inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                            :class="currentTheme === 'light' ? 'border-neutral-300 hover:bg-neutral-100 text-neutral-700' : 'border-neutral-800 hover:bg-white/5 text-neutral-300'">
+                        <i class="fa-solid fa-xmark text-[11px]"></i>
+                        <span>Show All Venues</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Occasion Features Pill Strip -->
+            <div class="flex flex-wrap gap-2 pt-4 mt-4 border-t border-amber-900/15 text-[11px]">
+                <span class="px-2.5 py-1 rounded-full border flex items-center gap-1.5 opacity-90"
+                      :class="currentTheme === 'light' ? 'bg-white border-neutral-200 text-neutral-700' : 'bg-neutral-900 border-neutral-800 text-neutral-300'">
+                    <i class="fa-solid fa-check text-luxuryGold-500 text-[10px]"></i> Tailored Seating &amp; Staging
+                </span>
+                <span class="px-2.5 py-1 rounded-full border flex items-center gap-1.5 opacity-90"
+                      :class="currentTheme === 'light' ? 'bg-white border-neutral-200 text-neutral-700' : 'bg-neutral-900 border-neutral-800 text-neutral-300'">
+                    <i class="fa-solid fa-check text-luxuryGold-500 text-[10px]"></i> 5-Star Multi-Cuisine Catering
+                </span>
+                <span class="px-2.5 py-1 rounded-full border flex items-center gap-1.5 opacity-90"
+                      :class="currentTheme === 'light' ? 'bg-white border-neutral-200 text-neutral-700' : 'bg-neutral-900 border-neutral-800 text-neutral-300'">
+                    <i class="fa-solid fa-check text-luxuryGold-500 text-[10px]"></i> Audio-Visual &amp; Tech Support
+                </span>
+                <span class="px-2.5 py-1 rounded-full border flex items-center gap-1.5 opacity-90"
+                      :class="currentTheme === 'light' ? 'bg-white border-neutral-200 text-neutral-700' : 'bg-neutral-900 border-neutral-800 text-neutral-300'">
+                    <i class="fa-solid fa-check text-luxuryGold-500 text-[10px]"></i> Dedicated Event Coordinator
+                </span>
+            </div>
         </div>
         {% endfor %}
-    </div>
-</section>
+
+        <!-- VENUES GRID -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-start">
+            {% for venue in venues %}
+            <div x-data="{ expanded: false }"
+                 x-show="selectedOccasion === 'all' || {{ venue.suitable_event_slugs_js|safe }}.includes(selectedOccasion)"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 class="rounded-2xl overflow-hidden border shadow-lg group hover:translate-y-[-4px] duration-500 flex flex-col transition-all"
+                 :class="{
+                     'bg-white border-gray-200': currentTheme === 'light',
+                     'bg-[#161412] border-amber-900/20': currentTheme !== 'light',
+                     'ring-2 ring-luxuryGold-500/50 shadow-luxuryGold-500/10': selectedOccasion !== 'all' && {{ venue.suitable_event_slugs_js|safe }}.includes(selectedOccasion)
+                 }">
+                
+                <!-- Cover Image (Clickable Link with Occasion Param) -->
+                <a href="{% url 'conference:venue_detail' venue.slug %}"
+                   :href="'{% url 'conference:venue_detail' venue.slug %}' + (selectedOccasion !== 'all' ? '?event_type=' + selectedOccasion : '')" 
+                   class="relative h-52 sm:h-64 lg:h-72 overflow-hidden block">
+                    <img src="{% if venue.display_image_url %}{{ venue.display_image_url }}{% else %}https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=600{% endif %}" 
+                         alt="{{ venue.name }}" class="w-full h-full object-cover group-hover:scale-105 duration-700">
+                    
+                    <span class="absolute top-4 right-4 z-10 px-3 sm:px-4 py-1 text-[11px] sm:text-xs font-semibold bg-black/75 text-luxuryGold-300 rounded-full backdrop-blur-sm">
+                        Capacity: {{ venue.capacity }} Pax
+                    </span>
+                    
+                    {% if venue.is_featured %}
+                    <span class="absolute top-4 left-4 z-10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-luxuryGold-500 text-black rounded-full shadow">
+                        Featured Space
+                    </span>
+                    {% endif %}
+
+                    <!-- Recommended Badge on Occasion Match -->
+                    <div x-show="selectedOccasion !== 'all' && {{ venue.suitable_event_slugs_js|safe }}.includes(selectedOccasion)" 
+                         class="absolute bottom-4 left-4 z-10 px-3 py-1 text-[11px] font-bold bg-black/85 border border-luxuryGold-500/60 text-luxuryGold-300 rounded-full backdrop-blur-md flex items-center gap-1.5 shadow-lg animate__animated animate__fadeIn">
+                        <i class="fa-solid fa-sparkles text-luxuryGold-400 text-[10px]"></i>
+                        <span>Suited for Selected Occasion</span>
+                    </div>
+                </a>
+                
+                <!-- Details -->
+                <div class="p-5 sm:p-6 flex-grow flex flex-col justify-between">
+                    <div class="space-y-3 sm:space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4">
+                            <a href="{% url 'conference:venue_detail' venue.slug %}"
+                               :href="'{% url 'conference:venue_detail' venue.slug %}' + (selectedOccasion !== 'all' ? '?event_type=' + selectedOccasion : '')" class="hover:text-luxuryGold-400 transition-colors">
+                                <h3 class="font-luxury-title text-xl sm:text-2xl font-bold tracking-wide">{{ venue.name }}</h3>
+                            </a>
+                            <span class="text-xs font-semibold text-luxuryGold-500 shrink-0">
+                                Starting: {{ venue.currency_symbol }} {{ venue.current_base_price|floatformat:0 }}
+                            </span>
+                        </div>
+                        
+                        <div class="space-y-1.5">
+                            <p class="text-xs sm:text-sm opacity-85 leading-relaxed transition-all duration-300"
+                               :class="expanded ? 'line-clamp-none animate__animated animate__fadeIn' : 'line-clamp-3 overflow-hidden'"
+                               :style="expanded ? '' : '-webkit-line-clamp: 3; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;'">
+                                {{ venue.description }}
+                            </p>
+                            {% if venue.description|length > 100 %}
+                            <button @click="expanded = !expanded" 
+                                    type="button"
+                                    class="inline-flex items-center gap-1.5 text-xs font-semibold text-luxuryGold-500 hover:text-luxuryGold-400 transition-colors cursor-pointer focus:outline-none pt-1">
+                                <span x-text="expanded ? 'Show Less' : 'Show More'">Show More</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300"
+                                    :class="expanded ? 'rotate-180' : ''"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="space-y-2 text-xs opacity-75 pt-2 border-t border-amber-900/10">
+                            <p class="font-semibold text-luxuryGold-500 text-xs">
+                                <i class="fa-solid fa-shapes mr-1.5"></i>Layout Styles &amp; Capacities:
+                            </p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs opacity-90">
+                                {% for layout in venue.parsed_layouts %}
+                                    <span class="break-words"><i class="fa-solid fa-circle-check text-[9px] mr-1.5 opacity-60 text-luxuryGold-400"></i><strong>{{ layout.name }}:</strong> {% if layout.capacity %}{{ layout.capacity }} pax{% else %}{{ layout.value }}{% endif %}</span>
+                                {% empty %}
+                                    <span>No layout configurations specified.</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Single Clean CTA Button with Contextual Text -->
+                    <div class="pt-4 sm:pt-6 mt-4 sm:mt-6 border-t border-amber-900/10">
+                        <a href="{% url 'conference:venue_detail' venue.slug %}"
+                           :href="'{% url 'conference:venue_detail' venue.slug %}' + (selectedOccasion !== 'all' ? '?event_type=' + selectedOccasion : '')" 
+                           class="w-full py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-center flex items-center justify-center gap-2 transition-colors shadow-sm"
+                           :class="{ 'bg-amber-800 text-white hover:bg-amber-900': currentTheme === 'light', 'bg-luxuryGold-500 text-black hover:bg-luxuryGold-400': currentTheme !== 'light' }">
+                            <span x-text="selectedOccasion !== 'all' ? 'View Details &amp; Request Proposal for Occasion' : 'View Details &amp; Request Proposal'">
+                                View Details &amp; Request Proposal
+                            </span>
+                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-1 md:col-span-2 text-center py-16">
+                <p class="text-sm opacity-60">No event venue halls registered yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Filter Empty State (When no venues match selected occasion) -->
+        <div x-show="getCount() === 0" 
+             class="text-center py-16 max-w-md mx-auto space-y-3 animate__animated animate__fadeIn"
+             style="display: none;">
+            <div class="w-14 h-14 rounded-full bg-luxuryGold-500/10 text-luxuryGold-500 flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-calendar-xmark"></i>
+            </div>
+            <h3 class="font-luxury-title text-xl font-bold">No Venue Halls Match this Filter</h3>
+            <p class="text-xs opacity-75 leading-relaxed">
+                We can customize any of our luxury halls for custom occasions and setups. Feel free to explore all venues or speak directly with our events coordinator.
+            </p>
+            <div class="pt-2">
+                <button @click="selectOccasion('all')" type="button" class="px-6 py-2.5 rounded-full bg-luxuryGold-500 text-neutral-950 text-xs font-bold uppercase tracking-wider shadow cursor-pointer">
+                    View All Venues
+                </button>
+            </div>
+        </div>
+
+    </section>
+</div>
 {% endblock %}

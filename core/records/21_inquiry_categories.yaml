@@ -1,0 +1,31 @@
+inquiry_categories:
+  - name: General Inquiry
+    slug: general
+    description: "General hotel inquiries, questions, and guest assistance."
+    display_order: 1
+    is_active: true
+  - name: Room Booking
+    slug: room-booking
+    description: "Room accommodation, luxury suites, and reservation inquiries."
+    display_order: 2
+    is_active: true
+  - name: Fine Dining Table
+    slug: dining
+    description: "Restaurant reservations, banquet dining, and culinary requests."
+    display_order: 3
+    is_active: true
+  - name: Meetings & Events
+    slug: events-banquets
+    description: "Corporate conferences, wedding banquets, and hall celebrations."
+    display_order: 4
+    is_active: true
+  - name: Recreation & Wellness
+    slug: recreation-wellness
+    description: "Spa therapy, swimming pool, health club, and wellness inquiries."
+    display_order: 5
+    is_active: true
+  - name: Guest Feedback
+    slug: feedback
+    description: "Guest reviews, service feedback, and personal recommendations."
+    display_order: 6
+    is_active: true

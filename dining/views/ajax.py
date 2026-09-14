@@ -151,7 +151,7 @@ def book_table_ajax(request, venue_id):
             notification_type='dining_reservation_created',
             title=f"New Dining Reservation from {name}",
             message=f"Venue: {venue.name} on {date} at {time_str} ({guests} guests)",
-            link_url=reverse('admin_dashboard:dining_dashboard')
+            link_url=reverse('admin_dashboard:dining_dashboard') + '?tab=reservations'
         )
         send_inquiry_notification_email('dining', reservation)
     except Exception:

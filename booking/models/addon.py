@@ -7,15 +7,16 @@ class Addon(models.Model):
     prices: models.QuerySet
 
     APPLIES_TO_CHOICES = (
-        ('both', 'Both Rooms & Services'),
+        ('both', 'Both Rooms & Events/Conference'),
         ('room', 'Room Bookings Only'),
+        ('events', 'Events & Conference Only'),
     )
 
     PRICE_TYPE_CHOICES = (
         ('per_night', 'Per Room / Per Night'),
         ('per_person', 'Per Guest'),
         ('per_person_per_night', 'Per Guest / Per Night'),
-        ('per_booking', 'Per Room Booking'),
+        ('per_booking', 'Per Booking / Event (Flat Rate)'),
     )
 
     name = models.CharField(max_length=150)

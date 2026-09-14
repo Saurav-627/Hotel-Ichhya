@@ -14,6 +14,10 @@
     <a href="{% url 'admin_dashboard:branch_create' %}" class="px-4 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-lg text-sm transition">
         <i class="fa-solid fa-plus mr-1.5"></i> Add Branch
     </a>
+    {% elif active_tab == 'inquiries' %}
+    <a href="{% url 'admin_dashboard:inquiry_category_create' %}" class="px-4 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-lg text-sm transition flex items-center gap-1.5 shadow-sm">
+        <i class="fa-solid fa-plus mr-1"></i> Add Category
+    </a>
     {% elif active_tab == 'subscribers' %}
     <a href="{% url 'admin_dashboard:contact_broadcast' %}" class="px-4 py-2.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-lg text-sm transition flex items-center gap-2">
         <i class="fa-solid fa-paper-plane"></i> Broadcast Campaign
@@ -87,17 +91,79 @@
     </div>
 
     {% elif active_tab == 'inquiries' %}
+    <!-- Inquiry Categories Management Card -->
+    <div class="custom-card rounded-2xl p-6 shadow-sm border border-neutral-200 dark:border-neutral-800 space-y-4 mb-6">
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-neutral-200 dark:border-neutral-800">
+            <div>
+                <h3 class="text-base font-serif font-bold text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
+                    <i class="fa-solid fa-tags text-luxuryGold-500"></i>
+                    <span>Inquiry Categories</span>
+                </h3>
+                <p class="text-xs text-neutral-500 mt-0.5">Manage category options available for guests in the public contact form.</p>
+            </div>
+            <a href="{% url 'admin_dashboard:inquiry_category_create' %}" 
+               class="px-3.5 py-1.5 bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold rounded-xl text-xs transition flex items-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-plus"></i> Add Category
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 pt-1">
+            {% for cat in categories %}
+            <div class="p-3.5 rounded-xl border border-neutral-200/80 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/40 flex items-center justify-between gap-3 hover:border-luxuryGold-500/30 transition">
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2">
+                        <strong class="text-sm font-bold text-neutral-900 dark:text-neutral-100 truncate">{{ cat.name }}</strong>
+                        {% if cat.is_active %}
+                        <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 uppercase shrink-0">Active</span>
+                        {% else %}
+                        <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-neutral-500/10 text-neutral-400 border border-neutral-500/20 uppercase shrink-0">Hidden</span>
+                        {% endif %}
+                    </div>
+                    <div class="flex items-center gap-3 mt-1 text-[11px] text-neutral-500">
+                        <span><i class="fa-solid fa-arrow-down-1-9 text-luxuryGold-500 mr-1"></i>Order: {{ cat.display_order }}</span>
+                        <span><i class="fa-solid fa-envelope-open-text text-luxuryGold-500 mr-1"></i>{{ cat.inquiry_count|default:0 }} inquiries</span>
+                    </div>
+                    {% if cat.description %}
+                    <p class="text-[11px] text-neutral-400 mt-1 truncate" title="{{ cat.description }}">{{ cat.description }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <a href="{% url 'admin_dashboard:inquiry_category_edit' cat.id %}" 
+                       class="p-1.5 text-neutral-400 hover:text-luxuryGold-500 transition text-xs" title="Edit Category">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                    <a href="{% url 'admin_dashboard:inquiry_category_delete' cat.id %}" 
+                       class="p-1.5 text-neutral-400 hover:text-rose-500 transition text-xs" title="Delete Category">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-6 text-xs text-neutral-500">
+                No inquiry categories configured. Click "Add Category" to create one.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
     <!-- Clear All Header Bar -->
-    <div class="flex items-center justify-between mb-4">
-        <h3 class="text-base font-serif font-bold text-neutral-900 dark:text-neutral-100">Guest Contact Inquiries</h3>
-        {% if inquiries %}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <div>
+            <h3 class="text-base font-serif font-bold text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
+                <span>Guest Contact Inquiries</span>
+                <span class="text-xs font-sans font-normal text-neutral-500">({{ inquiries_filtered_count|default:0 }} shown{% if selected_category %} of {{ inquiries_total|default:0 }}{% endif %})</span>
+            </h3>
+        </div>
+        {% if inquiries_total %}
         <div x-data="{ clearModalOpen: false }">
             <button type="button" @click="clearModalOpen = true" class="px-3.5 py-1.5 bg-rose-500/10 hover:bg-rose-600 text-rose-500 hover:text-white font-bold rounded-xl text-xs transition-colors border border-rose-500/20 flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-trash-can"></i> Clear All Inquiries
             </button>
 
             <!-- Modal Backdrop & Card -->
-            <div x-show="clearModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-950/70 backdrop-blur-sm">
+            <div x-show="clearModalOpen" x-cloak 
+                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-950/70 backdrop-blur-sm"
+                 style="display: none;">
                 <div @click.away="clearModalOpen = false" class="custom-card rounded-2xl p-6 sm:p-8 max-w-md w-full text-center bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-2xl space-y-5">
                     <div class="h-14 w-14 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto text-2xl border border-rose-500/20">
                         <i class="fa-solid fa-triangle-exclamation"></i>
@@ -123,6 +189,21 @@
         {% endif %}
     </div>
 
+    <!-- Category Filter Pills -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-2 mb-4 text-xs no-scrollbar">
+        <a href="?tab=inquiries" 
+           class="px-3 py-1.5 rounded-lg font-semibold transition shrink-0 {% if not selected_category %}bg-luxuryGold-500 text-neutral-950 shadow-sm{% else %}bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:text-luxuryGold-500{% endif %}">
+            All Inquiries ({{ inquiries_total|default:0 }})
+        </a>
+        {% for cat in categories %}
+        <a href="?tab=inquiries&category={{ cat.slug }}" 
+           class="px-3 py-1.5 rounded-lg font-semibold transition shrink-0 flex items-center gap-1.5 {% if selected_category == cat.slug or selected_category == cat.id|stringformat:'s' %}bg-luxuryGold-500 text-neutral-950 shadow-sm{% else %}bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:text-luxuryGold-500{% endif %}">
+            <span>{{ cat.name }}</span>
+            <span class="opacity-70 text-[10px]">({{ cat.inquiry_count|default:0 }})</span>
+        </a>
+        {% endfor %}
+    </div>
+
     <!-- Inquiries List table -->
     <div class="custom-card rounded-2xl overflow-hidden shadow-sm">
         <table class="w-full text-left border-collapse">
@@ -143,8 +224,16 @@
                         <strong class="text-neutral-900 dark:text-neutral-200 block">{{ inq.name }}</strong>
                         <span class="text-xs text-neutral-500 block">{{ inq.email }} · {{ inq.phone }}</span>
                     </td>
-                    <td class="px-6 py-4 text-neutral-600 dark:text-neutral-400 font-medium uppercase text-xs">
-                        {{ inq.get_category_display }}
+                    <td class="px-6 py-4 font-medium uppercase text-xs">
+                        {% if inq.category %}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold bg-luxuryGold-500/10 text-luxuryGold-600 dark:text-luxuryGold-400 border border-luxuryGold-500/20">
+                            {{ inq.category.name }}
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold bg-neutral-500/10 text-neutral-400 border border-neutral-500/20">
+                            {{ inq.get_category_display }}
+                        </span>
+                        {% endif %}
                     </td>
                     <td class="px-6 py-4 text-neutral-850 dark:text-neutral-300 font-semibold">{{ inq.subject }}</td>
                     <td class="px-6 py-4 text-neutral-500 italic max-w-xs truncate" title="{{ inq.message }}">{{ inq.message }}</td>
@@ -165,7 +254,7 @@
                 {% empty %}
                 <tr>
                     <td colspan="6" class="px-6 py-12 text-center text-sm text-neutral-500">
-                        No general contact inquiries received yet.
+                        No contact inquiries found matching criteria.
                     </td>
                 </tr>
                 {% endfor %}

@@ -2,11 +2,35 @@ event_venues:
 - name: Janaki Hall
   description: Step into the grandeur of Janaki Hall at Hotel Ichchha, a venue that epitomizes elegance and charm.
   capacity: 400
+  is_featured: true
+  allow_custom_addons: true
   layout_options: |-
     Theatre: 400 pax
     Banquet: 250 pax
     Round Table: 200 pax
     Classroom: 150 pax
+  event_types:
+    - luxury-weddings
+    - corporate-conferences
+    - gala-dinners
+    - workshops-seminars
+    - social-celebrations
+  available_addons:
+    - "Executive High Tea & Refreshments"
+    - "Premium Audio/Visual & Stage Tech"
+  layouts:
+    - name: Theatre
+      capacity: 400
+      display_order: 1
+    - name: Banquet
+      capacity: 250
+      display_order: 2
+    - name: Round Table
+      capacity: 200
+      display_order: 3
+    - name: Classroom
+      capacity: 150
+      display_order: 4
   base_prices:
     - currency: NPR
       base_price: 50000.0
@@ -15,14 +39,38 @@ event_venues:
     - currency: EUR
       base_price: 360.0
   is_active: true
+
 - name: Jyamire Hall
   description: Ascend to the zenith of luxury with Jyamire Hall at Hotel Ichchha, a beacon of unparalleled sophistication.
   capacity: 150
+  is_featured: true
+  allow_custom_addons: true
   layout_options: |-
     Theatre: 150 pax
     Banquet: 100 pax
     Round Table: 80 pax
     Classroom: 60 pax
+  event_types:
+    - corporate-conferences
+    - gala-dinners
+    - workshops-seminars
+    - social-celebrations
+  available_addons:
+    - "Premium Audio/Visual & Stage Tech"
+    - "VIP Chauffeur & Shuttle Logistics"
+  layouts:
+    - name: Theatre
+      capacity: 150
+      display_order: 1
+    - name: Banquet
+      capacity: 100
+      display_order: 2
+    - name: Round Table
+      capacity: 80
+      display_order: 3
+    - name: Classroom
+      capacity: 60
+      display_order: 4
   base_prices:
     - currency: NPR
       base_price: 35000.0
@@ -31,13 +79,31 @@ event_venues:
     - currency: EUR
       base_price: 250.0
   is_active: true
+
 - name: Narayani Hall
   description: Narayani Hall at Hotel Ichchha is where grandeur meets innovation, a prestigious venue.
   capacity: 10
+  is_featured: false
+  allow_custom_addons: false
   layout_options: |-
     Board Room: 10 pax
     U-Shape: 8 pax
     Classroom: 8 pax
+  event_types:
+    - executive-meetings
+  available_addons:
+    - "Executive High Tea & Refreshments"
+    - "Premium Audio/Visual & Stage Tech"
+  layouts:
+    - name: Board Room
+      capacity: 10
+      display_order: 1
+    - name: U-Shape
+      capacity: 8
+      display_order: 2
+    - name: Classroom
+      capacity: 8
+      display_order: 3
   base_prices:
     - currency: NPR
       base_price: 15000.0
@@ -46,13 +112,31 @@ event_venues:
     - currency: EUR
       base_price: 110.0
   is_active: true
+
 - name: Balmiki Hall
   description: Balmiki Hall at Hotel Ichchha is a marvel of architectural beauty and functional elegance.
   capacity: 25
+  is_featured: false
+  allow_custom_addons: true
   layout_options: |-
     U-Shape: 25 pax
     Classroom: 20 pax
     Board Room: 15 pax
+  event_types:
+    - executive-meetings
+    - workshops-seminars
+  available_addons:
+    - "Executive High Tea & Refreshments"
+  layouts:
+    - name: U-Shape
+      capacity: 25
+      display_order: 1
+    - name: Classroom
+      capacity: 20
+      display_order: 2
+    - name: Board Room
+      capacity: 15
+      display_order: 3
   base_prices:
     - currency: NPR
       base_price: 20000.0
