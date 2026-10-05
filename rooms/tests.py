@@ -1,5 +1,6 @@
 from decimal import Decimal
 import datetime
+from unittest.mock import patch, MagicMock
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
@@ -171,7 +172,12 @@ class RoomFeatureTests(TestCase):
             transaction_id="TXN_12345"
         )
         callback_url = reverse('payments:payment_callback', kwargs={'payment_id': payment.id})
-        self.client.get(callback_url)
+        with patch('stripe.checkout.Session.retrieve') as mock_retrieve:
+            mock_session = MagicMock()
+            mock_session.payment_status = 'paid'
+            mock_session.to_dict.return_value = {'id': 'cs_test_mock', 'payment_status': 'paid'}
+            mock_retrieve.return_value = mock_session
+            self.client.get(callback_url, {'session_id': 'cs_test_mock'})
 
         booking.refresh_from_db()
         self.assertEqual(booking.status, 'confirmed')
