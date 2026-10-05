@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="py-6 sm:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+<section class="py-4 sm:py-12 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
         
         <!-- VENUE INFO & GALLERY (2 COLS) -->
-        <div class="lg:col-span-2 space-y-6 sm:space-y-8">
+        <div class="lg:col-span-2 space-y-4 sm:space-y-8">
             <!-- Gallery Slider (Alpine.js) -->
             <!-- Gallery Slider with Lightbox (Alpine.js) -->
             <div x-data="{
@@ -21,7 +21,7 @@
                 next() { this.activeSlide = (this.activeSlide + 1) % this.slides.length }
             }"
             x-init="if (slides.length > 1) setInterval(() => next(), 5000)"
-            class="relative h-[260px] sm:h-[380px] lg:h-[480px] overflow-hidden rounded-2xl border border-amber-900/10 bg-neutral-950 flex items-center justify-center">
+            class="relative h-[240px] sm:h-[380px] lg:h-[480px] overflow-hidden rounded-2xl border border-amber-900/10 bg-neutral-950 flex items-center justify-center">
                 
                 <!-- Slide List (Zero-Crop object-contain) -->
                 <template x-for="(slide, index) in slides" :key="index">
@@ -86,63 +86,63 @@
                 </template>
             </div>
 
-            <div class="space-y-3 sm:space-y-4">
+            <div class="space-y-2 sm:space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4">
-                    <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">Premium Event Space</span>
+                    <span class="text-[10px] sm:text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">Premium Event Space</span>
                     <span class="text-xs sm:text-sm font-bold text-luxuryGold-500 font-luxury-title">Base Rental: {{ venue.currency_symbol }} {{ venue.current_base_price|floatformat:0 }}</span>
                 </div>
-                <h1 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold tracking-wide">{{ venue.name }}</h1>
+                <h1 class="font-luxury-title text-xl sm:text-4xl lg:text-5xl font-bold tracking-wide">{{ venue.name }}</h1>
                 <p class="text-xs sm:text-sm leading-relaxed opacity-85">{{ venue.description }}</p>
             </div>
 
             <!-- KEY SPECIFICATIONS BAR -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-2xl border text-xs"
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 p-3 sm:p-4 rounded-xl sm:rounded-2xl border text-xs"
                  :class="{ 'bg-gray-50 border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
-                <div class="flex items-center gap-3 p-2">
-                    <div class="w-9 h-9 rounded-full bg-luxuryGold-500/15 text-luxuryGold-500 flex items-center justify-center shrink-0 text-sm">
+                <div class="flex items-center gap-2.5 sm:gap-3 p-1.5 sm:p-2">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-luxuryGold-500/15 text-luxuryGold-500 flex items-center justify-center shrink-0 text-xs sm:text-sm">
                         <i class="fa-solid fa-users"></i>
                     </div>
                     <div>
-                        <span class="block text-[10px] uppercase tracking-wider font-semibold opacity-60">Maximum Capacity</span>
+                        <span class="block text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold opacity-60">Maximum Capacity</span>
                         <strong class="text-xs sm:text-sm font-bold text-luxuryGold-500 dark:text-luxuryGold-300">{{ venue.capacity }} Guests Max</strong>
                     </div>
                 </div>
-                <div class="flex items-center gap-3 p-2 border-t sm:border-t-0 sm:border-l" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
-                    <div class="w-9 h-9 rounded-full bg-luxuryGold-500/15 text-luxuryGold-500 flex items-center justify-center shrink-0 text-sm">
+                <div class="flex items-center gap-2.5 sm:gap-3 p-1.5 sm:p-2 border-t sm:border-t-0 sm:border-l" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-luxuryGold-500/15 text-luxuryGold-500 flex items-center justify-center shrink-0 text-xs sm:text-sm">
                         <i class="fa-solid fa-tag"></i>
                     </div>
                     <div>
-                        <span class="block text-[10px] uppercase tracking-wider font-semibold opacity-60">Base Rental Rate</span>
+                        <span class="block text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold opacity-60">Base Rental Rate</span>
                         <strong class="text-xs sm:text-sm font-bold text-luxuryGold-500 dark:text-luxuryGold-300">{{ venue.currency_symbol }} {{ venue.current_base_price|floatformat:0 }}</strong>
                     </div>
                 </div>
-                <div class="flex items-center gap-3 p-2 border-t sm:border-t-0 sm:border-l" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
-                    <div class="w-9 h-9 rounded-full bg-luxuryGold-500/15 text-luxuryGold-500 flex items-center justify-center shrink-0 text-sm">
+                <div class="flex items-center gap-2.5 sm:gap-3 p-1.5 sm:p-2 border-t sm:border-t-0 sm:border-l" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-luxuryGold-500/15 text-luxuryGold-500 flex items-center justify-center shrink-0 text-xs sm:text-sm">
                         <i class="fa-solid fa-shapes"></i>
                     </div>
                     <div>
-                        <span class="block text-[10px] uppercase tracking-wider font-semibold opacity-60">Seating Styles</span>
+                        <span class="block text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold opacity-60">Seating Styles</span>
                         <strong class="text-xs sm:text-sm font-bold text-luxuryGold-500 dark:text-luxuryGold-300">{{ venue.parsed_layouts|length }} Layout Styles</strong>
                     </div>
                 </div>
             </div>
 
             <!-- LAYOUTS AND CAPACITY SPECIFICATION TABLE -->
-            <div class="p-4 sm:p-6 rounded-2xl border border-amber-900/10 space-y-4" :class="{ 'bg-gray-50': currentTheme === 'light', 'bg-[#161412]': currentTheme !== 'light' }">
-                <h3 class="font-luxury-title text-lg sm:text-xl font-bold border-b pb-3" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
+            <div class="p-3.5 sm:p-6 rounded-xl sm:rounded-2xl border border-amber-900/10 space-y-3 sm:space-y-4" :class="{ 'bg-gray-50': currentTheme === 'light', 'bg-[#161412]': currentTheme !== 'light' }">
+                <h3 class="font-luxury-title text-base sm:text-xl font-bold border-b pb-2 sm:pb-3" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
                     Seating Layout Capacities
                 </h3>
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 pt-2">
-                    <div class="text-center p-3 sm:p-4 rounded-xl border border-white/5 bg-black/10">
-                        <i class="fa-solid fa-users text-xl sm:text-2xl text-luxuryGold-500 mb-1.5"></i>
-                        <h4 class="text-[10px] sm:text-xs font-bold uppercase tracking-wider opacity-60">Max Capacity</h4>
-                        <p class="text-base sm:text-lg font-bold mt-1 text-luxuryGold-300">{{ venue.capacity }} pax</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 pt-1 sm:pt-2">
+                    <div class="text-center p-2.5 sm:p-4 rounded-xl border border-white/5 bg-black/10">
+                        <i class="fa-solid fa-users text-lg sm:text-2xl text-luxuryGold-500 mb-1"></i>
+                        <h4 class="text-[9px] sm:text-xs font-bold uppercase tracking-wider opacity-60">Max Capacity</h4>
+                        <p class="text-sm sm:text-lg font-bold mt-0.5 sm:mt-1 text-luxuryGold-300">{{ venue.capacity }} pax</p>
                     </div>
                     {% for layout in venue.parsed_layouts %}
-                    <div class="text-center p-3 sm:p-4 rounded-xl border border-white/5 bg-black/10 flex flex-col items-center justify-center">
-                        <i class="fa-solid fa-chair text-xl sm:text-2xl text-luxuryGold-500 mb-1.5"></i>
-                        <h4 class="text-[10px] sm:text-xs font-bold uppercase tracking-wider opacity-60 break-words leading-tight">{{ layout.name }}</h4>
-                        <p class="text-xs sm:text-sm font-bold mt-1 text-luxuryGold-300 break-words leading-tight">
+                    <div class="text-center p-2.5 sm:p-4 rounded-xl border border-white/5 bg-black/10 flex flex-col items-center justify-center">
+                        <i class="fa-solid fa-chair text-lg sm:text-2xl text-luxuryGold-500 mb-1"></i>
+                        <h4 class="text-[9px] sm:text-xs font-bold uppercase tracking-wider opacity-60 break-words leading-tight">{{ layout.name }}</h4>
+                        <p class="text-xs sm:text-sm font-bold mt-0.5 sm:mt-1 text-luxuryGold-300 break-words leading-tight">
                             {% if layout.capacity %}{{ layout.capacity }} pax{% else %}{{ layout.value }}{% endif %}
                         </p>
                     </div>
@@ -152,35 +152,35 @@
 
             <!-- COMPLIMENTARY VENUE INCLUSIONS SECTION -->
             {% if venue_inclusions %}
-            <div class="p-4 sm:p-6 rounded-2xl border space-y-4"
+            <div class="p-3.5 sm:p-6 rounded-xl sm:rounded-2xl border space-y-3 sm:space-y-4"
                  :class="{ 'bg-gray-50 border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/10': currentTheme !== 'light' }">
-                <div class="flex items-center justify-between flex-wrap gap-2 border-b pb-3"
+                <div class="flex items-center justify-between flex-wrap gap-2 border-b pb-2.5 sm:pb-3"
                      :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
                     <div class="flex items-center gap-2">
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 inline-flex items-center">
-                            <i class="fa-solid fa-gift mr-1.5 text-xs"></i> Package Inclusions
+                        <span class="px-2 sm:px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 inline-flex items-center">
+                            <i class="fa-solid fa-gift mr-1 text-xs"></i> Package Inclusions
                         </span>
-                        <h3 class="font-luxury-title text-base sm:text-lg font-bold">Included With This Venue</h3>
+                        <h3 class="font-luxury-title text-sm sm:text-lg font-bold">Included With This Venue</h3>
                     </div>
-                    <span class="text-[11px] opacity-70">Complimentary with hall rental</span>
+                    <span class="text-[10px] sm:text-[11px] opacity-70">Complimentary with hall rental</span>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 pt-1">
                     {% for addon in venue_inclusions %}
-                    <div class="p-3 sm:p-3.5 rounded-xl border flex items-start gap-3 transition-colors duration-200"
+                    <div class="p-2.5 sm:p-3.5 rounded-lg sm:rounded-xl border flex items-start gap-2.5 sm:gap-3 transition-colors duration-200"
                          :class="{ 'bg-white border-gray-200 shadow-sm': currentTheme === 'light', 'bg-black/20 border-white/5 text-white': currentTheme !== 'light' }">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 text-sm">
+                        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 text-xs sm:text-sm">
                             <i class="fa-solid {{ addon.icon|default:'fa-circle-check' }}"></i>
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center justify-between gap-1.5 flex-wrap">
                                 <h4 class="font-semibold text-xs sm:text-sm leading-snug break-words">{{ addon.name }}</h4>
-                                <span class="inline-flex items-center px-2 py-0.5 text-[9px] rounded-full font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 shrink-0">
+                                <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[9px] rounded-full font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 shrink-0">
                                     Included Free
                                 </span>
                             </div>
                             {% if addon.description %}
-                            <p class="opacity-70 mt-1 leading-relaxed text-[11px]">{{ addon.description }}</p>
+                            <p class="opacity-70 mt-0.5 sm:mt-1 leading-relaxed text-[10px] sm:text-[11px]">{{ addon.description }}</p>
                             {% endif %}
                         </div>
                     </div>
@@ -191,18 +191,18 @@
         </div>
 
         <!-- EVENT INQUIRY FORM (1 COL) -->
-        <div class="space-y-8 lg:col-span-1">
-            <div class="rounded-2xl p-5 sm:p-6 border shadow-xl sticky top-20 lg:top-28"
+        <div class="space-y-6 sm:space-y-8 lg:col-span-1">
+            <div class="rounded-xl sm:rounded-2xl p-4 sm:p-6 border shadow-xl sticky top-20 lg:top-28"
                  :class="{
                      'bg-white border-gray-200 text-gray-800': currentTheme === 'light',
                      'bg-[#161412] border-amber-900/20 text-amber-100': currentTheme !== 'light'
                  }">
-                <h3 class="font-luxury-title text-lg sm:text-xl font-semibold mb-2 border-b pb-4" 
+                <h3 class="font-luxury-title text-base sm:text-xl font-semibold mb-1.5 sm:mb-2 border-b pb-2.5 sm:pb-4" 
                     :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
                     Request Proposal
                 </h3>
                 
-                <p class="text-xs opacity-75 mb-6">Plan your meetings, seminars, and weddings. Fill in details and receive a customized banquet quote.</p>
+                <p class="text-xs opacity-75 mb-4 sm:mb-6">Plan your meetings, seminars, and weddings. Fill in details and receive a customized banquet quote.</p>
 
                 <!-- Django messages rendering -->
                 {% if messages %}
@@ -326,36 +326,36 @@
                     {% csrf_token %}
                     
                     <div>
-                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Full Name *</label>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1 sm:mb-1.5 opacity-80">Full Name *</label>
                         <input type="text" name="name" required x-model="name" @blur="validateName()" @input="validateName()"
                                placeholder="Your Full Name"
-                               class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-1 bg-transparent text-inherit transition-colors"
+                               class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border focus:outline-none focus:ring-1 bg-transparent text-inherit transition-colors text-xs sm:text-sm"
                                :class="errors.name ? 'border-red-500 text-red-500 focus:ring-red-500' : 'focus:ring-luxuryGold-500'">
-                        <p x-show="errors.name" x-text="errors.name" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
+                        <p x-show="errors.name" x-text="errors.name" class="text-[10px] sm:text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                         {% if form.name.errors %}
                         <p class="text-red-500 text-[10px] mt-1">{{ form.name.errors.as_text }}</p>
                         {% endif %}
                     </div>
                     
                     <div>
-                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Email Address *</label>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1 sm:mb-1.5 opacity-80">Email Address *</label>
                         <input type="email" name="email" required x-model="email" @blur="validateEmail()" @input="validateEmail()"
                                placeholder="your.email@example.com"
-                               class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-1 bg-transparent text-inherit transition-colors"
+                               class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border focus:outline-none focus:ring-1 bg-transparent text-inherit transition-colors text-xs sm:text-sm"
                                :class="errors.email ? 'border-red-500 text-red-500 focus:ring-red-500' : 'focus:ring-luxuryGold-500'">
-                        <p x-show="errors.email" x-text="errors.email" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
+                        <p x-show="errors.email" x-text="errors.email" class="text-[10px] sm:text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                         {% if form.email.errors %}
                         <p class="text-red-500 text-[10px] mt-1">{{ form.email.errors.as_text }}</p>
                         {% endif %}
                     </div>
                     
                     <div>
-                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Contact Phone *</label>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1 sm:mb-1.5 opacity-80">Contact Phone *</label>
                         <input type="tel" name="phone" required x-model="phone" @blur="validatePhone()" @input="validatePhone()"
                                placeholder="10-digit mobile number"
-                               class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-1 bg-transparent text-inherit transition-colors"
+                               class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border focus:outline-none focus:ring-1 bg-transparent text-inherit transition-colors text-xs sm:text-sm"
                                :class="errors.phone ? 'border-red-500 text-red-500 focus:ring-red-500' : 'focus:ring-luxuryGold-500'">
-                        <p x-show="errors.phone" x-text="errors.phone" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
+                        <p x-show="errors.phone" x-text="errors.phone" class="text-[10px] sm:text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                         {% if form.phone.errors %}
                         <p class="text-red-500 text-[10px] mt-1">{{ form.phone.errors.as_text }}</p>
                         {% endif %}
@@ -364,7 +364,7 @@
                     <!-- Event Type Selection (Only shown if venue has assigned event categories) -->
                     {% if form.fields.event_type.queryset.exists %}
                     <div>
-                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Event Category</label>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1 sm:mb-1.5 opacity-80">Event Category</label>
                         {{ form.event_type }}
                         {% if form.event_type.errors %}
                         <p class="text-red-500 text-[10px] mt-1">{{ form.event_type.errors.as_text }}</p>
@@ -372,24 +372,24 @@
                     </div>
                     {% endif %}
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
-                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Event Date *</label>
+                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1 sm:mb-1.5 opacity-80">Event Date *</label>
                             <input type="date" name="event_date" required min="{% now 'Y-m-d' %}" x-model="eventDate" @blur="validateEventDate()" @change="validateEventDate()"
-                                   class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-1 bg-transparent text-inherit cursor-pointer transition-colors"
+                                   class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border focus:outline-none focus:ring-1 bg-transparent text-inherit cursor-pointer transition-colors text-xs sm:text-sm"
                                    :class="errors.eventDate ? 'border-red-500 text-red-500 focus:ring-red-500' : 'focus:ring-luxuryGold-500'">
-                            <p x-show="errors.eventDate" x-text="errors.eventDate" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
+                            <p x-show="errors.eventDate" x-text="errors.eventDate" class="text-[10px] sm:text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                             {% if form.event_date.errors %}
                             <p class="text-red-500 text-[10px] mt-1">{{ form.event_date.errors.as_text }}</p>
                             {% endif %}
                         </div>
                         <div>
-                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Guest Count *</label>
+                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1 sm:mb-1.5 opacity-80">Guest Count *</label>
                             <input type="number" name="guest_count" min="1" required x-model="guestCount" @blur="validateGuestCount()" @input="validateGuestCount()"
                                    :placeholder="'Expected Guests (Max ' + effectiveCapacity + ')'"
-                                   class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-1 bg-transparent text-inherit transition-colors"
+                                   class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border focus:outline-none focus:ring-1 bg-transparent text-inherit transition-colors text-xs sm:text-sm"
                                    :class="errors.guestCount ? 'border-red-500 text-red-500 focus:ring-red-500' : 'focus:ring-luxuryGold-500'">
-                            <p x-show="errors.guestCount" x-text="errors.guestCount" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
+                            <p x-show="errors.guestCount" x-text="errors.guestCount" class="text-[10px] sm:text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                             {% if form.guest_count.errors %}
                             <p class="text-red-500 text-[10px] mt-1">{{ form.guest_count.errors.as_text }}</p>
                             {% endif %}
@@ -397,26 +397,26 @@
                     </div>
 
                     <!-- Event Time Window -->
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-3 sm:gap-4">
                         <div>
-                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Start Time</label>
+                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1 sm:mb-1.5 opacity-80">Start Time</label>
                             <input type="time" name="start_time" x-model="startTime" @change="validateTimes()"
-                                   class="w-full px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-1 focus:ring-luxuryGold-500 bg-transparent text-inherit cursor-pointer">
+                                   class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-1 focus:ring-luxuryGold-500 bg-transparent text-inherit cursor-pointer text-xs sm:text-sm">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">End Time</label>
+                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1 sm:mb-1.5 opacity-80">End Time</label>
                             <input type="time" name="end_time" x-model="endTime" @change="validateTimes()"
-                                   class="w-full px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-1 focus:ring-luxuryGold-500 bg-transparent text-inherit cursor-pointer">
-                            <p x-show="errors.endTime" x-text="errors.endTime" class="text-[11px] text-red-500 font-semibold mt-1"></p>
+                                   class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-1 focus:ring-luxuryGold-500 bg-transparent text-inherit cursor-pointer text-xs sm:text-sm">
+                            <p x-show="errors.endTime" x-text="errors.endTime" class="text-[10px] sm:text-[11px] text-red-500 font-semibold mt-1"></p>
                         </div>
                     </div>
 
                     <!-- Seating Layout Selection -->
                     {% if venue_layouts %}
                     <div>
-                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Preferred Seating Setup</label>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1 sm:mb-1.5 opacity-80">Preferred Seating Setup</label>
                         <select name="preferred_layout" x-model="selectedLayout" @change="validateGuestCount()"
-                                class="w-full px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-1 focus:ring-luxuryGold-500 bg-transparent text-inherit cursor-pointer">
+                                class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-1 focus:ring-luxuryGold-500 bg-transparent text-inherit cursor-pointer text-xs sm:text-sm">
                             <option value="">— Select Layout Setup (Optional) —</option>
                             {% for l in venue_layouts %}
                             <option value="{{ l.id }}">{{ l.name }} (Capacity: {{ l.capacity }} pax)</option>
@@ -427,7 +427,7 @@
 
                     <!-- Optional Services / Add-ons Checkboxes -->
                     {% if venue.allow_custom_addons and event_services %}
-                    <div class="space-y-2 pt-2 border-t border-neutral-200/60 dark:border-neutral-800/60">
+                    <div class="space-y-1.5 sm:space-y-2 pt-2 border-t border-neutral-200/60 dark:border-neutral-800/60">
                         <div class="flex items-center justify-between">
                             <label class="block text-[10px] font-semibold uppercase tracking-wider opacity-80">Optional Event Add-on Services</label>
                             <span class="text-[9px] font-bold text-luxuryGold-500 uppercase tracking-wider">Customizable</span>
@@ -459,7 +459,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Special Requirements &amp; Remarks</label>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1 sm:mb-1.5 opacity-80">Special Requirements &amp; Remarks</label>
                         {{ form.notes }}
                         {% if form.notes.errors %}
                         <p class="text-red-500 text-[10px] mt-1">{{ form.notes.errors.as_text }}</p>
@@ -467,7 +467,7 @@
                     </div>
 
                     <button type="submit" :disabled="isSubmitting"
-                            class="w-full py-3.5 mt-4 rounded-lg text-xs font-bold uppercase tracking-wider text-center flex items-center justify-center gap-2 shadow-md transition-all duration-200"
+                            class="w-full py-2.5 sm:py-3.5 mt-3 sm:mt-4 rounded-lg text-xs font-bold uppercase tracking-wider text-center flex items-center justify-center gap-2 shadow-md transition-all duration-200"
                             :class="{
                                 'bg-amber-800 text-white': currentTheme === 'light',
                                 'bg-luxuryGold-500 text-black gold-glow': currentTheme !== 'light',

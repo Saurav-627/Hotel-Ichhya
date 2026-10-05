@@ -20,7 +20,33 @@ SECRET_KEY = env('SECRET_KEY', default='django-insecure-luxury-hotel-secret-key-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG', default=True)
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'])
+# CSRF & Allowed Hosts Configuration for Production
+CSRF_TRUSTED_ORIGINS = env.list(
+    'CSRF_TRUSTED_ORIGINS',
+    default=[
+        "http://127.0.0.1",
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+        "http://localhost",
+        "https://premdurbar.com",
+        "https://www.premdurbar.com",
+        "https://hotelichchha.com",
+        "https://www.hotelichchha.com",
+    ]
+)
+
+ALLOWED_HOSTS = env.list(
+    'ALLOWED_HOSTS',
+    default=[
+        "127.0.0.1",
+        "localhost",
+        "hotelichchha.com",
+        "www.hotelichchha.com",
+    ]
+)
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
 
 # Custom User Model
 AUTH_USER_MODEL = 'accounts.User'
@@ -181,9 +207,11 @@ CELERY_TIMEZONE = TIME_ZONE
 # Default Auto Field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'accounts.User'
-
-
+# Authentication Backends (allows login with Username or Email)
+AUTHENTICATION_BACKENDS = [
+    'accounts.backends.EmailOrUsernameModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 # Payment Gateways Config
 ESEWA_CLIENT_ID = env('ESEWA_CLIENT_ID', default='EPAYTEST')
@@ -194,7 +222,7 @@ KHALTI_CLIENT_ID = env('KHALTI_CLIENT_ID', default='')
 KHALTI_CLIENT_SECRET = env('KHALTI_CLIENT_SECRET', default='test_secret_key_5c8e3381e3cb41ee84e03d36b42b9e67')
 KHALTI_DEMO = env.bool('KHALTI_DEMO', default=True)
 
-# Stripe Gateway Config
+# Stripe Payment Config
 STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='')
 STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='')
 STRIPE_WEBHOOK_SECRET = env('STRIPE_WEBHOOK_SECRET', default='')
@@ -210,4 +238,3 @@ EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=False)
 EMAIL_TIMEOUT = env.int('EMAIL_TIMEOUT', default=10)
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Hotel Ichchha <noreply@hotelichchha.com>')
 SITE_DOMAIN = env('SITE_DOMAIN', default='127.0.0.1:8000')
-

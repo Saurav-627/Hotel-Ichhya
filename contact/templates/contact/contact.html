@@ -2,53 +2,53 @@
 
 {% block content %}
 <!-- HEADER HERO BANNER -->
-<section class="py-12 sm:py-20 border-b border-amber-900/10 text-center relative overflow-hidden bg-cover bg-center"
+<section class="py-8 sm:py-20 border-b border-amber-900/10 text-center relative overflow-hidden bg-cover bg-center"
          style="background-image: url('{% if seo_raw and seo_raw.header_image %}{{ seo_raw.header_image.url }}{% else %}https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1200{% endif %}');">
     <div class="absolute inset-0 bg-black/75"></div>
-    <div class="relative z-10 space-y-3 sm:space-y-4 px-4">
-        <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-300">{{ seo_raw.header_subtitle|default:"Get In Touch" }}</span>
-        <h1 class="font-luxury-title text-3xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">{{ seo_raw.header_title|default:"Concierge &amp; Contact" }}</h1>
+    <div class="relative z-10 space-y-2 sm:space-y-4 px-4">
+        <span class="text-[10px] sm:text-xs font-semibold tracking-widest uppercase text-luxuryGold-300">{{ seo_raw.header_subtitle|default:"Get In Touch" }}</span>
+        <h1 class="font-luxury-title text-2xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">{{ seo_raw.header_title|default:"Concierge &amp; Contact" }}</h1>
         <p class="text-xs sm:text-sm text-white/80 max-w-xl mx-auto">{{ seo_raw.header_description|default:"We are here to assist you with room bookings, event planning, or general questions." }}</p>
     </div>
 </section>
 
 <!-- CONTACT & INQUIRY CONTAINER -->
-<section class="py-8 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16">
+<section class="py-6 sm:py-16 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-12 lg:gap-16">
         
         <!-- CONTACT INFO & BRANCHES (LEFT) -->
-        <div class="space-y-8 sm:space-y-12">
-            <div class="space-y-2.5 sm:space-y-4">
-                <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">Resort Addresses</span>
-                <h2 class="font-luxury-title text-2xl sm:text-3xl font-bold">Our Branches &amp; Properties</h2>
+        <div class="space-y-6 sm:space-y-12">
+            <div class="space-y-1.5 sm:space-y-4">
+                <span class="text-[10px] sm:text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">Resort Addresses</span>
+                <h2 class="font-luxury-title text-lg sm:text-3xl font-bold">Our Branches &amp; Properties</h2>
                 <p class="text-xs sm:text-sm opacity-85 leading-relaxed">{{ hotel_settings.site_name }} operates primary properties and guest assistance wings across multiple destinations.</p>
             </div>
 
-            <div class="space-y-6">
+            <div class="space-y-4 sm:space-y-6">
                 {% for branch in branches %}
-                <div class="p-5 sm:p-6 rounded-2xl border shadow-sm space-y-4"
+                <div class="p-3.5 sm:p-6 rounded-xl sm:rounded-2xl border shadow-sm space-y-3 sm:space-y-4"
                      :class="{
                          'bg-white border-gray-200': currentTheme === 'light',
                          'bg-[#161412] border-amber-900/20': currentTheme !== 'light'
                      }">
-                    <div class="flex items-center justify-between border-b pb-3 gap-2" :class="{ 'border-gray-100': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
-                        <h3 class="font-semibold text-base sm:text-lg flex items-center gap-2">
+                    <div class="flex items-center justify-between border-b pb-2.5 sm:pb-3 gap-2" :class="{ 'border-gray-100': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">
+                        <h3 class="font-semibold text-sm sm:text-lg flex items-center gap-2">
                             <i class="fa-solid fa-hotel text-luxuryGold-500 shrink-0"></i>
                             <span>{{ branch.name }}</span>
                         </h3>
                         {% if branch.is_main %}
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-luxuryGold-400 uppercase shrink-0">Headquarters</span>
+                        <span class="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-amber-500/20 text-luxuryGold-400 uppercase shrink-0">Headquarters</span>
                         {% endif %}
                     </div>
                     
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs opacity-85">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs opacity-85">
                         <p class="truncate"><i class="fa-solid fa-location-dot text-luxuryGold-500 mr-2 shrink-0"></i>{{ branch.address }}</p>
                         <p class="truncate"><i class="fa-solid fa-phone text-luxuryGold-500 mr-2 shrink-0"></i>{{ branch.phone }}</p>
                         <p class="truncate sm:col-span-2"><i class="fa-solid fa-envelope text-luxuryGold-500 mr-2 shrink-0"></i>{{ branch.email }}</p>
                     </div>
 
                     {% if branch.maps_iframe %}
-                    <div class="relative overflow-hidden rounded-xl h-56 sm:h-72 lg:h-80 border border-amber-900/10 mt-4">
+                    <div class="relative overflow-hidden rounded-lg sm:rounded-xl h-44 sm:h-72 lg:h-80 border border-amber-900/10 mt-3 sm:mt-4 [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0">
                         {{ branch.maps_iframe|safe }}
                     </div>
                     {% endif %}
@@ -60,20 +60,20 @@
         </div>
 
         <!-- CONTACT INQUIRY FORM (RIGHT) -->
-        <div class="space-y-8">
-            <div class="rounded-2xl p-5 sm:p-8 lg:p-10 border shadow-xl sticky top-20 lg:top-28"
+        <div class="space-y-6 sm:space-y-8">
+            <div class="rounded-xl sm:rounded-2xl p-4 sm:p-8 lg:p-10 border shadow-xl sticky top-20 lg:top-28"
                  :class="{
                      'bg-white border-gray-200': currentTheme === 'light',
                      'bg-[#161412] border-amber-900/20 text-amber-100': currentTheme !== 'light'
                  }">
                 
-                <h3 class="font-luxury-title text-xl sm:text-2xl font-semibold mb-2">{{ hotel_settings.contact_form_title|default:"Send an Inquiry" }}</h3>
-                <p class="text-xs opacity-75 mb-6">{{ hotel_settings.contact_form_subtitle|default:"Have a custom event or dining reservation question? Complete the form below." }}</p>
+                <h3 class="font-luxury-title text-lg sm:text-2xl font-semibold mb-1.5 sm:mb-2">{{ hotel_settings.contact_form_title|default:"Send an Inquiry" }}</h3>
+                <p class="text-xs opacity-75 mb-4 sm:mb-6">{{ hotel_settings.contact_form_subtitle|default:"Have a custom event or dining reservation question? Complete the form below." }}</p>
 
                 <!-- HTMX Response feedback -->
-                <div id="contact-response" class="mb-6"></div>
+                <div id="contact-response" class="mb-4 sm:mb-6"></div>
 
-                <form hx-post="{% url 'contact:submit_inquiry_ajax' %}" hx-target="#contact-response" hx-swap="innerHTML" class="space-y-4 sm:space-y-5" novalidate
+                <form hx-post="{% url 'contact:submit_inquiry_ajax' %}" hx-target="#contact-response" hx-swap="innerHTML" class="space-y-3 sm:space-y-5" novalidate
                       x-data="{
                           isSubmitting: false,
                           name: '',
@@ -158,34 +158,34 @@
                       @submit="if (!validateForm($event)) $event.preventDefault()">
                     {% csrf_token %}
                     <div>
-                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Full Name *</label>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1 sm:mb-1.5 opacity-80">Full Name *</label>
                         <input type="text" name="name" required x-model="name" @blur="validateName()" @input="validateName()"
-                               class="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 transition-colors"
+                               class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 transition-colors"
                                :class="errors.name ? 'border-red-500 text-red-500 focus:ring-red-500' : (currentTheme === 'light' ? 'border-gray-300 focus:ring-luxuryGold-400' : 'border-amber-900/40 focus:ring-luxuryGold-400')">
-                        <p x-show="errors.name" x-text="errors.name" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
+                        <p x-show="errors.name" x-text="errors.name" class="text-[10px] sm:text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                     </div>
                     
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
-                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Email *</label>
+                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1 sm:mb-1.5 opacity-80">Email *</label>
                             <input type="email" name="email" required x-model="email" @blur="validateEmail()" @input="validateEmail()"
-                                   class="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 transition-colors"
+                                   class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 transition-colors"
                                    :class="errors.email ? 'border-red-500 text-red-500 focus:ring-red-500' : (currentTheme === 'light' ? 'border-gray-300 focus:ring-luxuryGold-400' : 'border-amber-900/40 focus:ring-luxuryGold-400')">
-                            <p x-show="errors.email" x-text="errors.email" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
+                            <p x-show="errors.email" x-text="errors.email" class="text-[10px] sm:text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Phone</label>
+                            <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1 sm:mb-1.5 opacity-80">Phone</label>
                             <input type="tel" name="phone" x-model="phone" @blur="validatePhone()" @input="validatePhone()"
                                    placeholder="10-digit mobile number"
-                                   class="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 transition-colors"
+                                   class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 transition-colors"
                                    :class="errors.phone ? 'border-red-500 text-red-500 focus:ring-red-500' : (currentTheme === 'light' ? 'border-gray-300 focus:ring-luxuryGold-400' : 'border-amber-900/40 focus:ring-luxuryGold-400')">
-                            <p x-show="errors.phone" x-text="errors.phone" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
+                            <p x-show="errors.phone" x-text="errors.phone" class="text-[10px] sm:text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Inquiry Category</label>
-                        <select name="category" class="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-luxuryGold-400 cursor-pointer"
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1 sm:mb-1.5 opacity-80">Inquiry Category</label>
+                        <select name="category" class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-luxuryGold-400 cursor-pointer"
                                 :class="{ 'border-gray-300': currentTheme === 'light', 'border-amber-900/40': currentTheme !== 'light' }">
                             {% for cat in categories %}
                             <option value="{{ cat.id }}" class="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100">{{ cat.name }}</option>
@@ -196,23 +196,23 @@
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Subject *</label>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1 sm:mb-1.5 opacity-80">Subject *</label>
                         <input type="text" name="subject" required x-model="subject" @blur="validateSubject()" @input="validateSubject()"
-                               class="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 transition-colors"
+                               class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 transition-colors"
                                :class="errors.subject ? 'border-red-500 text-red-500 focus:ring-red-500' : (currentTheme === 'light' ? 'border-gray-300 focus:ring-luxuryGold-400' : 'border-amber-900/40 focus:ring-luxuryGold-400')">
-                        <p x-show="errors.subject" x-text="errors.subject" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
+                        <p x-show="errors.subject" x-text="errors.subject" class="text-[10px] sm:text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-80">Message *</label>
-                        <textarea name="message" rows="4" required x-model="message" @blur="validateMessage()" @input="validateMessage()"
-                                  class="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 transition-colors"
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider mb-1 sm:mb-1.5 opacity-80">Message *</label>
+                        <textarea name="message" rows="3" required x-model="message" @blur="validateMessage()" @input="validateMessage()"
+                                  class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border bg-transparent text-xs focus:outline-none focus:ring-1 transition-colors"
                                   :class="errors.message ? 'border-red-500 text-red-500 focus:ring-red-500' : (currentTheme === 'light' ? 'border-gray-300 focus:ring-luxuryGold-400' : 'border-amber-900/40 focus:ring-luxuryGold-400')"></textarea>
-                        <p x-show="errors.message" x-text="errors.message" class="text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
+                        <p x-show="errors.message" x-text="errors.message" class="text-[10px] sm:text-[11px] text-red-500 font-semibold mt-1 animate__animated animate__fadeIn"></p>
                     </div>
 
                     <button type="submit" :disabled="isSubmitting"
-                            class="w-full py-3.5 sm:py-4 mt-2 rounded-lg text-xs font-bold uppercase tracking-wider text-center flex items-center justify-center gap-2 shadow-md transition-all duration-200"
+                            class="w-full py-2.5 sm:py-4 mt-2 rounded-lg text-xs font-bold uppercase tracking-wider text-center flex items-center justify-center gap-2 shadow-md transition-all duration-200"
                             :class="{
                                 'bg-amber-800 text-white': currentTheme === 'light',
                                 'bg-luxuryGold-500 text-black gold-glow': currentTheme !== 'light',

@@ -182,21 +182,21 @@
                         </div>
 
                         <!-- Card CTA -->
-                        <div class="pt-4 sm:pt-6 mt-4 sm:mt-6 border-t border-amber-900/10 flex items-center justify-between gap-4">
-                            <a href="{% url 'rooms:room_detail' room.slug %}" class="text-xs font-semibold uppercase tracking-wider hover:text-luxuryGold-400 transition-colors">Details & Specs</a>
+                        <div class="pt-4 sm:pt-6 mt-4 sm:mt-6 border-t border-amber-900/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+                            <a href="{% url 'rooms:room_detail' room.slug %}" class="text-xs font-semibold uppercase tracking-wider hover:text-luxuryGold-400 transition-colors text-center sm:text-left py-1">Details &amp; Specs</a>
                             <a href="{% url 'rooms:room_detail' room.slug %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" 
-                               class="px-4 sm:px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors border"
-                               :class="{
-                                   'bg-amber-800 text-white border-amber-800': currentTheme === 'light',
-                                   'bg-luxuryGold-500 border-luxuryGold-500 text-black': currentTheme !== 'light'
-                               }">
+                               class="px-4 sm:px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors border text-center"
+                                :class="{
+                                    'bg-amber-800 text-white border-amber-800': currentTheme === 'light',
+                                    'bg-luxuryGold-500 border-luxuryGold-500 text-black': currentTheme !== 'light'
+                                }">
                                 Reserve Suite
                             </a>
                         </div>
                     </div>
                 </div>
                 {% empty %}
-                <div class="col-span-2 text-center py-16">
+                <div class="col-span-1 sm:col-span-2 text-center py-16">
                     <p class="text-sm opacity-60">No rooms match your filter criteria. Try clearing search fields.</p>
                 </div>
                 {% endfor %}

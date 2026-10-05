@@ -21,6 +21,7 @@ A modern, high-performance Django-based hospitality and booking management platf
 - [Dynamic Page Banners (SEO Admin)](#-dynamic-page-banners-seo-admin)
 - [Payment Gateway Integration](#-payment-gateway-integration)
 - [Email & Notification Services](#-email--notification-services)
+- [Mobile-First Responsive Design & Bottom Sheet Modal](#-mobile-first-responsive-design--bottom-sheet-modal)
 - [Environment Configuration Reference](#-environment-configuration-reference)
 
 ---
@@ -56,6 +57,12 @@ Every aspect of the platform—from site identity, navigation menus, and room av
 * **Room Inventory & Code Tracking**: Explicit physical room identifiers (`room_number`) and inventory counts (`total_rooms`) per room listing.
 * **Room Duplication Tool**: One-click action in admin to duplicate existing rooms with full facility and image associations for rapid cataloging.
 * **Standardized Invoicing Engine**: Print-ready, pixel-perfect invoice layout (`invoice.html`) accessible to both guests and administrators with itemized night breakdowns, tax calculations (13% VAT), discounts, and payment status badges.
+
+### 📱 Mobile-First Responsive Design & Bottom Sheet Modal
+* **Mobile-Optimized Typography & Spacing**: Proportional scaling across all 11 public-facing template domains (About, Rooms, Dining, Recreation, Conference, Contact, Gallery, Header). Heavy desktop section padding (`py-16 sm:py-24`) reduces gracefully on mobile (`py-8 sm:py-20`) to eliminate awkward gaps.
+* **Slide-Up Bottom Sheet Modal**: On mobile devices, the room draft reservation modal (`room_detail.html`) transitions into an app-like bottom sheet with a tactile top drag indicator (`w-10 h-1 bg-neutral-400/50 rounded-full`), max 85vh height, smooth CSS transform transitions (`translate-y-full` to `translate-y-0`), and touch scroll lock.
+* **Interactive Responsive Add-on Toggles**: Ancillary service selector cards with compact, animated toggle switches (`w-9 h-5 sm:w-11 sm:h-6`) and live multi-currency calculation.
+* **Compact Header & Navbar**: Mobile navigation bar with reduced height (`h-16 sm:h-20`), optimized brand logo (`h-10 sm:h-14`), and compact mobile currency picker button.
 
 ### 👑 Dynamic About Page & Leadership CMS
 * **Dedicated CMS App (`about`)**: Complete management of the About page including hero banners, hotel heritage narrative, 6 quick feature badges, statistics counters, CEO narrative (Rewanta Prasad Dhaubhadel / Rebu with Swiss Hotel Management School credentials), mission/vision/values, and bottom CTA banner.
@@ -219,7 +226,11 @@ uv run python manage.py seed_data
 # 5. Create administrative superuser account
 uv run python manage.py createsuperuser
 
-# 6. Start development server
+# 6. Build production Tailwind CSS bundle & collect static assets
+npm run build:css
+uv run python manage.py collectstatic --noinput --clear
+
+# 7. Start development server
 uv run python manage.py runserver 0.0.0.0:8000
 ```
 
@@ -438,8 +449,13 @@ The application reads configuration from environment variables or a `.env` file 
 | `ESEWA_CLIENT_ID` | String | `EPAYTEST` | eSewa merchant/product code |
 | `ESEWA_CLIENT_SECRET`| String | *Test secret* | eSewa secret key for HMAC signature |
 | `ESEWA_DEMO` | Boolean | `True` | Toggle eSewa sandbox mode |
+| `KHALTI_CLIENT_ID` | String | *Test ID* | Khalti client ID |
 | `KHALTI_CLIENT_SECRET`| String | *Test secret* | Khalti secret live/test key |
 | `KHALTI_DEMO` | Boolean | `True` | Toggle Khalti sandbox mode |
+| `STRIPE_PUBLIC_KEY` | String | `""` | Stripe Publishable Key (`pk_test_...`) |
+| `STRIPE_SECRET_KEY` | String | `""` | Stripe Secret Key (`sk_test_...`) |
+| `STRIPE_WEBHOOK_SECRET` | String | `""` | Stripe Webhook Secret (`whsec_...`) |
+| `BASE_URL` | String | `http://localhost:8000` | Application base URL used for payment gateway callbacks & webhooks |
 
 ---
 

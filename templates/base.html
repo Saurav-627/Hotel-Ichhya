@@ -294,7 +294,7 @@
     <!-- Toast Notification Container (Django Messages & HTMX Events) -->
     <div x-data="toastManager()"
          @show-toast.window="addToast($event.detail)"
-         class="fixed top-24 right-6 z-[9999] space-y-3 max-w-sm w-full pointer-events-none">
+         class="fixed top-20 sm:top-24 right-3 sm:right-6 z-[9999] space-y-3 max-w-[calc(100vw-1.5rem)] sm:max-w-sm w-full pointer-events-none">
         
         <!-- Django Server Messages on Page Load -->
         {% if messages %}

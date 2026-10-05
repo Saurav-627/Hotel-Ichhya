@@ -2,11 +2,11 @@
 
 {% block content %}
 <!-- RECREATION DETAIL -->
-<section class="py-6 sm:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+<section class="py-4 sm:py-12 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
 
         <!-- MAIN CONTENT (2 COLS) -->
-        <div class="lg:col-span-2 space-y-6 sm:space-y-8">
+        <div class="lg:col-span-2 space-y-4 sm:space-y-8">
 
             <!-- Gallery Slider with Lightbox (Alpine.js) -->
             <div x-data="{
@@ -22,7 +22,7 @@
                 next() { this.activeSlide = (this.activeSlide + 1) % this.slides.length }
             }"
             x-init="if (slides.length > 1) setInterval(() => next(), 5000)"
-            class="relative h-[260px] sm:h-[380px] lg:h-[440px] overflow-hidden rounded-2xl border border-amber-900/10 bg-neutral-950 flex items-center justify-center">
+            class="relative h-[240px] sm:h-[380px] lg:h-[440px] overflow-hidden rounded-2xl border border-amber-900/10 bg-neutral-950 flex items-center justify-center">
                 
                 <!-- Slide List (Zero-Crop object-contain) -->
                 <template x-for="(slide, index) in slides" :key="index">
@@ -38,7 +38,7 @@
 
                 <!-- Category badge -->
                 <div class="absolute top-3 left-3 sm:top-4 sm:left-4 z-30 pointer-events-none">
-                    <span class="px-2.5 sm:px-3 py-1 text-[10px] sm:text-[11px] font-semibold bg-black/75 text-luxuryGold-300 rounded-full backdrop-blur-sm uppercase tracking-wider shadow-md">
+                    <span class="px-2.5 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-semibold bg-black/75 text-luxuryGold-300 rounded-full backdrop-blur-sm uppercase tracking-wider shadow-md">
                         {{ activity.get_category_display }}
                     </span>
                 </div>
@@ -95,46 +95,46 @@
             </div>
 
             <!-- Title & Description -->
-            <div class="space-y-2 sm:space-y-3">
+            <div class="space-y-1.5 sm:space-y-3">
                 <span class="text-[10px] sm:text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">{{ activity.get_category_display }}</span>
-                <h1 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold tracking-wide leading-tight">{{ activity.name }}</h1>
+                <h1 class="font-luxury-title text-xl sm:text-4xl lg:text-5xl font-bold tracking-wide leading-tight">{{ activity.name }}</h1>
                 <p class="text-xs sm:text-sm leading-relaxed opacity-85">{{ activity.description }}</p>
             </div>
 
             <!-- KEY SPECS BAR — 1-col on mobile, 2-col on sm, 3-col on lg -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 p-3 sm:p-4 rounded-2xl border"
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border"
                  :class="{ 'bg-gray-50 border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
                 <!-- Timings -->
-                <div class="flex items-center gap-3 p-2.5 rounded-xl"
+                <div class="flex items-center gap-2.5 sm:gap-3 p-2 sm:p-2.5 rounded-lg sm:rounded-xl"
                      :class="{ 'bg-white': currentTheme === 'light', 'bg-white/5': currentTheme !== 'light' }">
-                    <div class="w-8 h-8 rounded-full bg-luxuryGold-500/15 text-luxuryGold-500 flex items-center justify-center shrink-0 text-sm">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-luxuryGold-500/15 text-luxuryGold-500 flex items-center justify-center shrink-0 text-xs sm:text-sm">
                         <i class="fa-solid fa-clock"></i>
                     </div>
                     <div class="min-w-0">
-                        <span class="block text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold opacity-60">Opening Hours</span>
+                        <span class="block text-[8px] sm:text-[10px] uppercase tracking-wider font-semibold opacity-60">Opening Hours</span>
                         <strong class="block text-xs sm:text-sm font-bold text-luxuryGold-500 dark:text-luxuryGold-300 leading-snug break-words">{{ activity.timings }}</strong>
                     </div>
                 </div>
                 <!-- Pricing -->
-                <div class="flex items-center gap-3 p-2.5 rounded-xl"
+                <div class="flex items-center gap-2.5 sm:gap-3 p-2 sm:p-2.5 rounded-lg sm:rounded-xl"
                      :class="{ 'bg-white': currentTheme === 'light', 'bg-white/5': currentTheme !== 'light' }">
-                    <div class="w-8 h-8 rounded-full bg-luxuryGold-500/15 text-luxuryGold-500 flex items-center justify-center shrink-0 text-sm">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-luxuryGold-500/15 text-luxuryGold-500 flex items-center justify-center shrink-0 text-xs sm:text-sm">
                         <i class="fa-solid fa-tag"></i>
                     </div>
                     <div class="min-w-0">
-                        <span class="block text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold opacity-60">Charges</span>
+                        <span class="block text-[8px] sm:text-[10px] uppercase tracking-wider font-semibold opacity-60">Charges</span>
                         <strong class="block text-xs sm:text-sm font-bold text-luxuryGold-500 dark:text-luxuryGold-300 leading-snug break-words">{{ activity.price_info }}</strong>
                     </div>
                 </div>
                 <!-- Capacity -->
                 {% if activity.capacity %}
-                <div class="flex items-center gap-3 p-2.5 rounded-xl sm:col-span-2 lg:col-span-1"
+                <div class="flex items-center gap-2.5 sm:gap-3 p-2 sm:p-2.5 rounded-lg sm:rounded-xl sm:col-span-2 lg:col-span-1"
                      :class="{ 'bg-white': currentTheme === 'light', 'bg-white/5': currentTheme !== 'light' }">
-                    <div class="w-8 h-8 rounded-full bg-luxuryGold-500/15 text-luxuryGold-500 flex items-center justify-center shrink-0 text-sm">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-luxuryGold-500/15 text-luxuryGold-500 flex items-center justify-center shrink-0 text-xs sm:text-sm">
                         <i class="fa-solid fa-users"></i>
                     </div>
                     <div class="min-w-0">
-                        <span class="block text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold opacity-60">Capacity</span>
+                        <span class="block text-[8px] sm:text-[10px] uppercase tracking-wider font-semibold opacity-60">Capacity</span>
                         <strong class="block text-xs sm:text-sm font-bold text-luxuryGold-500 dark:text-luxuryGold-300">{{ activity.capacity }} Guests</strong>
                     </div>
                 </div>
@@ -142,29 +142,29 @@
             </div>
 
             <!-- MOBILE ONLY CTA -->
-            <div class="lg:hidden rounded-2xl border p-4 sm:p-5 space-y-4"
+            <div class="lg:hidden rounded-xl sm:rounded-2xl border p-3.5 sm:p-5 space-y-3 sm:space-y-4"
                  :class="{ 'bg-white border-gray-200 shadow-sm': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
-                <div class="space-y-2">
+                <div class="space-y-1.5 sm:space-y-2">
                     <div>
                         <span class="text-[10px] font-semibold tracking-widest uppercase text-luxuryGold-500 block">{{ activity.get_category_display }}</span>
-                        <p class="font-luxury-title text-lg font-bold mt-0.5 leading-tight">{{ activity.name }}</p>
+                        <p class="font-luxury-title text-base sm:text-lg font-bold mt-0.5 leading-tight">{{ activity.name }}</p>
                     </div>
-                    <div class="flex items-center gap-2 p-3 rounded-xl border"
+                    <div class="flex items-center gap-2 p-2.5 sm:p-3 rounded-lg sm:rounded-xl border"
                          :class="{ 'bg-luxuryGold-50 border-luxuryGold-200': currentTheme === 'light', 'bg-luxuryGold-500/5 border-luxuryGold-500/20': currentTheme !== 'light' }">
-                        <i class="fa-solid fa-tag text-luxuryGold-500 shrink-0"></i>
+                        <i class="fa-solid fa-tag text-luxuryGold-500 shrink-0 text-xs sm:text-sm"></i>
                         <div class="min-w-0">
-                            <span class="text-[9px] uppercase tracking-wider opacity-60 block">Access Fee</span>
-                            <p class="font-bold text-sm text-luxuryGold-500 leading-snug break-words">{{ activity.price_info }}</p>
+                            <span class="text-[8px] sm:text-[9px] uppercase tracking-wider opacity-60 block">Access Fee</span>
+                            <p class="font-bold text-xs sm:text-sm text-luxuryGold-500 leading-snug break-words">{{ activity.price_info }}</p>
                         </div>
                     </div>
                 </div>
-                <div class="flex gap-3">
+                <div class="flex gap-2.5 sm:gap-3">
                     <a href="{% url 'contact:contact_page' %}"
-                       class="flex-1 py-3 text-center rounded-xl bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold text-xs uppercase tracking-wider transition-colors">
+                       class="flex-1 py-2.5 sm:py-3 text-center rounded-lg sm:rounded-xl bg-luxuryGold-500 hover:bg-luxuryGold-400 text-neutral-950 font-bold text-xs uppercase tracking-wider transition-colors">
                         <i class="fa-solid fa-calendar-check mr-1.5"></i>Book Now
                     </a>
                     <a href="{% url 'recreation:recreation_list' %}"
-                       class="flex-1 py-3 text-center rounded-xl border font-semibold text-xs uppercase tracking-wider transition-colors"
+                       class="flex-1 py-2.5 sm:py-3 text-center rounded-lg sm:rounded-xl border font-semibold text-xs uppercase tracking-wider transition-colors"
                        :class="{ 'border-gray-300 hover:bg-gray-50': currentTheme === 'light', 'border-amber-900/30 hover:bg-amber-900/10': currentTheme !== 'light' }">
                         <i class="fa-solid fa-arrow-left mr-1.5"></i>Back
                     </a>

@@ -41,6 +41,16 @@
 4. [Static, Hardcoded & Architectural Elements](#4-static-hardcoded--architectural-elements)
 5. [Database Seeding & YAML Records Catalog](#5-database-seeding--yaml-records-catalog)
 6. [Master CMS & Model Control Matrix](#6-master-cms--model-control-matrix)
+7. [Developer Environment, `uv` Package Management & Setup Guide](#7-developer-environment-uv-package-management--setup-guide)
+   - [7.1 `uv` Modern Package Management](#71-uv-modern-package-management)
+   - [7.2 Step-by-Step Developer Setup with `uv`](#72-step-by-step-developer-setup-with-uv)
+   - [7.3 Makefile Automation Commands](#73-makefile-automation-commands)
+   - [7.4 Environment Configuration Reference](#74-environment-configuration-reference)
+8. [Mobile-First Responsive Engineering & Bottom Sheet Architecture](#8-mobile-first-responsive-engineering--bottom-sheet-architecture)
+   - [8.1 11-Domain Mobile Viewport Scaling Standards](#81-11-domain-mobile-viewport-scaling-standards)
+   - [8.2 Slide-Up Bottom Sheet Modal for Room Bookings](#82-slide-up-bottom-sheet-modal-for-room-bookings)
+   - [8.3 Responsive Add-on Toggle Controls & Interactive Micro-Animations](#83-responsive-add-on-toggle-controls--interactive-micro-animations)
+   - [8.4 Lenis Smooth Inertia Scroll Protection](#84-lenis-smooth-inertia-scroll-protection)
 
 ---
 
@@ -762,4 +772,115 @@ The platform database can be seeded from 21 structured YAML files in `core/recor
 
 ---
 
-*Hotel Ichchha Platform Architecture & CMS Specification • Version 2.0 • Updated September 2026*
+## 7. Developer Environment, `uv` Package Management & Setup Guide
+
+The Hotel Ichchha codebase uses **`uv`** (Astral's high-performance Python package and project manager written in Rust) for virtual environment orchestration, dependency resolution, and deterministic package locking.
+
+### 7.1 `uv` Modern Package Management
+* **Deterministic Locking (`uv.lock`)**: Guarantees identical package trees across macOS, Linux, and Docker environments.
+* **Instantaneous Resolution**: Resolves 47+ direct and transitive packages in under 1 second.
+* **Direct Execution (`uv run`)**: Automatically binds execution to the active or project `.venv` without requiring explicit shell activation.
+
+### 7.2 Step-by-Step Developer Setup with `uv`
+
+```bash
+# 1. Clone repository and navigate to root directory
+cd Hotel-Ichha
+
+# 2. Sync virtual environment and install all pinned dependencies
+uv sync
+
+# 3. Apply database migrations
+uv run python manage.py migrate
+
+# 4. Seed all modular YAML records into the database
+uv run python manage.py seed_data
+
+# 5. Create an administrative superuser account
+uv run python manage.py createsuperuser
+
+# 6. Compile production Tailwind CSS bundle & collect static assets
+npm run build:css
+uv run python manage.py collectstatic --noinput --clear
+
+# 7. Start the development server
+uv run python manage.py runserver 0.0.0.0:8000
+```
+
+### 7.3 Makefile Automation Commands
+
+The repository provides a centralized `Makefile` with automated commands:
+
+| Command | Action | Underlying Execution |
+|---|---|---|
+| `make setup` | Complete 1-step workspace initialization | `install migrate seed-all` |
+| `make run` | Start local development server | `$(PYTHON) manage.py runserver` |
+| `make test` | Execute test suite | `$(PYTHON) manage.py test` |
+| `make seed-all` | Import 21 YAML records | `$(PYTHON) manage.py seed_data` |
+| `make superuser` | Create superuser | `$(PYTHON) manage.py createsuperuser` |
+| `make build-css` | Build minified Tailwind CSS bundle | `npm run build:css` |
+| `make collectstatic` | Build CSS and collect static assets | `collectstatic --noinput --clear` |
+| `make backup` | Create database snapshot (retains 10) | `$(PYTHON) manage.py db_backup --keep 10` |
+| `make mailpit` | Launch local SMTP mail test server | Docker container `axllent/mailpit` |
+| `make docker-up` | Launch full PostgreSQL + Redis + Gunicorn stack | `docker compose up -d` |
+
+### 7.4 Environment Configuration Reference
+
+The application loads environment variables from a root `.env` file:
+
+| Variable | Type | Default | Description |
+|---|---|---|---|
+| `DEBUG` | Boolean | `True` | Django debug mode (set to `False` in production) |
+| `SECRET_KEY` | String | *Insecure fallback* | Unique cryptographic secret key |
+| `ALLOWED_HOSTS` | List | `*` | Comma-separated list of allowed host header domains |
+| `DATABASE_URL` | String | `sqlite:///db.sqlite3` | Database URI (`postgres://user:pass@host:5432/dbname`) |
+| `REDIS_URL` | String | `""` | Redis URI (`redis://localhost:6379/0`) |
+| `CELERY_BROKER_URL`| String | `redis://localhost:6379/1` | Celery broker URL |
+| `SITE_DOMAIN` | String | `127.0.0.1:8000` | Domain name used in absolute email URLs |
+| `EMAIL_BACKEND` | String | `django.core.mail.backends.smtp.EmailBackend` | Email backend |
+| `EMAIL_HOST` | String | `""` | SMTP Host (e.g. `smtp.sendgrid.net` or `localhost` for Mailpit) |
+| `EMAIL_PORT` | Integer | `1025` | SMTP Port (`1025` for Mailpit, `587` for TLS) |
+| `EMAIL_HOST_USER` | String | `""` | SMTP Username |
+| `EMAIL_HOST_PASSWORD`| String | `""` | SMTP Password / API Key |
+| `EMAIL_USE_TLS` | Boolean | `False` | Enable TLS encryption |
+| `DEFAULT_FROM_EMAIL`| String | `Hotel Ichchha <noreply@hotelichchha.com>` | Default sender address |
+| `ESEWA_CLIENT_ID` | String | `EPAYTEST` | eSewa merchant/product code |
+| `ESEWA_CLIENT_SECRET`| String | *Test secret* | eSewa secret key for HMAC signature |
+| `ESEWA_DEMO` | Boolean | `True` | Toggle eSewa sandbox mode |
+| `KHALTI_CLIENT_ID` | String | *Test ID* | Khalti client ID |
+| `KHALTI_CLIENT_SECRET`| String | *Test secret* | Khalti secret live/test key |
+| `KHALTI_DEMO` | Boolean | `True` | Toggle Khalti sandbox mode |
+| `STRIPE_PUBLIC_KEY` | String | `""` | Stripe Publishable Key (`pk_test_...`) |
+| `STRIPE_SECRET_KEY` | String | `""` | Stripe Secret Key (`sk_test_...`) |
+| `STRIPE_WEBHOOK_SECRET` | String | `""` | Stripe Webhook Secret (`whsec_...`) |
+| `BASE_URL` | String | `http://localhost:8000` | Application base URL used for payment gateway callbacks & webhooks |
+
+---
+
+## 8. Mobile-First Responsive Engineering & Bottom Sheet Architecture
+
+All 11 user-facing domains of the platform implement mobile-first responsive scaling to ensure an ultra-luxury user experience on mobile screens without clunky oversized text or horizontal scrolling.
+
+### 8.1 11-Domain Mobile Viewport Scaling Standards
+* **Hero Banners & Typography**: Page banner titles scale from `text-2xl` on mobile to `sm:text-5xl lg:text-6xl` on desktop. Room and venue titles scale from `text-xl` on mobile to `sm:text-4xl` on desktop.
+* **Proportional Vertical Spacing**: Section padding is adjusted to `py-8 sm:py-20` (from `py-16 sm:py-24`) eliminating massive empty spaces on mobile screens.
+* **Compact Header & Navbar**: Mobile navigation bar height is tightened to `h-16 sm:h-20` with a brand logo scaled to `h-10 sm:h-14`, compact mobile currency picker button (`px-2 py-1 text-[11px]`), and responsive hamburger menu.
+* **Card & Form Padding**: Dining, venue, and recreation cards adapt padding to `p-3.5 sm:p-6`, and reservation form cards adapt to `p-4 sm:p-6` with touch-friendly input fields.
+
+### 8.2 Slide-Up Bottom Sheet Modal for Room Bookings
+In `rooms/templates/rooms/room_detail.html`:
+* **Bottom Sheet Container**: On screens below `640px`, the draft reservation modal anchors to the bottom of the viewport (`items-end sm:items-center`), featuring rounded top corners (`rounded-t-3xl sm:rounded-2xl`) and constrained height (`max-h-[85vh]`).
+* **Tactile Drag Handle**: Renders a centered horizontal drag bar (`w-10 h-1 bg-neutral-400/50 rounded-full`) signaling native mobile bottom-sheet behavior.
+* **Alpine.js Physics Transitions**: Slides up smoothly from the bottom on mobile (`x-transition:enter-start="translate-y-full sm:translate-y-0 sm:scale-95 sm:opacity-0"` / `x-transition:enter-end="translate-y-0 sm:scale-100 sm:opacity-100"`) while maintaining centered modal animations on desktop.
+* **Mobile Summary Stacking**: Booking summary details are ordered prominently at the top of the bottom sheet (`order-1 lg:order-2`), followed by the guest details form (`order-2 lg:order-1`).
+
+### 8.3 Responsive Add-on Toggle Controls & Interactive Micro-Animations
+* **Interactive Toggles**: Ancillary service items (airport shuttle, extra bed, romantic dinner, audio-visual equipment) utilize custom animated toggle switches (`w-9 h-5 sm:w-11 sm:h-6` with knob `w-4 h-4 sm:w-5 sm:h-5` and `translate-x-4 sm:translate-x-5`).
+* **Multi-Currency Dynamic Computation**: Toggle switches instantly recompute total charges across billing types (`per_night`, `per_person`, `per_person_per_night`, `per_booking`) in real-time.
+
+### 8.4 Lenis Smooth Inertia Scroll Protection
+* **Universal Scroll Containment**: Universal `MutationObserver` in `templates/base.html` detects when `lightboxOpen` or `showModal` is triggered, halting Lenis smooth scroll (`window.lenis.stop()`) and freezing body scroll (`overflow: hidden`) to prevent background page scroll bleed.
+
+---
+
+*Hotel Ichchha Platform Architecture & CMS Specification • Version 2.1 • Updated October 2026*

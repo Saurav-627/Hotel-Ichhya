@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="py-6 sm:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+<section class="py-4 sm:py-12 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
         
         <!-- VENUE INFO & CHEF (2 COLS) -->
-        <div class="lg:col-span-2 space-y-6 sm:space-y-8">
+        <div class="lg:col-span-2 space-y-4 sm:space-y-8">
             <!-- Gallery Slider (Alpine.js) -->
             <!-- Gallery Slider with Lightbox (Alpine.js) -->
             <div x-data="{
@@ -21,7 +21,7 @@
                 next() { this.activeSlide = (this.activeSlide + 1) % this.slides.length }
             }"
             x-init="if (slides.length > 1) setInterval(() => next(), 5000)"
-            class="relative h-[260px] sm:h-[380px] lg:h-[450px] overflow-hidden rounded-2xl border border-amber-900/10 bg-neutral-950 flex items-center justify-center">
+            class="relative h-[240px] sm:h-[380px] lg:h-[450px] overflow-hidden rounded-2xl border border-amber-900/10 bg-neutral-950 flex items-center justify-center">
                 
                 <!-- Slide List (Zero-Crop object-contain) -->
                 <template x-for="(slide, index) in slides" :key="index">
@@ -86,32 +86,32 @@
                 </template>
             </div>
 
-            <div class="space-y-3 sm:space-y-4">
-                <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">{{ venue.get_category_display }}</span>
-                <h1 class="font-luxury-title text-2xl sm:text-4xl lg:text-5xl font-bold tracking-wide">{{ venue.name }}</h1>
+            <div class="space-y-2 sm:space-y-4">
+                <span class="text-[10px] sm:text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">{{ venue.get_category_display }}</span>
+                <h1 class="font-luxury-title text-xl sm:text-4xl lg:text-5xl font-bold tracking-wide">{{ venue.name }}</h1>
                 <p class="text-xs sm:text-sm leading-relaxed opacity-85">{{ venue.description }}</p>
             </div>
 
             <!-- EXECUTIVE CHEF PROFILE -->
             {% if venue.chef_name or venue.chef_bio or venue.chef_image or venue.chef_specialty %}
-            <div class="p-5 sm:p-7 rounded-2xl border space-y-4"
+            <div class="p-3.5 sm:p-7 rounded-xl sm:rounded-2xl border space-y-3 sm:space-y-4"
                  :class="{ 'bg-gray-50/80 border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
-                <span class="text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">Master Culinary Artist</span>
+                <span class="text-[10px] sm:text-xs font-semibold tracking-widest uppercase text-luxuryGold-500">Master Culinary Artist</span>
                 
-                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6">
                     {% if venue.chef_image %}
-                    <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden shrink-0 border-2 border-luxuryGold-400 shadow-md">
+                    <div class="relative w-16 h-16 sm:w-24 sm:h-24 rounded-full overflow-hidden shrink-0 border-2 border-luxuryGold-400 shadow-md">
                         <img src="{{ venue.chef_image.url }}" alt="{{ venue.chef_name|default:'Executive Chef' }}" class="w-full h-full object-cover">
                     </div>
                     {% endif %}
                     
-                    <div class="space-y-1">
+                    <div class="space-y-0.5 sm:space-y-1">
                         {% if venue.chef_name %}
-                        <h3 class="font-luxury-title text-xl sm:text-2xl font-bold">{{ venue.chef_name }}</h3>
+                        <h3 class="font-luxury-title text-lg sm:text-2xl font-bold">{{ venue.chef_name }}</h3>
                         {% endif %}
-                        <p class="text-xs font-medium text-luxuryGold-400 uppercase tracking-wider">Head Executive Chef</p>
+                        <p class="text-[11px] sm:text-xs font-medium text-luxuryGold-400 uppercase tracking-wider">Head Executive Chef</p>
                         {% if venue.chef_specialty %}
-                        <p class="text-xs sm:text-sm opacity-90 italic pt-1">
+                        <p class="text-xs sm:text-sm opacity-90 italic pt-0.5 sm:pt-1">
                             <i class="fa-solid fa-utensils text-luxuryGold-500 mr-1.5"></i>Specialty: "{{ venue.chef_specialty }}"
                         </p>
                         {% endif %}
@@ -129,14 +129,14 @@
 
             <!-- FEATURED DISHES -->
             {% if venue.featured_dishes %}
-            <div class="space-y-3 pt-2">
-                <h3 class="font-luxury-title text-lg sm:text-xl font-bold">Signature Culinary Highlights</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="space-y-2.5 sm:space-y-3 pt-1 sm:pt-2">
+                <h3 class="font-luxury-title text-base sm:text-xl font-bold">Signature Culinary Highlights</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                     {% for dish in venue.featured_dishes.splitlines %}
                         {% if dish %}
-                        <div class="p-3.5 rounded-xl border flex items-center gap-3"
+                        <div class="p-2.5 sm:p-3.5 rounded-xl border flex items-center gap-2.5 sm:gap-3"
                              :class="{ 'bg-white border-gray-200': currentTheme === 'light', 'bg-[#161412] border-amber-900/20': currentTheme !== 'light' }">
-                            <div class="w-8 h-8 rounded-full bg-luxuryGold-500/15 text-luxuryGold-500 flex items-center justify-center shrink-0 text-sm">
+                            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-luxuryGold-500/15 text-luxuryGold-500 flex items-center justify-center shrink-0 text-xs sm:text-sm">
                                 <i class="fa-solid fa-bowl-food"></i>
                             </div>
                             <span class="text-xs sm:text-sm font-medium opacity-90">{{ dish }}</span>
@@ -158,27 +158,27 @@
         </div>
 
         <!-- TABLE RESERVATION FORM (1 COL) -->
-        <div class="space-y-8 lg:col-span-1">
-            <div class="rounded-2xl p-5 sm:p-6 border shadow-xl sticky top-20 lg:top-28"
+        <div class="space-y-6 sm:space-y-8 lg:col-span-1">
+            <div class="rounded-xl sm:rounded-2xl p-4 sm:p-6 border shadow-xl sticky top-20 lg:top-28"
                  :class="{
                      'bg-white border-gray-200': currentTheme === 'light',
                      'bg-[#161412] border-amber-900/20': currentTheme !== 'light'
                  }">
-                <h3 class="font-luxury-title text-lg sm:text-xl font-semibold mb-2 border-b pb-4" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">Book a Table</h3>
+                <h3 class="font-luxury-title text-base sm:text-xl font-semibold mb-1.5 sm:mb-2 border-b pb-2.5 sm:pb-4" :class="{ 'border-gray-200': currentTheme === 'light', 'border-amber-900/10': currentTheme !== 'light' }">Book a Table</h3>
                 
-                <p class="text-xs opacity-75 mb-3">Reserve your table ahead to ensure prime seating. Confirmation is sent via email.</p>
+                <p class="text-xs opacity-75 mb-2.5 sm:mb-3">Reserve your table ahead to ensure prime seating. Confirmation is sent via email.</p>
 
                 <!-- Venue Timings & Capacity info badge -->
-                <div class="space-y-1.5 pb-4 mb-4 border-b border-amber-900/10 text-xs opacity-85">
+                <div class="space-y-1 sm:space-y-1.5 pb-3 sm:pb-4 mb-3 sm:mb-4 border-b border-amber-900/10 text-xs opacity-85">
                     <p class="flex items-center gap-2"><i class="fa-solid fa-clock text-luxuryGold-500 w-4"></i><span>Hours: <strong class="text-luxuryGold-400">{{ venue.timings }}</strong></span></p>
                     <p class="flex items-center gap-2"><i class="fa-solid fa-chair text-luxuryGold-500 w-4"></i><span>Capacity: <strong class="text-luxuryGold-400">{{ venue.capacity }} Seats Max</strong></span></p>
                 </div>
 
                 <!-- HTMX Response Area -->
-                <div id="reservation-response" class="mb-4"></div>
+                <div id="reservation-response" class="mb-3 sm:mb-4"></div>
 
                 <!-- Reservation Form -->
-                <form hx-post="{% url 'dining:book_table_ajax' venue.id %}" hx-target="#reservation-response" hx-swap="innerHTML" class="space-y-4" novalidate
+                <form hx-post="{% url 'dining:book_table_ajax' venue.id %}" hx-target="#reservation-response" hx-swap="innerHTML" class="space-y-3 sm:space-y-4" novalidate
                       x-data="{
                           isSubmitting: false,
                           name: '',
@@ -339,7 +339,7 @@
                     </div>
 
                     <button type="submit" :disabled="isSubmitting"
-                            class="w-full py-3.5 mt-4 rounded-lg text-xs font-bold uppercase tracking-wider text-center flex items-center justify-center gap-2 shadow-md transition-all duration-200"
+                            class="w-full py-2.5 sm:py-3.5 mt-3 sm:mt-4 rounded-lg text-xs font-bold uppercase tracking-wider text-center flex items-center justify-center gap-2 shadow-md transition-all duration-200"
                             :class="{
                                 'bg-amber-800 text-white': currentTheme === 'light',
                                 'bg-luxuryGold-500 text-black gold-glow': currentTheme !== 'light',

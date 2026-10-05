@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hotel Ichchha — Engineering & Project Handover Documentation</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Fira+Code:wght@400;500;600&display=swap');
+
+        @page {
+            size: A4;
+            margin: 16mm 14mm 18mm 14mm;
+            @bottom-right {
+                content: "Page " counter(page);
+                font-family: 'Outfit', sans-serif;
+                font-size: 8pt;
+                color: #888888;
+            }
+            @bottom-left {
+                content: "Hotel Ichchha Platform Handover";
+                font-family: 'Outfit', sans-serif;
+                font-size: 8pt;
+                color: #888888;
+            }
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #1a1a1a;
+            background-color: #ffffff;
+            line-height: 1.55;
+            font-size: 9.5pt;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, h5 {
+            font-family: 'Playfair Display', Georgia, serif;
+            color: #0d0c0a;
+            margin-top: 1.2em;
+            margin-bottom: 0.4em;
+            page-break-after: avoid;
+        }
+
+        h1 { font-size: 20pt; line-height: 1.2; font-weight: 700; }
+        h2 { font-size: 14pt; line-height: 1.25; font-weight: 700; border-bottom: 1.5px solid #d4af37; padding-bottom: 4px; margin-top: 1.5em; }
+        h3 { font-size: 11pt; line-height: 1.3; font-weight: 600; color: #8a6414; }
+        h4 { font-size: 10pt; font-weight: 600; color: #333; }
+
+        p, li {
+            color: #2e2c29;
+            font-size: 9.5pt;
+            margin-top: 0.3em;
+            margin-bottom: 0.5em;
+        }
+
+        ul, ol {
+            margin-top: 0.3em;
+            margin-bottom: 0.7em;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 0.25em;
+        }
+
+        /* Code Blocks */
+        code, pre {
+            font-family: 'Fira Code', Menlo, Monaco, Consolas, monospace;
+        }
+
+        code {
+            font-size: 8.5pt;
+            background: #f4f4f5;
+            color: #b45309;
+            padding: 1.5px 4.5px;
+            border-radius: 4px;
+            border: 1px solid #e4e4e7;
+        }
+
+        pre {
+            background: #0f1117;
+            color: #f8fafc;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 8pt;
+            line-height: 1.45;
+            overflow-x: auto;
+            border: 1px solid #1e293b;
+            page-break-inside: avoid;
+            margin: 0.6em 0;
+        }
+
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+            border: none;
+            font-size: 8pt;
+        }
+
+        /* Cover Page */
+        .cover-page {
+            page-break-after: always;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px 10px;
+            text-align: center;
+        }
+
+        .cover-badge {
+            display: inline-block;
+            background: #0d0c0a;
+            color: #d4af37;
+            padding: 6px 18px;
+            border-radius: 30px;
+            font-size: 9pt;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border: 1px solid #d4af37;
+            margin-bottom: 20px;
+        }
+
+        .cover-title {
+            font-size: 28pt;
+            color: #0d0c0a;
+            font-weight: 700;
+            margin: 10px 0;
+            letter-spacing: -0.5px;
+            line-height: 1.15;
+        }
+
+        .cover-subtitle {
+            font-size: 13pt;
+            color: #666;
+            max-width: 550px;
+            margin: 15px auto 30px auto;
+            font-weight: 400;
+            line-height: 1.4;
+        }
+
+        .cover-meta {
+            background: #faf8f5;
+            border: 1px solid #eedcba;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 480px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .cover-meta table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+        }
+
+        .cover-meta td {
+            padding: 5px 8px;
+        }
+
+        .cover-meta td.label {
+            font-weight: 600;
+            color: #8a6414;
+            width: 38%;
+        }
+
+        .cover-meta td.val {
+            color: #222;
+        }
+
+        .cover-footer {
+            font-size: 8pt;
+            color: #888;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        /* Section Dividers */
+        .section-header {
+            page-break-before: always;
+        }
+
+        .page-break {
+            page-break-after: always;
+        }
+
+        /* Tables */
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8.5pt;
+            margin: 0.8em 0 1.2em 0;
+            page-break-inside: avoid;
+        }
+
+        table.data-table th, table.data-table td {
+            border: 1px solid #e5e7eb;
+            padding: 6px 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        table.data-table th {
+            background-color: #f9fafb;
+            color: #111827;
+            font-weight: 600;
+            border-bottom: 2px solid #d4af37;
+        }
+
+        table.data-table tr:nth-child(even) {
+            background-color: #fafaf9;
+        }
+
+        /* Alerts and Callouts */
+        .alert {
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin: 0.8em 0;
+            font-size: 9pt;
+            page-break-inside: avoid;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background-color: #f0fdfa;
+            border-color: #0d9488;
+            color: #134e4a;
+        }
+
+        .alert-warning {
+            background-color: #fffbeb;
+            border-color: #d97706;
+            color: #78350f;
+        }
+
+        .alert-success {
+            background-color: #f0fdf4;
+            border-color: #16a34a;
+            color: #14532d;
+        }
+
+        .alert-gold {
+            background-color: #fdfaf3;
+            border-color: #d4af37;
+            color: #785310;
+        }
+
+        .alert-title {
+            font-weight: 700;
+            margin-bottom: 3px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Grid Cards */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 0.8em 0;
+            page-break-inside: avoid;
+        }
+
+        .card {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 10px 12px;
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 9.5pt;
+            color: #92400e;
+            margin-bottom: 4px;
+        }
+
+        .card-body {
+            font-size: 8.5pt;
+            color: #4b5563;
+            line-height: 1.4;
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: 12px;
+            font-size: 7.5pt;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .pill-gold { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+        .pill-blue { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+        .pill-green { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .pill-purple { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+
+        /* Flow Diagrams */
+        .flow-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 8px;
+            page-break-inside: avoid;
+        }
+
+        .flow-num {
+            background: #d4af37;
+            color: #000;
+            font-weight: 800;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8pt;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .flow-content {
+            flex: 1;
+            font-size: 9pt;
+        }
+
+        .flow-content strong {
+            color: #0d0c0a;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== COVER PAGE ==================== -->
+    <div class="cover-page">
+        <div>
+            <div class="cover-badge">★ Engineering Documentation ★</div>
+            <h1 class="cover-title">Hotel Ichchha Platform</h1>
+            <div class="cover-subtitle">
+                Comprehensive Technical Architecture, Business Workflows, Payment Gateways &amp; Developer Handover Guide
+            </div>
+        </div>
+
+        <div class="cover-meta">
+            <table>
+                <tr>
+                    <td class="label">Project:</td>
+                    <td class="val">Hotel Ichchha Resort &amp; Convention Hub</td>
+                </tr>
+                <tr>
+                    <td class="label">Platform Version:</td>
+                    <td class="val">v2.4.0 (Production Ready)</td>
+                </tr>
+                <tr>
+                    <td class="label">Primary Framework:</td>
+                    <td class="val">Django 5.x / Python 3.12+</td>
+                </tr>
+                <tr>
+                    <td class="label">Frontend Stack:</td>
+                    <td class="val">Tailwind CSS, Alpine.js, HTMX, Air Datepicker</td>
+                </tr>
+                <tr>
+                    <td class="label">Payment Gateways:</td>
+                    <td class="val">Stripe (USD/EUR), eSewa (NPR), Khalti (NPR)</td>
+                </tr>
+                <tr>
+                    <td class="label">Target Audience:</td>
+                    <td class="val">Fullstack Engineers, DevOps &amp; Tech Leads</td>
+                </tr>
+                <tr>
+                    <td class="label">Date of Handover:</td>
+                    <td class="val">October 2026</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="cover-footer">
+            Confidential &amp; Proprietary — For Internal Engineering &amp; Operational Handover Only
+        </div>
+    </div>
+
+
+    <!-- ==================== TABLE OF CONTENTS ==================== -->
+    <h2>Table of Contents</h2>
+    <ol style="line-height: 1.8; font-size: 10pt; margin-top: 15px;">
+        <li><strong>Executive Summary &amp; Platform Architecture</strong></li>
+        <li><strong>Repository Layout &amp; Application Directory Map</strong></li>
+        <li><strong>Local Development Environment &amp; Configuration</strong></li>
+        <li><strong>Database Schema &amp; Data Model Architecture</strong></li>
+        <li><strong>Core Business Workflows &amp; Booking Lifecycle Engine</strong></li>
+        <li><strong>Multi-Gateway Payment Architecture (Stripe, eSewa, Khalti)</strong></li>
+        <li><strong>Frontend Design System, Lenis Inertia &amp; Responsiveness</strong></li>
+        <li><strong>Administration Dashboard &amp; CMS Management</strong></li>
+        <li><strong>Automated Test Suite &amp; Quality Verification</strong></li>
+        <li><strong>Production Deployment &amp; Server Hardening Checklist</strong></li>
+        <li><strong>Operational Runbook &amp; Troubleshooting Guide</strong></li>
+    </ol>
+
+    <div class="alert alert-gold" style="margin-top: 30px;">
+        <div class="alert-title">📌 Handover Document Notice</div>
+        This document contains end-to-end specifications for every component of the Hotel Ichchha codebase. It enables a newly onboarded developer to set up the environment, run automated tests, safely manage payment webhooks, modify room availability locking rules, and deploy updates with zero downtime.
+    </div>
+
+
+    <!-- ==================== SECTION 1 ==================== -->
+    <div class="section-header"></div>
+    <h2>1. Executive Summary &amp; Platform Architecture</h2>
+    <p>
+        The <strong>Hotel Ichchha Platform</strong> is a luxury hotel management, online reservation, and guest hospitality platform engineered specifically for Hotel Ichchha, a 5-star resort and convention center located in Simara, Bara, Nepal.
+    </p>
+    <p>
+        The platform features an intuitive, luxury user interface built with customized theme tokens (Light, Dark, Luxury Gold, and Festival), a real-time availability and dynamic pricing engine, integrated multi-currency support (NPR, USD, INR, EUR, GBP), and multi-gateway checkout pipelines covering both domestic Nepali wallets (eSewa, Khalti) and international credit cards (Stripe).
+    </p>
+
+    <h3>High-Level Architecture Diagram</h3>
+    <pre><code>
++-----------------------------------------------------------------------------------------+
+|                                    CLIENT BROWSER                                       |
+|  [Desktop / Tablet / Mobile Viewports] [Alpine.js UI State] [HTMX Async] [Air Datepicker]|
++-----------------------------------------------------------------------------------------+
+                                      | HTTPS
+                                      v
++-----------------------------------------------------------------------------------------+
+|                                  NGINX REVERSE PROXY                                    |
+|              SSL/TLS Termination | Static & Media Caching | Gzip Compression            |
++-----------------------------------------------------------------------------------------+
+                                      | WSGI / Socket
+                                      v
++-----------------------------------------------------------------------------------------+
+|                              GUNICORN / DJANGO WEB APP                                  |
+|                                                                                         |
+|  [rooms]        [booking]      [payments]       [homepage]      [admin_dashboard]       |
+|  Chambers       Availability   Stripe / eSewa   CMS Showcase    KPI Analytics           |
+|  Addons         Locking        Khalti Webhooks  Hero & Reviews  Reservation Mgmt        |
+|                                                                                         |
+|  [dining]       [conference]   [recreation]     [about]         [seo & core]            |
+|  Table Booking  Venues & AV    Activities       Executive Bio   Currency Rates / SEO    |
++-----------------------------------------------------------------------------------------+
+                                      | ORM
+                                      v
++-----------------------------------------------------------------------------------------+
+|                            POSTGRESQL / SQLITE DATABASE                                 |
+|            Reservations | Payments | Room Inventory | Seasonal Prices | CMS Media       |
++-----------------------------------------------------------------------------------------+
+    </code></pre>
+
+    <h3>Core Technology Stack</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 25%;">Layer</th>
+                <th style="width: 35%;">Technology</th>
+                <th style="width: 40%;">Role in Application</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Backend Engine</strong></td>
+                <td>Python 3.12+ / Django 5.x</td>
+                <td>MVC Framework, ORM, URL dispatching, auth, session management.</td>
+            </tr>
+            <tr>
+                <td><strong>Database</strong></td>
+                <td>PostgreSQL (Production) / SQLite (Dev)</td>
+                <td>ACID-compliant relational store with foreign keys and unique constraints.</td>
+            </tr>
+            <tr>
+                <td><strong>Frontend CSS</strong></td>
+                <td>Tailwind CSS (Compiled Bundle)</td>
+                <td>Utility-first responsive styling with custom luxury color tokens.</td>
+            </tr>
+            <tr>
+                <td><strong>Client Reactivity</strong></td>
+                <td>Alpine.js 3.x</td>
+                <td>Lightweight reactive state (modals, currency dropdowns, counters).</td>
+            </tr>
+            <tr>
+                <td><strong>Async Interactions</strong></td>
+                <td>HTMX 1.9+</td>
+                <td>Server-rendered AJAX swaps for table bookings and contact inquiries.</td>
+            </tr>
+            <tr>
+                <td><strong>Datepicker</strong></td>
+                <td>Air Datepicker 3.5+</td>
+                <td>Bespoke touch-friendly calendar with booked-date disabling.</td>
+            </tr>
+            <tr>
+                <td><strong>Smooth Scrolling</strong></td>
+                <td>Lenis 1.1+</td>
+                <td>Inertia scrolling with automatic modal overlay scroll containment.</td>
+            </tr>
+            <tr>
+                <td><strong>Payment Gateways</strong></td>
+                <td>Stripe, eSewa, Khalti</td>
+                <td>PCI-compliant international card handling and domestic QR/wallet APIs.</td>
+            </tr>
+        </tbody>
+    </table>
+
+
+    <!-- ==================== SECTION 2 ==================== -->
+    <div class="section-header"></div>
+    <h2>2. Repository Layout &amp; Application Directory Map</h2>
+    <p>
+        The project follows clean Django modular design principles. Each domain functionality is segregated into an isolated application.
+    </p>
+
+    <pre><code>Hotel-Ichha/
+├── config/                     # Core project configuration (settings, wsgi, root urls)
+│   ├── settings.py             # Environment loading, apps, Stripe/eSewa/Khalti credentials
+│   ├── urls.py                 # Root URL router mapping to sub-apps
+│   └── wsgi.py                 # WSGI application entrypoint
+├── core/                       # Site-wide settings, currency converter, navigation menus
+│   ├── models/                 # SiteSetting, HeaderMenu, FooterLink, CurrencyExchangeRate
+│   └── management/commands/    # seed_data.py (Seed complete 5-star data fixtures)
+├── rooms/                      # Room chambers, categories, amenities, live availability API
+│   ├── models/                 # RoomCategory, RoomChamber, RoomAddon, SeasonalPrice
+│   ├── views/                  # room_list, room_detail, check_availability, booked_dates
+│   └── templates/rooms/        # room_list.html, room_detail.html
+├── booking/                    # Reservation engine, hold mechanisms, checkout initiation
+│   ├── models/                 # BookingReservation, BookingAddon, Coupon
+│   ├── views/                  # create_booking, checkout_page, apply_coupon
+│   └── templates/booking/      # checkout.html
+├── payments/                   # Multi-gateway transactions, webhook receivers, receipts
+│   ├── services/               # StripePayment, EsewaPayment, KhaltiPayment, PaymentFactory
+│   ├── views/                  # process_payment, payment_callback, stripe_webhook, invoice
+│   ├── urls.py                 # routes including /payments/webhook/stripe/
+│   └── templates/payments/     # process.html, success.html, invoice.html
+├── homepage/                   # CMS hero carousel, spotlight events, review highlights
+├── dining/                     # Restaurant listings, menus, table reservations via HTMX
+├── conference/                 # Banquet halls, seating capacities, corporate inquiry forms
+├── recreation/                 # Spa, swimming pool, gymnasium, outdoor activities
+├── about/                      # Heritage narrative, CEO executive bio, board of directors
+├── contact/                    # Multi-branch properties, Google Maps embeds, contact forms
+├── blogs/                      # Resort journal, news announcements, articles
+├── gallery/                    # Categorized photo gallery with lightbox modal
+├── admin_dashboard/            # Bespoke administration console & analytics (NOT modified)
+├── templates/                  # Base layouts & reusable partials
+│   ├── base.html               # Main layout, SEO tags, Lenis scroll, Air Datepicker
+│   └── includes/               # header.html, mobile_menu.html, footer.html, search_modal.html
+├── static/                     # CSS, JS, branding images, compiled bundles
+│   └── css/main.bundle.css     # Production compiled Tailwind CSS bundle
+├── media/                      # User-uploaded files (room images, PDFs, avatars)
+├── manage.py                   # Django CLI management entrypoint
+└── Makefile                    # Developer shortcut commands (run, migrate, test)</code></pre>
+
+
+    <!-- ==================== SECTION 3 ==================== -->
+    <div class="section-header"></div>
+    <h2>3. Local Development Environment &amp; Configuration</h2>
+
+    <h3>3.1 Prerequisites</h3>
+    <ul>
+        <li><strong>Python</strong>: 3.12 or higher (Python 3.14 compatible)</li>
+        <li><strong>Package &amp; Project Manager</strong>: <code>uv</code> (Astral's ultra-fast package manager — <em>Recommended &amp; Primary</em>) or standard <code>pip</code></li>
+        <li><strong>Git</strong>: Version control</li>
+        <li><strong>Make</strong>: Standard build automation utility (Linux/macOS)</li>
+        <li><strong>Node.js &amp; npm</strong>: v18+ (Required for compiling Tailwind CSS bundle)</li>
+    </ul>
+
+    <h3>3.2 Environment Variables (.env)</h3>
+    <p>Create a <code>.env</code> file in the repository root by copying from <code>.env.example</code>:</p>
+    <pre><code># Core Security & Debug
+SECRET_KEY="your-strong-production-django-secret-key"
+DEBUG=True
+ALLOWED_HOSTS="localhost,127.0.0.1"
+
+# Database Configuration (Leave blank for default SQLite in local dev)
+DATABASE_URL="sqlite:///db.sqlite3"
+# Or PostgreSQL for production:
+# DATABASE_URL="postgresql://user:password@localhost:5432/hotel_ichha"
+
+# International Payment Gateway (Stripe)
+STRIPE_SECRET_KEY="sk_test_..."
+STRIPE_PUBLISHABLE_KEY="pk_test_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."
+
+# Nepal Domestic Gateways (eSewa & Khalti)
+ESEWA_CLIENT_ID="EPAYTEST"
+ESEWA_CLIENT_SECRET="8gBm/:&EnhH.1/q"
+ESEWA_DEMO=True
+
+KHALTI_CLIENT_ID="test_public_key_..."
+KHALTI_CLIENT_SECRET="test_secret_key_..."
+KHALTI_DEMO=True
+
+# Site URLs for Callbacks
+BASE_URL="http://localhost:8000"
+SITE_DOMAIN="127.0.0.1:8000"</code></pre>
+
+    <h3>3.3 Installation &amp; Execution Step-by-Step</h3>
+
+    <div class="alert alert-info">
+        <strong>⚡ Preferred Modern Workflow:</strong> The platform is natively standardized on <code>uv</code>. Using <code>uv</code> allows instantaneous virtual environment creation, deterministic sub-second dependency locking, and direct execution via <code>uv run</code>.
+    </div>
+
+    <h4>Method A: Instant One-Step Setup with Makefile (Recommended)</h4>
+    <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-content">
+            <strong>Execute one-step automated workspace setup:</strong><br>
+            <code>make setup</code><br>
+            <span style="font-size: 8.5pt; color: #666;">(Automatically syncs dependencies with <code>uv sync</code>, applies database migrations, and imports all 21 YAML records from <code>core/records/</code>)</span>
+        </div>
+    </div>
+    <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-content">
+            <strong>Create an administrative superuser:</strong><br>
+            <code>make superuser</code>
+        </div>
+    </div>
+    <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-content">
+            <strong>Start the local development server:</strong><br>
+            <code>make run</code> (Launches development server on <code>0.0.0.0:8000</code>)
+        </div>
+    </div>
+
+    <h4>Method B: Manual Setup with <code>uv</code></h4>
+    <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-content">
+            <strong>Sync virtual environment and lockfile dependencies:</strong><br>
+            <code>uv sync</code><br>
+            <span style="font-size: 8.5pt; color: #666;">(Creates <code>.venv</code> automatically and resolves packages from <code>pyproject.toml</code> / <code>uv.lock</code>)</span>
+        </div>
+    </div>
+    <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-content">
+            <strong>Apply database migrations:</strong><br>
+            <code>uv run python manage.py migrate</code>
+        </div>
+    </div>
+    <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-content">
+            <strong>Seed all modular YAML fixtures &amp; hotel data:</strong><br>
+            <code>uv run python manage.py seed_data</code>
+        </div>
+    </div>
+    <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-content">
+            <strong>Create administrative staff account:</strong><br>
+            <code>uv run python manage.py createsuperuser</code>
+        </div>
+    </div>
+    <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-content">
+            <strong>Build frontend Tailwind CSS bundle:</strong><br>
+            <code>npm run build:css &amp;&amp; uv run python manage.py collectstatic --noinput --clear</code>
+        </div>
+    </div>
+    <div class="flow-step">
+        <div class="flow-num">6</div>
+        <div class="flow-content">
+            <strong>Start the development server:</strong><br>
+            <code>uv run python manage.py runserver 0.0.0.0:8000</code>
+        </div>
+    </div>
+
+    <h4>Method C: Traditional Virtualenv &amp; Pip Setup (Fallback)</h4>
+    <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-content">
+            <strong>Create and activate Python virtual environment:</strong><br>
+            <code>python3 -m venv .venv &amp;&amp; source .venv/bin/activate</code>
+        </div>
+    </div>
+    <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-content">
+            <strong>Install dependencies:</strong><br>
+            <code>pip install -r requirements.txt</code> (or <code>uv pip install -r pyproject.toml</code>)
+        </div>
+    </div>
+    <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-content">
+            <strong>Apply database migrations:</strong><br>
+            <code>python manage.py migrate</code>
+        </div>
+    </div>
+    <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-content">
+            <strong>Populate sample fixtures &amp; hotel data:</strong><br>
+            <code>python manage.py seed_data</code>
+        </div>
+    </div>
+    <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-content">
+            <strong>Start the local server:</strong><br>
+            <code>python manage.py runserver</code> or run <code>make run</code>
+        </div>
+    </div>
+
+
+    <!-- ==================== SECTION 4 ==================== -->
+    <div class="section-header"></div>
+    <h2>4. Database Schema &amp; Data Model Architecture</h2>
+    <p>
+        The platform schema enforces data integrity through model validation, database relationships, and status state machines.
+    </p>
+
+    <div class="cards-grid">
+        <div class="card">
+            <div class="card-title">🏨 rooms.RoomChamber</div>
+            <div class="card-body">
+                Represents physical suites. Key fields: <code>title</code>, <code>slug</code>, <code>category</code> (FK), <code>room_number</code>, <code>base_price</code>, <code>discount_price</code>, <code>currency</code> (FK), <code>max_adults</code>, <code>max_children</code>, <code>room_size</code>, <code>total_inventory</code>, <code>tax_percentage</code>.
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">🏷️ rooms.SeasonalPrice</div>
+            <div class="card-body">
+                Dynamic seasonal price overrides for high seasons, festivals, or holidays. Fields: <code>room</code> (FK), <code>name</code>, <code>start_date</code>, <code>end_date</code>, <code>price_override</code>, <code>is_active</code>.
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">📅 booking.BookingReservation</div>
+            <div class="card-body">
+                Central reservation record. Fields: <code>booking_uid</code> (UUID), <code>room</code> (FK), <code>guest_name</code>, <code>guest_email</code>, <code>guest_phone</code>, <code>check_in</code>, <code>check_out</code>, <code>num_rooms</code>, <code>adults</code>, <code>daily_rate</code>, <code>subtotal</code>, <code>tax</code>, <code>total</code>, <code>currency_code</code>, <code>status</code> (draft/pending/confirmed/cancelled).
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">💳 payments.PaymentTransaction</div>
+            <div class="card-body">
+                Audit trail for all checkout attempts. Fields: <code>booking</code> (FK), <code>gateway</code> (stripe/esewa/khalti), <code>transaction_id</code>, <code>amount</code>, <code>currency</code>, <code>status</code> (pending/success/failed), <code>gateway_payload</code>, <code>created_at</code>.
+            </div>
+        </div>
+    </div>
+
+    <h3>Add-on Pricing Types (<code>rooms.RoomAddon</code>)</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Price Type</th>
+                <th>Calculation Formula</th>
+                <th>Use Case</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>fixed</code></td>
+                <td><code>price × quantity</code></td>
+                <td>One-time services (e.g. VIP Champagne bottle, Flower arrangement)</td>
+            </tr>
+            <tr>
+                <td><code>per_night</code></td>
+                <td><code>price × nights × num_rooms</code></td>
+                <td>Nightly room upgrades (e.g. High-speed executive Wi-Fi, Balcony view)</td>
+            </tr>
+            <tr>
+                <td><code>per_person</code></td>
+                <td><code>price × total_guests</code></td>
+                <td>One-time per-guest services (e.g. Simara airport pick-up shuttle)</td>
+            </tr>
+            <tr>
+                <td><code>per_person_per_night</code></td>
+                <td><code>price × total_guests × nights</code></td>
+                <td>Recurring personal services (e.g. Full-board breakfast buffet)</td>
+            </tr>
+        </tbody>
+    </table>
+
+
+    <!-- ==================== SECTION 5 ==================== -->
+    <div class="section-header"></div>
+    <h2>5. Core Business Workflows &amp; Booking Lifecycle Engine</h2>
+
+    <h3>5.1 Booking Lifecycle State Machine</h3>
+    <pre><code>
+   +-------------------------------------------------------------+
+   | 1. DRAFT                                                    |
+   | Guest selects dates, room count, addons, inputs info.       |
+   | Booking object created with status='draft'.                 |
+   | Room inventory is NOT permanently deducted yet.             |
+   +-------------------------------------------------------------+
+                                 |
+                                 v
+   +-------------------------------------------------------------+
+   | 2. PENDING                                                  |
+   | Guest selects gateway (Stripe/eSewa/Khalti) on checkout.    |
+   | Handshake token created. PaymentTransaction status='pending'|
+   +-------------------------------------------------------------+
+                    /                         \
+       Payment Success                   Payment Failure / Cancel
+                  /                             \
+                 v                               v
+   +---------------------------+   +-----------------------------+
+   | 3. CONFIRMED              |   | 4. FAILED / EXPIRED         |
+   | Webhook or callback verifies|   | Transaction status='failed' |
+   | signature and updates booking|   | Booking remains 'draft' or  |
+   | status to 'confirmed'.    |   | gets purged by cleaner job. |
+   | Confirmation email queued.|   +-----------------------------+
+   +---------------------------+
+    </code></pre>
+
+    <h3>5.2 Real-Time Availability Checking Logic</h3>
+    <p>
+        The availability endpoint at <code>/rooms/api/&lt;room_id&gt;/check-availability/</code> checks whether a requested room has enough physical chambers free for the given date range.
+    </p>
+    <div class="alert alert-info">
+        <strong>Overlapping Date Formula:</strong><br>
+        Two date ranges <code>[check_in, check_out]</code> and <code>[b.check_in, b.check_out]</code> overlap if and only if:<br>
+        <code>b.check_in &lt; requested_check_out AND b.check_out &gt; requested_check_in</code>
+    </div>
+    <p>
+        Only confirmed bookings (and active locked reservations) are counted against the room's <code>total_inventory</code>, preventing false "sold out" states from abandoned cart sessions while guaranteeing zero double-bookings.
+    </p>
+
+
+    <!-- ==================== SECTION 6 ==================== -->
+    <div class="section-header"></div>
+    <h2>6. Multi-Gateway Payment Architecture</h2>
+    <p>
+        Payment processing utilizes the <strong>Factory Pattern</strong> located in <code>payments/services/</code>. The factory dynamically instantiates the correct service class depending on the chosen provider:
+    </p>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Gateway</th>
+                <th>Currencies</th>
+                <th>Handshake Method</th>
+                <th>Verification Route</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Stripe</strong></td>
+                <td>USD, EUR, GBP, AUD</td>
+                <td>Stripe Checkout Session (Redirect URL)</td>
+                <td>Webhook: <code>/payments/webhook/stripe/</code><br>Callback: <code>/payments/callback/stripe/</code></td>
+            </tr>
+            <tr>
+                <td><strong>eSewa</strong></td>
+                <td>NPR</td>
+                <td>HMAC-SHA256 Form Post via Base64 Payload</td>
+                <td>Callback: <code>/payments/callback/esewa/</code></td>
+            </tr>
+            <tr>
+                <td><strong>Khalti</strong></td>
+                <td>NPR</td>
+                <td>REST API Session Initiation (<code>pidx</code>)</td>
+                <td>Callback: <code>/payments/callback/khalti/</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Stripe Webhook Asynchronous Flow</h3>
+    <div class="alert alert-gold">
+        <strong>Endpoint:</strong> <code>POST /payments/webhook/stripe/</code> (CSRF exempt)<br>
+        <strong>Security:</strong> The webhook validates the <code>Stripe-Signature</code> header against the configured <code>STRIPE_WEBHOOK_SECRET</code>. When a <code>checkout.session.completed</code> event arrives, it inspects <code>session.metadata.booking_uid</code>, confirms the payment transaction, and flips the booking status to <code>confirmed</code> atomically.
+    </div>
+
+    <h3>Currency Locking Guarantee</h3>
+    <p>
+        To prevent currency exchange arbitrage between booking initiation and payment processing, the currency selector is automatically locked on the checkout page (<code>checkout.html</code>).
+        If the reservation is in USD, only Stripe is offered. If the reservation is in NPR, local wallets eSewa and Khalti are presented.
+    </p>
+
+
+    <!-- ==================== SECTION 7 ==================== -->
+    <div class="section-header"></div>
+    <h2>7. Frontend Design System &amp; Responsiveness</h2>
+
+    <h3>7.1 Unified Breakpoint Hierarchy</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Viewport Category</th>
+                <th>Screen Width</th>
+                <th>Layout Strategy</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Mobile</strong></td>
+                <td><code>&lt; 640px</code></td>
+                <td>Single column stacked, full-width CTA buttons (<code>w-full sm:w-auto</code>), hamburger drawer navigation, collapsible filter panels.</td>
+            </tr>
+            <tr>
+                <td><strong>Tablet</strong></td>
+                <td><code>640px – 1024px</code></td>
+                <td>2-column grids for cards and form fields, drawer navigation active (<code>lg:hidden</code>) to prevent 8-item menu overflow, sticky booking widgets adapt below hero content.</td>
+            </tr>
+            <tr>
+                <td><strong>Desktop</strong></td>
+                <td><code>&gt; 1024px</code></td>
+                <td>Full horizontal mega menu, multi-column grids (3–4 columns), sticky sidebar booking reservation cards.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>7.2 Smooth Scrolling (Lenis) with Modal Protection</h3>
+    <p>
+        The platform uses <strong>Lenis Smooth Inertia Scrolling</strong> on desktop and mobile. To prevent background scroll bleed when modals (search, image lightbox, booking guest details, security handshake) are open, a universal <code>MutationObserver</code> halts Lenis scrolling whenever <code>overflow: hidden</code> or <code>modal-open</code> is attached to the <code>&lt;body&gt;</code> element.
+    </p>
+
+    <h3>7.3 Mobile-First Viewport Typography &amp; Spacing Optimization</h3>
+    <p>
+        To deliver a pristine 5-star guest experience on mobile devices without horizontal overflow or clunky oversized headings, all 11 public-facing template domains implement mobile-first responsive scaling:
+    </p>
+    <ul>
+        <li><strong>Tightened Hero Banners &amp; Headings</strong>: Section titles scale dynamically (e.g. <code>text-2xl sm:text-5xl lg:text-6xl</code> for page banners; <code>text-xl sm:text-4xl</code> for room chambers and venues).</li>
+        <li><strong>Compact Vertical Spacing</strong>: Heavy desktop padding (<code>py-16 sm:py-24</code>) is proportionately reduced on mobile viewports to <code>py-8 sm:py-20</code>.</li>
+        <li><strong>Mobile Navigation Header</strong>: The topbar and main navbar reduce height on mobile (<code>h-16 sm:h-20</code>) with a compact logo (<code>h-10 sm:h-14</code>) and dedicated mobile currency badge.</li>
+        <li><strong>Form Inputs &amp; Controls</strong>: Buttons, counters, and input fields scale to touch-friendly heights (<code>py-2.5 sm:py-3.5</code>) preventing browser viewport zoom.</li>
+    </ul>
+
+    <h3>7.4 Mobile Bottom Sheet Modal &amp; Responsive Add-on Toggles</h3>
+    <p>
+        On room detail and booking pages (<code>rooms/templates/rooms/room_detail.html</code>):
+    </p>
+    <ul>
+        <li><strong>Bottom Sheet Architecture</strong>: The draft reservation modal automatically transforms into a native-feeling slide-up bottom sheet on mobile screens (<code>items-end sm:items-center</code>, <code>rounded-t-3xl sm:rounded-2xl</code>, with a centered top drag handle <code>w-10 h-1 bg-neutral-400/50 rounded-full</code>).</li>
+        <li><strong>Smooth Transform Transitions</strong>: Powered by Alpine.js, the modal slides up vertically from the bottom on mobile (<code>translate-y-full</code> to <code>translate-y-0</code>) while centering and fading smoothly on tablet and desktop (<code>sm:scale-95 sm:opacity-0</code>).</li>
+        <li><strong>Responsive Add-on Switch Controls</strong>: Ancillary service add-ons feature responsive animated toggle switches (<code>w-9 h-5 sm:w-11 sm:h-6</code> with sliding knob <code>translate-x-4 sm:translate-x-5</code>) with real-time multi-currency price calculations.</li>
+    </ul>
+
+
+    <!-- ==================== SECTION 8 ==================== -->
+    <div class="section-header"></div>
+    <h2>8. Administration Dashboard &amp; CMS Management</h2>
+    <p>
+        The platform features two administration interfaces:
+    </p>
+    <ul>
+        <li><strong>Standard Django Admin (<code>/admin/</code>)</strong>: Used for low-level database operations, permissions, currency exchange rate updates, and raw audit logs.</li>
+        <li><strong>Executive Admin Dashboard (<code>/dashboard/</code>)</strong>: Custom-built luxury analytics suite displaying real-time occupancy rates, revenue metrics, seasonal discount managers, and reservation calendars.</li>
+    </ul>
+
+    <div class="alert alert-warning">
+        <div class="alert-title">⚠️ Admin Dashboard Invariant</div>
+        As per system requirements, templates in <code>admin_dashboard/templates/</code> are designated exclusively for staff operations and must not be altered during user-facing layout revisions.
+    </div>
+
+
+    <!-- ==================== SECTION 9 ==================== -->
+    <div class="section-header"></div>
+    <h2>9. Automated Test Suite &amp; Quality Verification</h2>
+    <p>
+        The platform is validated with a comprehensive automated test suite spanning unit tests, integration tests, and edge case coverage.
+    </p>
+
+    <h3>Running Tests</h3>
+    <pre><code># Run complete test suite using uv (or make)
+uv run python manage.py test
+# or
+make test
+
+# Run payment tests specifically
+uv run python manage.py test payments.tests
+
+# Run room availability tests
+uv run python manage.py test rooms.tests</code></pre>
+
+    <div class="alert alert-success">
+        <div class="alert-title">✓ Test Verification Result</div>
+        All <strong>59 test cases</strong> currently execute with zero failures:
+        <code>Ran 59 tests in ~20s ... OK</code>.
+    </div>
+
+
+    <!-- ==================== SECTION 10 ==================== -->
+    <div class="section-header"></div>
+    <h2>10. Production Deployment &amp; Server Hardening Checklist</h2>
+
+    <h3>10.1 Production Environment Setup</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Setting</th>
+                <th>Production Value</th>
+                <th>Purpose</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>DEBUG</code></td>
+                <td><code>False</code></td>
+                <td>Disables stack trace leaks and debug toolbar.</td>
+            </tr>
+            <tr>
+                <td><code>ALLOWED_HOSTS</code></td>
+                <td><code>hotelichchha.com, www.hotelichchha.com</code></td>
+                <td>HTTP Host header validation against poisoning attacks.</td>
+            </tr>
+            <tr>
+                <td><code>SECURE_SSL_REDIRECT</code></td>
+                <td><code>True</code></td>
+                <td>Forces all HTTP traffic to HTTPS.</td>
+            </tr>
+            <tr>
+                <td><code>SESSION_COOKIE_SECURE</code></td>
+                <td><code>True</code></td>
+                <td>Transmits session cookies exclusively over HTTPS.</td>
+            </tr>
+            <tr>
+                <td><code>CSRF_COOKIE_SECURE</code></td>
+                <td><code>True</code></td>
+                <td>Transmits CSRF tokens exclusively over HTTPS.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>10.2 Systemd Service Example (<code>/etc/systemd/system/hotel_ichha.service</code>)</h3>
+    <pre><code>[Unit]
+Description=Hotel Ichchha Gunicorn Daemon
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/hotel-ichha
+ExecStart=/var/www/hotel-ichha/.venv/bin/gunicorn \
+          --workers 4 \
+          --bind 127.0.0.1:8000 \
+          --access-logfile /var/log/hotel_ichha_access.log \
+          --error-logfile /var/log/hotel_ichha_error.log \
+          config.wsgi:application
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+
+
+    <!-- ==================== SECTION 11 ==================== -->
+    <div class="section-header"></div>
+    <h2>11. Operational Runbook &amp; Troubleshooting Guide</h2>
+
+    <h3>Common Operational Issues &amp; Resolutions</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 30%;">Symptom</th>
+                <th style="width: 30%;">Probable Cause</th>
+                <th style="width: 40%;">Resolution Procedure</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Stripe Webhook Signature Verification Error (400)</strong></td>
+                <td>Mismatched <code>STRIPE_WEBHOOK_SECRET</code> between Stripe Dashboard and <code>.env</code>.</td>
+                <td>Retrieve current signing secret from Stripe Dashboard (Developers &gt; Webhooks) and update <code>.env</code>.</td>
+            </tr>
+            <tr>
+                <td><strong>Room Shows Unavailable but Calendar is Empty</strong></td>
+                <td>A draft booking created during testing is locking inventory.</td>
+                <td>Run cleaning command or cancel draft reservations from Django admin.</td>
+            </tr>
+            <tr>
+                <td><strong>Static Assets / Styles Missing in Production</strong></td>
+                <td>Static bundle was not collected into <code>staticfiles/</code> directory.</td>
+                <td>Run <code>python manage.py collectstatic --noinput</code> and check Nginx alias mapping.</td>
+            </tr>
+            <tr>
+                <td><strong>Air Datepicker Virtual Keyboard Pops Up on Mobile</strong></td>
+                <td>Input lacks <code>readonly</code> or <code>inputmode="none"</code> attributes.</td>
+                <td>Ensure inputs are initialized via <code>base.html</code> auto-initialization script.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="alert alert-gold" style="margin-top: 25px;">
+        <strong>Document Sign-off:</strong> This concludes the technical handover documentation for Hotel Ichchha. The project is fully documented, tested, and prepared for seamless developer transition.
+    </div>
+
+</body>
+</html>

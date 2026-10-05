@@ -367,6 +367,8 @@
 
     <!-- SECURITY HANDSHAKE MODAL -->
     <div x-show="showModal" 
+         x-effect="document.body.style.overflow = showModal ? 'hidden' : ''; if (window.lenis) { showModal ? window.lenis.stop() : window.lenis.start(); }"
+         data-lenis-prevent
          class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
