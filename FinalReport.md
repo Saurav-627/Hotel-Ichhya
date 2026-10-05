@@ -96,6 +96,7 @@
 | `theme` | Choice | Default platform theme (Light, Dark, Luxury Gold, Festival) |
 | `contact_phone` | String | Primary phone number rendered in header top bar, footer, and invoice metadata |
 | `contact_email` | Email | Official inquiry email rendered in header top bar, footer, and invoices |
+| `inquiry_notification_email`| Email | Staff inbox receiving instant email notifications for new guest inquiries and contact queries |
 | `address` | String | Hotel physical address rendered in footer, contact page, and invoice header |
 | `google_maps_iframe`| Text (HTML) | Raw iframe embed code for Google Maps displayed on contact page |
 | `facebook_url` | URL | Link to hotel Facebook page in footer |
@@ -103,8 +104,14 @@
 | `twitter_url` | URL | Link to hotel X/Twitter profile in footer |
 | `youtube_url` | URL | Link to hotel YouTube channel in footer |
 | `tripadvisor_url`| URL | Link to hotel TripAdvisor profile in footer |
+| `header_badge` | String | Top navigation announcement badge (e.g. "⭐ 5-Star Luxury Resort") |
+| `header_cta_text` / `url`| String | Top header call-to-action button label and URL (e.g. "Book A Stay" -> `/rooms/`) |
 | `about_text` | Text | Short hotel introduction paragraph rendered in the footer brand column |
 | `copyright_text`| String | Custom copyright line rendered at the bottom of all pages |
+| `awards_text` | String | Footer awards and accreditation badge (e.g. "Awards: World Luxury Hotel Winner 2026") |
+| `contact_form_title`| String | Heading text rendered above the public contact inquiry form |
+| `contact_form_subtitle`| String | Subtitle instructions rendered beneath the contact inquiry heading |
+| `contact_form_button_text`| String | Submit button label rendered on the public contact inquiry form |
 
 ---
 
@@ -276,14 +283,18 @@
 
 #### 1. Main Room Record (`Room`)
 * `title`: Room name (e.g. "Presidential Suite", "Executive King Room")
+* `room_number`: Room code or number identifier (e.g. "101", "102", "Villa A")
 * `category`: ForeignKey to `RoomCategory` (e.g. Suites, Deluxe, Executive)
 * `description`: Full rich-text description
 * `highlights`: Bullet points highlighting key room features
 * `tax_percentage`: VAT rate (default: `13.00%`)
 * `room_size`: Room area in sq. ft. or sq. meters
+* `total_rooms`: Total physical inventory count available for this specific room listing
 * `max_adults` / `max_children`: Guest capacity thresholds
 * `bed_type`: Bed configuration (e.g. "King Bed", "Two Twin Beds")
 * `facilities`: ManyToMany relation to `RoomFacility`
+* `included_addons`: ManyToMany to `booking.Addon` — complimentary included services (e.g. Complimentary Breakfast, Airport Shuttle, Welcome Drink) rendered with icons on the public detail page
+* `allow_custom_addons`: Boolean toggle determining whether guests can select optional paid add-ons during room reservation checkout
 * `virtual_tour_url`: 360-degree interactive 3D virtual tour embed link
 * `video_url`: YouTube/Vimeo video walkthrough link
 * `is_featured`: Pins room to the homepage showcase slider
@@ -319,23 +330,31 @@
 #### 7. Room Duplication Action
 * In `/admin/rooms/`, administrators can click **Duplicate Room** to instantly clone a room record with all associated base prices, facilities, and policy rules for fast onboarding of similar room types.
 
+#### 8. Complimentary Inclusions vs. Optional Paid Add-ons
+* **Public Room Detail**: Renders a dedicated "Complimentary Inclusions" card displaying all linked `included_addons` with their respective FontAwesome icons.
+* **Checkout Pipeline**: When `allow_custom_addons` is enabled, guests can browse and attach optional paid services (`Addon`) to their reservation. Any services already provided as complimentary inclusions are automatically excluded from the paid add-on selection to prevent double charging.
+
 ---
 
 ### 2.12 Booking Add-on Services
-* **Admin Path:** `Marketing -> Add-on Services` (`/admin/addons/`)
+* **Admin Path:** `Marketing / Services -> Add-on Services` (`/admin/addons/`)
 * **Models:** `booking/models/addon.py` (`Addon`, `AddonPrice`)
-* **Description:** Optional services offered to guests during the checkout flow.
+* **Description:** Unified ancillary services offered to guests during room booking checkouts or banquet inquiry submissions.
 
 | Field | Type | Description |
 |---|---|---|
-| `name` | String | Service name (e.g. "Airport Private Pick-up", "Candlelight Dinner Setup", "Extra Bed") |
-| `description` | Text | Description shown to guests during checkout |
-| `icon` | String | FontAwesome icon class (e.g. `fa-car`, `fa-utensils`, `fa-bed`, `fa-spa`) |
-| `applies_to` | Choice | Applicable product: `room` (Room stays only) or `both` (Rooms & events) |
+| `name` | String | Service name (e.g. "Airport Private Pick-up", "Candlelight Dinner Setup", "Audio Visual Package") |
+| `description` | Text | Description shown to guests during checkout or venue inquiry |
+| `icon` | String | FontAwesome icon class (e.g. `fa-car`, `fa-utensils`, `fa-bed`, `fa-video`, `fa-microphone`) |
+| `applies_to` | Choice | Applicable domain: `room` (Room stays only), `events` (Event & banquet halls only), or `both` (Universal) |
 | `price_type` | Choice | Billing type: `per_night`, `per_person`, `per_person_per_night`, `per_booking` |
 | `is_active` | Boolean | Toggle add-on availability |
-| `order` | Integer | Display sequence during checkout |
+| `order` | Integer | Display sequence during selection |
 | `prices` (Inline) | FK | Multi-currency pricing (`AddonPrice`) in USD, NPR, EUR, GBP |
+
+#### Admin Add-on Dashboard Features:
+* **Scope Filtering**: Filter tabs for **All Services**, **Room Stay Add-ons**, and **Event & Banquet Add-ons** with luxury gold active states.
+* **Venue Association**: Event venues can selectively enable/disable custom add-ons via `venue.allow_custom_addons` and choose allowed items via `venue.available_addons`.
 
 ---
 
@@ -404,20 +423,33 @@
 ---
 
 ### 2.16 Conference, Banquet & Event Venues
-* **Admin Path:** `Conference -> Event Venues` (`/admin/conference/venues/`)
-* **Models:** `conference/models/venue.py`, `conference/models/venue_base_price.py`, `conference/models/venue_image.py`
-* **Description:** Manages convention halls, banquet spaces, and meeting rooms.
+* **Admin Path:** `Conference -> Events & Hall` (`/admin/conference/`)
+* **Models:** `conference/models/venue.py`, `conference/models/event_type.py`, `conference/models/venue_layout.py`, `conference/models/venue_base_price.py`, `conference/models/venue_image.py`
+* **Description:** Manages convention halls, banquet spaces, meeting rooms, occasion categories, and seating arrangements.
 
+#### 1. Event Venue Record (`EventVenue`)
 | Field | Type | Description |
 |---|---|---|
 | `name` | String | Hall name (e.g. "Grand Ichchha Ballroom", "Summit Meeting Hall") |
 | `description` | Text | Detailed venue features, audio-visual capabilities, and lighting |
 | `capacity` | Integer | Max theater/floating capacity (e.g. 1000) |
-| `layout_options`| Text | Formatted seating options (e.g. `Theatre: 1000, Banquet: 600, Classroom: 350`) |
+| `event_types` | M2M | Linked occasion categories (`EventType`) suitable for this hall |
+| `layouts` | M2M | Linked seating layouts (`VenueLayout`) supported by this hall |
+| `allow_custom_addons` | Boolean | Toggles whether guests can select optional add-ons during inquiry |
+| `available_addons` | M2M | Specific add-on services (`booking.Addon`) available for this hall |
 | `base_prices` (Inline)| FK | Multi-currency starting rental rates (`VenueBasePrice`) |
 | `image` | Image | Primary cover photograph |
-| `images` (Inline)| FK | Multi-image gallery (`EventVenueImage`) with lightbox zoom |
-| `is_active` | Boolean | Toggle public visibility |
+| `images` (Inline)| FK | Multi-image gallery (`EventVenueImage`) with zero-crop lightbox zoom |
+| `is_featured` | Boolean | Featured on homepage events carousel |
+| `is_active` | Boolean | Toggle public listing visibility |
+
+#### 2. Event Occasion Categories (`EventType`)
+* **Path:** `/admin/conference/?tab=event_types`
+* Manages occasion types (Weddings & Receptions, Corporate Conferences, Gala Dinners, Seminars & Workshops, Executive Board Meetings, Social Celebrations) with hero imagery, descriptions, display order, and active toggles.
+* **Public Form Filter**: The public inquiry form dynamically filters occasion options to display *only* those categories linked to the selected venue.
+
+#### 3. Venue Seating Layouts (`VenueLayout`)
+* Manages seating arrangements (Theatre, Banquet, Classroom, Boardroom, U-Shape, Reception) with icons and display ordering.
 
 ---
 
@@ -434,10 +466,11 @@
 ---
 
 ### 2.18 Contact Branches & Maps
-* **Admin Path:** `Contact -> Branches` (`/admin/contact/branches/`)
-* **Model:** `contact/models/branch.py` (`HotelBranch`)
-* **Description:** Manages contact cards for the main hotel and regional sales/branch offices.
+* **Admin Path:** `Contact -> Branches & Messages` (`/admin/contact/`)
+* **Models:** `contact/models/branch.py` (`HotelBranch`), `contact/models/inquiry_category.py` (`InquiryCategory`)
+* **Description:** Manages contact cards for the main hotel, regional sales offices, and dynamic inquiry categories.
 
+#### 1. Hotel Branch Record (`HotelBranch`)
 | Field | Type | Description |
 |---|---|---|
 | `name` | String | Office name (e.g. "Hotel Ichchha — Main Resort", "Kathmandu Sales Office") |
@@ -447,6 +480,12 @@
 | `maps_iframe` | Text | Google Maps iframe embed code for interactive map display |
 | `is_main` | Boolean | Highlights as the primary resort location |
 | `is_published` | Boolean | Toggle visibility on the contact page |
+
+#### 2. Inquiry Categories (`InquiryCategory`)
+* **Admin Path:** `/admin/contact/?tab=inquiries`
+* Dynamically manages category classifications for guest inquiries (General Inquiries, Room Booking & Rates, Dining & Table Reservations, Conference & Event Planning, Spa & Wellness, Career & Employment).
+* Fields: `name`, `slug`, `description`, `display_order`, `is_active`.
+* Public contact form renders active categories dynamically; admin dashboard filters messages using categorized pill tabs.
 
 ---
 
@@ -568,37 +607,58 @@ Guest-submitted records are generated through frontend guest interactions and re
 ### 3.2 Payment Transactions
 * **Admin Path:** `Payments -> Payment Transactions` (`/admin/payments/`)
 * **Model:** `payments/models/payment.py` (`Payment`)
-* **Workflow:**
+* **Workflow & Email Dispatch:**
   - Records gateway name (`esewa`, `khalti`, `stripe`, `bank_transfer`, `cash`), transaction UUID, amount paid, tax amount, currency, and raw JSON gateway response.
   - Automatically marks linked `Booking` as `confirmed` upon successful transaction verification.
-  - Dispatches automated HTML invoice email to the guest via `core.services.email_service.send_booking_invoice_email`.
+  - Dispatches automated branded HTML invoice email to the guest via `core.services.email_service.send_booking_invoice_email`.
+  - Concurrently dispatches an instant booking alert email to the hotel's inbox via `core.services.email_service.send_hotel_booking_notification_email` (`templates/emails/booking_notification_hotel_email.html`), providing staff with guest contact info, room details, payment total, and a direct link to the booking in the admin dashboard.
 
 ---
 
 ### 3.3 Dining Table Reservations
-* **Admin Path:** `Dining -> Table Reservations` (`/admin/dining/reservations/`)
+* **Admin Path:** `Dining -> Table Reservations` (`/admin/dining/?tab=reservations` or `/admin/dining/reservations/`)
 * **Model:** `dining/models/reservation.py` (`DiningReservation`)
-* **Workflow:**
-  - Captures guest name, email, phone, venue, date, time slot, party size, and special requests.
-  - Admin can update status (`pending`, `confirmed`, `cancelled`).
+* **Workflow & Administrative Enhancements:**
+  - **Public Form & Validation**: Captures guest name, email, phone, venue, date, time slot, party size, and special requests. Public dining detail page features an interactive booking modal with capacity validation (guest count cannot exceed venue capacity).
+  - **Direct Notification Routing**: Clicking a dining reservation alert in the admin notification dropdown routes directly to `/admin/dining/?tab=reservations` with the tab automatically activated.
+  - **5 Live KPI Summary Cards**:
+    1. *Total Reservations* (Lifetime volume)
+    2. *Pending Action* (Prominent amber alert badge requiring front-desk confirmation)
+    3. *Today's Bookings* (Guests scheduled for arrival today)
+    4. *Upcoming Bookings* (Future reservations)
+    5. *Cancelled / Archived* (Inactive reservations)
+  - **Search & Filter Toolbar**: Search reservations by guest name, contact email, phone number, or notes. Filter by confirmation status (`pending`, `confirmed`, `cancelled`) or dining venue.
+  - **Guest Special Requests Callout**: Guest dietary notes and special requirements are highlighted with gold icon indicators directly on the table row.
+  - **Reservation Dossier Modal**: Quick-view AJAX dossier modal (`/admin/dining/reservations/<id>/detail-json/`) rendered via Alpine.js displaying full guest info, venue, seating time, and staff notes without page reloads.
+  - **"Clear All" Batch Action**: Safe, modal-confirmed batch purge action (`/admin/dining/reservations/clear-all/`) allowing staff to clear test or historical reservations with a single click.
 
 ---
 
 ### 3.4 Conference & Banquet Inquiries
-* **Admin Path:** `Conference -> Event Inquiries` (`/admin/conference/inquiries/`)
+* **Admin Path:** `Conference -> Event Inquiries` (`/admin/conference/?tab=inquiries` or `/admin/conference/inquiries/`)
 * **Model:** `conference/models/inquiry.py` (`EventInquiry`)
-* **Workflow:**
-  - Captures event organizer details, chosen hall, expected event date, guest count, catering needs, and custom requirements.
-  - Admin can update inquiry status (`pending`, `contacted`, `confirmed`, `cancelled`).
+* **Workflow & Administrative Enhancements:**
+  - **Inquiry Submission & Filtering**: Captures event organizer details, chosen venue, event type (`EventType`), seating layout (`VenueLayout`), expected event date, guest count, catering needs, selected add-ons, and custom requirements. Dynamic JavaScript filtering on the public venue detail form restricts occasion options to *only* those toggled for the specific venue.
+  - **Submission Loading State**: Form submission button automatically displays an animated SVG spinner and disables itself to prevent duplicate submissions.
+  - **Direct Notification Routing**: Clicking an event inquiry notification in the navbar dropdown routes directly to `/admin/conference/?tab=inquiries`.
+  - **Schedule Conflict Detection (`has_conflict`)**: Automated scheduling analysis cross-references the requested event date against other inquiries and confirmed bookings for the same hall, displaying a high-visibility amber warning pill for overlapping dates.
+  - **6 Live KPI Summary Cards**: Total Inquiries, Pending Action (red alert badge), In Negotiation, Confirmed Events, Date Conflicts (amber badge), and Cancelled.
+  - **Upcoming Schedule Preview**: Sidebar preview widget outlining upcoming banquet dates and hall occupancy at a glance.
+  - **Interactive Dossier Modal**: Quick-view modal (`/admin/conference/inquiries/<id>/detail-json/`) showing complete organizer contact info, guest counts, catering selections, layout diagram, and custom requirements.
+  - **"Clear All" Batch Action**: Protected batch purge action with modal confirmation (`/admin/conference/inquiries/clear-all/`).
 
 ---
 
 ### 3.5 Contact Inquiries & SMTP Email Reply Modal
-* **Admin Path:** `Contact -> Inquiries` (`/admin/contact/inquiries/`)
-* **Model:** `contact/models/inquiry.py` (`ContactInquiry`)
-* **Workflow:**
-  - Categorized by `general`, `room`, `event`, or `dining`.
-  - Admin can open `/admin/contact/inquiries/<id>/` to review the inquiry and use the **integrated email reply modal** to compose and send a response directly to the guest's email via SMTP.
+* **Admin Path:** `Contact -> Inquiries` (`/admin/contact/?tab=inquiries` or `/admin/contact/inquiries/`)
+* **Model:** `contact/models/inquiry.py` (`ContactInquiry`), `contact/models/inquiry_category.py` (`InquiryCategory`)
+* **Workflow & Administrative Enhancements:**
+  - **Dynamic Classification**: Guest inquiries are categorized dynamically via `InquiryCategory` models (`General Inquiries`, `Room & Suites Reservations`, `Dining & Table Bookings`, `Conference & Banquets`, `Spa & Recreation`, `Careers & Press`).
+  - **Interactive Category Filter Tabs**: Admin contact dashboard provides filter pills with live count badges for each inquiry category.
+  - **Form Usability Improvements**: Input fields use standard text cursors, and the submit button triggers an animated loading spinner to confirm submission.
+  - **Instant Staff Email Notification**: Dispatches an instant email alert (`templates/emails/contact_inquiry_hotel_email.html`) via `core.services.email_service.send_contact_inquiry_emails` to `hotel_settings.inquiry_notification_email` (or `contact_email`) with direct reply-to headers and link to the admin inquiry dossier.
+  - **Integrated SMTP Email Reply Modal**: Admin can click "Reply" to open a modal and send custom HTML responses directly to the guest's email via SMTP without leaving the dashboard (`/admin/contact/inquiries/<id>/reply/`).
+  - **"Clear All" Batch Action**: Protected batch purge action with modal confirmation (`/admin/contact/inquiries/clear-all/`).
 
 ---
 
@@ -630,7 +690,7 @@ The following elements are managed at the codebase and template level:
 
 ## 5. Database Seeding & YAML Records Catalog
 
-The platform database can be seeded from 18 structured YAML files in `core/records/` via `python manage.py seed_data`:
+The platform database can be seeded from 21 structured YAML files in `core/records/` via `python manage.py seed_data`:
 
 | YAML File | Target Model(s) | Records Imported |
 |---|---|---|
@@ -652,6 +712,12 @@ The platform database can be seeded from 18 structured YAML files in `core/recor
 | `16_branches.yaml` | `HotelBranch` | Main Simara Resort and Kathmandu Sales Office |
 | `17_payment_processors.yaml` | `PaymentProcessor`, `PaymentProcessorCurrency` | eSewa, Khalti, Stripe, Bank Transfer, Cash gateways |
 | `18_about_page.yaml` | `AboutPage`, `TeamMember`, `AboutFacility` | Complete About page CMS, CEO message, leadership profiles |
+| `19_event_types.yaml` | `EventType` | 6 banquet occasion categories with cover images and Lucide icons |
+| `20_addons.yaml` | `Addon`, `AddonPrice` | Scoped add-on services (`room`, `events`, `both`) with multi-currency prices |
+| `21_inquiry_categories.yaml` | `InquiryCategory` | 6 dynamic contact inquiry categories for concierge and booking desks |
+
+> **Relational Cross-Reconciliation (`_reconcile_cross_relationships`)**:
+> In addition to importing records in sequential order, the `seed_data` engine executes an automated second-pass cross-reconciliation phase. This binds many-to-many relationships (e.g. associating `EventVenue` instances with their permissible `EventType` occasions and `Addon` packages) after all parent models exist in the database, ensuring zero relational or foreign-key errors.
 
 ---
 
@@ -672,13 +738,16 @@ The platform database can be seeded from 18 structured YAML files in `core/recor
 | **Rooms & Suites** | `Room`, `RoomBasePrice` | `/admin/rooms/` | ✅ | ❌ | Multi-Currency Rate |
 | **Seasonal Room Discounts** | `RoomSeasonalPrice` | `/admin/rooms/` (Inline) | ✅ | ❌ | Overlap Algorithm |
 | **Room Availability Blocks** | `RoomAvailability` | `/admin/rooms/calendar/` | ✅ | Auto-created | Date Conflict Check |
-| **Booking Add-on Services** | `Addon`, `AddonPrice` | `/admin/addons/` | ✅ | ❌ | Checkout Calculation |
+| **Booking & Event Add-on Services**| `Addon`, `AddonPrice` | `/admin/addons/` | ✅ | ❌ | Scoped (`room`/`events`/`both`) |
 | **Discount Coupons** | `Coupon`, `CouponMinSpend` | `/admin/coupons/` | ✅ | ❌ | Validation Engine |
 | **Dining Venues & Menus** | `DiningVenue`, `DiningVenueImage` | `/admin/dining/` | ✅ | ❌ | Zero-crop Lightbox |
 | **Recreation & Spa** | `RecreationActivity` | `/admin/recreation/` | ✅ | ❌ | Category Filter |
-| **Conference Venues** | `EventVenue`, `VenueBasePrice` | `/admin/conference/venues/` | ✅ | ❌ | Layout Parser |
+| **Conference Venues** | `EventVenue`, `VenueBasePrice` | `/admin/conference/` | ✅ | ❌ | Dynamic Layouts & Occasions |
+| **Occasion Categories (Event Types)**| `EventType` | `/admin/conference/?tab=event_types` | ✅ | ❌ | Lucide Icons & Venue M2M |
+| **Venue Seating Layouts** | `VenueLayout` | `/admin/conference/` | ✅ | ❌ | Capacity Multipliers |
 | **Resort Gallery** | `GalleryItem`, `GalleryCategory`| `/admin/cms/gallery/` | ✅ | ❌ | ImageKit Thumbnails |
 | **Branch Offices & Maps** | `HotelBranch` | `/admin/contact/branches/` | ✅ | ❌ | Google Maps Embed |
+| **Contact Inquiry Categories** | `InquiryCategory` | `/admin/contact/?tab=inquiries` | ✅ | ❌ | Dynamic Category Pills |
 | **Blog & News Articles** | `BlogPost` | `/admin/cms/blogs/` | ✅ | ❌ | Slugify Routing |
 | **Nearby Attractions** | `Attraction` | `/admin/cms/attractions/` | ✅ | ❌ | Category Badges |
 | **Guest Testimonials** | `Testimonial` | `/admin/cms/testimonials/` | ✅ | ❌ | Source Platform Badges |
@@ -686,11 +755,11 @@ The platform database can be seeded from 18 structured YAML files in `core/recor
 | **User & Staff Accounts** | `User` | `/admin/users/` | ✅ | Registration | Django Auth Engine |
 | **Room Reservations** | `Booking` | `/admin/bookings/` | Status / Invoice | ✅ | Pricing State Machine |
 | **Payment Transactions** | `Payment` | `/admin/payments/` | Verification | ✅ | Gateway API Verification |
-| **Dining Reservations** | `DiningReservation` | `/admin/dining/reservations/` | Status Update | ✅ | Email Notification |
-| **Conference Inquiries** | `EventInquiry` | `/admin/conference/inquiries/` | Status Update | ✅ | Staff Alert |
-| **Contact Form Inquiries** | `ContactInquiry` | `/admin/contact/inquiries/` | Email Reply Modal | ✅ | Category Routing |
+| **Dining Reservations** | `DiningReservation` | `/admin/dining/?tab=reservations` | 5 KPIs, Status, Dossier, Clear All | ✅ | Capacity Validation & Direct Alert Link |
+| **Conference Inquiries** | `EventInquiry` | `/admin/conference/?tab=inquiries` | 6 KPIs, Dossier, Conflicts, Clear All | ✅ | Conflict Detection & Direct Alert Link |
+| **Contact Form Inquiries** | `ContactInquiry` | `/admin/contact/?tab=inquiries` | Status, Email Reply, Clear All | ✅ | Dynamic Category Tabs & Direct Alert Link |
 | **Newsletter Subscribers** | `NewsletterSubscriber` | `/admin/contact/subscribers/` | Broadcast Engine | ✅ | Double Opt-in Token |
 
 ---
 
-*Hotel Ichchha Platform Architecture & CMS Specification • Version 2.0 • Updated August 2026*
+*Hotel Ichchha Platform Architecture & CMS Specification • Version 2.0 • Updated September 2026*

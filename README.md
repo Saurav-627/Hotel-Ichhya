@@ -52,6 +52,8 @@ Every aspect of the platform—from site identity, navigation menus, and room av
 ### 🏨 Rooms & Booking Engine
 * **Interactive Datepicker & Real-Time Availability**: Powered by Air Datepicker with date restrictions, blocking reserved dates, and checking overlapping bookings before checkout.
 * **Seasonal Price Overlap Algorithm**: High-fidelity date calculation ensures guests receive promotional rates for each individual qualifying night of their stay.
+* **Complimentary Inclusions & Scoped Add-ons**: Rooms support complimentary amenities (`included_addons`) rendered with icons on the detail page, and an `allow_custom_addons` toggle to control whether optional paid add-ons are offered at checkout.
+* **Room Inventory & Code Tracking**: Explicit physical room identifiers (`room_number`) and inventory counts (`total_rooms`) per room listing.
 * **Room Duplication Tool**: One-click action in admin to duplicate existing rooms with full facility and image associations for rapid cataloging.
 * **Standardized Invoicing Engine**: Print-ready, pixel-perfect invoice layout (`invoice.html`) accessible to both guests and administrators with itemized night breakdowns, tax calculations (13% VAT), discounts, and payment status badges.
 
@@ -118,7 +120,7 @@ Hotel-Ichha/
 ├── contact/                # Branch offices, contact inquiries, newsletter subscribers
 ├── core/                   # Base models, seed_data command, records (YAML), email service, utils
 │   ├── management/commands/# seed_data.py, db_backup.py
-│   ├── records/            # 18 modular YAML data files for initial/demo content
+│   ├── records/            # 21 modular YAML data files for initial/demo content
 │   └── services/           # email_service.py (invoices, verification, broadcasts)
 ├── dining/                 # Restaurants, bars, PDF menus, multi-image galleries, reservations
 ├── gallery/                # Resort photo & video gallery categorized by tabs, drone tags
@@ -149,13 +151,13 @@ Hotel-Ichha/
 |---|---|---|
 | `about` | `AboutPage`, `TeamMember`, `AboutFacility` | Singleton About CMS, leadership directory, facility highlights, video showcase |
 | `accounts` | `User` | Custom user accounts, guest profiles, staff role management |
-| `admin_dashboard`| `Notification` | Bespoke admin dashboard, analytics, charts, CMS views, invoice generator |
+| `admin_dashboard`| `Notification` | Bespoke admin dashboard, analytics, charts, CMS views, invoice generator, inquiry dossiers |
 | `blogs` | `BlogPost` | Articles, news, editorial categories, author attribution |
-| `booking` | `Booking`, `Addon`, `AddonPrice`, `BookingAddon`, `Coupon`, `CouponMinSpend` | Reservation pipeline, dynamic pricing, promo validation, addons |
-| `conference` | `EventVenue`, `VenueBasePrice`, `EventVenueImage`, `EventInquiry` | Event spaces, multi-currency rental rates, gallery sliders, inquiries |
-| `contact` | `HotelBranch`, `ContactInquiry`, `NewsletterSubscriber` | Branch locations, contact submissions, newsletter verification & broadcasts |
-| `core` | Abstract Base Models, Mixins | Base models, `seed_data` pipeline, YAML records, `email_service.py` |
-| `dining` | `DiningVenue`, `DiningVenueImage`, `DiningReservation` | Restaurants, bars, chef profiles, PDF menus, table reservations |
+| `booking` | `Booking`, `Addon`, `AddonPrice`, `BookingAddon`, `Coupon`, `CouponMinSpend` | Reservation pipeline, dynamic pricing, unified room & event add-ons, coupons |
+| `conference` | `EventVenue`, `EventType`, `VenueLayout`, `VenueBasePrice`, `EventVenueImage`, `EventInquiry` | Banquet halls, occasion categories, seating layouts, custom add-on toggles, inquiries & conflict detection |
+| `contact` | `HotelBranch`, `InquiryCategory`, `ContactInquiry`, `NewsletterSubscriber` | Branch offices, dynamic inquiry categories, email reply modal, newsletter verification & broadcasts |
+| `core` | Abstract Base Models, Mixins | Base models, `seed_data` pipeline with M2M reconciliation, YAML records, `email_service.py` |
+| `dining` | `DiningVenue`, `DiningVenueImage`, `DiningReservation` | Restaurants, bars, chef profiles, PDF menus, table reservations with direct routing & dossiers |
 | `gallery` | `GalleryCategory`, `GalleryItem` | Photo/video gallery, virtual tours, drone badges, imagekit thumbnails |
 | `homepage` | `HeroSlide`, `AboutPreview` | Homepage hero carousel, animated banners, about preview video |
 | `nearby_places` | `Attraction` | Local tourist attractions, distances, driving times, Google Maps links |
@@ -230,7 +232,7 @@ Access the application:
 
 ## 💾 Database Seeding & YAML Records
 
-The database seeding mechanism uses a modular, robust command located at `core/management/commands/seed_data.py`. It imports records in strict dependency order from 18 structured YAML files located in `core/records/`:
+The database seeding mechanism uses a modular, robust command located at `core/management/commands/seed_data.py`. It imports records in strict dependency order from 21 structured YAML files located in `core/records/`:
 
 ```text
 core/records/
@@ -244,15 +246,20 @@ core/records/
 ├── 08_rooms.yaml                # Rooms, multi-currency base/seasonal prices, galleries
 ├── 09_dining_venues.yaml        # Dining outlets, timings, signature dishes
 ├── 10_recreation_activities.yaml# Spa, pool, gym, casino activities
-├── 11_event_venues.yaml         # Banquet halls, multi-currency rates, layouts
+├── 11_event_venues.yaml         # Banquet halls, multi-currency rates, seating capacities
 ├── 12_attractions.yaml          # Nearby attractions, distances, driving times
 ├── 13_testimonials.yaml         # Guest reviews, ratings, source platforms
 ├── 14_seo_banners.yaml          # SEO metadata and dynamic hero page banners
 ├── 15_coupons.yaml              # Promotional discount coupons & min spend per currency
 ├── 16_branches.yaml             # Branch offices & Google Maps iframe embeds
 ├── 17_payment_processors.yaml   # eSewa, Khalti, Stripe, Bank Transfer processors
-└── 18_about_page.yaml           # About page CMS, CEO message, team members, facilities
+├── 18_about_page.yaml           # About page CMS, CEO message, team members, facilities
+├── 19_event_types.yaml          # Banquet occasions (Weddings, Galas, Conferences, Seminars)
+├── 20_addons.yaml               # Room & event add-ons with multi-currency pricing
+└── 21_inquiry_categories.yaml   # Public inquiry categories for contact and booking desks
 ```
+
+> **Relational Integrity**: The `seed_data` pipeline features an automatic cross-reconciliation step (`_reconcile_cross_relationships`) that safely links M2M relations between venues, occasion categories, and add-ons regardless of file sequence.
 
 To re-run the full seeding process at any time:
 ```bash
@@ -322,10 +329,15 @@ The administrative dashboard (`/admin/`) is completely custom-built with **Tailw
 
 ### Key Admin Modules:
 * **Analytics Overview (`/admin/`)**:
-  - Live occupancy metrics, today's check-ins and check-outs.
+  - Live occupancy metrics, today's check-ins, check-outs, and today's dining bookings.
   - Multi-currency daily and monthly revenue cards (e.g., NPR & USD).
   - 7-day revenue trend chart grouped by currency.
-  - Real-time activity feeds and quick-action links.
+  - Real-time activity feeds streaming room bookings, payments, and dining reservations with direct links.
+* **Inquiries & Reservations Hub**:
+  - **Dining & Table Reservations (`/admin/dining/?tab=reservations`)**: 5 live KPI summary cards, pending badges, search by guest/contact/notes, status and venue filters, guest special requests display, Alpine.js reservation dossier modal, and direct notification routing.
+  - **Conference & Event Inquiries (`/admin/conference/?tab=inquiries`)**: 6 KPI cards, upcoming schedule preview with date conflict detection, occasion and layout tracking, detailed inquiry dossier modal.
+  - **Contact Messages (`/admin/contact/?tab=inquiries`)**: Inquiry category organization, filter pills, and integrated SMTP email reply modal.
+  - **Batch "Clear All" Actions**: Protected batch clear actions with modal confirmations across all 3 modules (Dining, Events, and Contact).
 * **Booking Management (`/admin/bookings/`)**:
   - Filter bookings by status (Draft, Pending, Confirmed, Checked In, Checked Out, Cancelled).
   - Status updater with automatic notification triggers.
@@ -336,10 +348,9 @@ The administrative dashboard (`/admin/`) is completely custom-built with **Tailw
   - Room duplication action to clone existing rooms with all facilities and settings.
 * **CMS Management (`/admin/cms/`)**:
   - Direct control over Hero Slides, About Preview, About Page CMS, Team Members, Facility Highlights, Dining Venues, Recreation Activities, Gallery Items, Testimonials, Attractions, and Blog Posts.
-* **Marketing & Communications**:
+* **Marketing & Add-ons Hub**:
+  - `/admin/addons/`: Unified add-on services manager supporting Room Stays, Events & Banquets, or Both, with multi-currency pricing.
   - `/admin/coupons/`: Discount coupon manager with currency minimum spend rules.
-  - `/admin/addons/`: Room and service add-ons manager.
-  - `/admin/contact/inquiries/`: View inquiries and reply directly via email modal.
   - `/admin/contact/broadcast/`: Send bulk promotional emails to verified subscribers.
 * **Settings & Gateways (`/admin/settings/`)**:
   - Global hotel identity (logos, favicons, contacts, social links, theme).
@@ -395,10 +406,12 @@ Every public listing page features a **dynamic hero banner** (subtitle, title, d
 The platform features an email service (`core/services/email_service.py`) supporting both production SMTP and local testing via Mailpit:
 
 1. **Booking Invoices**: Dispatches branded HTML invoice emails (`templates/emails/booking_invoice_email.html`) upon payment confirmation with direct link to online printable receipt.
-2. **Newsletter Verification**: Double opt-in confirmation emails (`templates/emails/newsletter_verification_email.html`) with secure verification tokens.
-3. **Newsletter Welcome**: Automated welcome greeting (`templates/emails/newsletter_welcome_email.html`) sent upon successful verification.
-4. **Subscriber Broadcasts**: Bulk broadcast engine (`templates/emails/newsletter_broadcast_email.html`) sent from `/admin/contact/broadcast/`.
-5. **Inquiry Replies**: Direct email replies sent from `/admin/contact/inquiries/<id>/`.
+2. **Hotel Staff Booking Alerts**: Concurrently dispatches an instant alert email (`templates/emails/booking_notification_hotel_email.html`) to the hotel's inbox with guest info, room stay summary, payment amount, and direct admin link.
+3. **Hotel Staff Contact Alerts**: Instant notification (`templates/emails/contact_inquiry_hotel_email.html`) sent to the hotel upon new contact inquiries with direct reply-to headers for rapid staff response.
+4. **Newsletter Verification**: Double opt-in confirmation emails (`templates/emails/newsletter_verification_email.html`) with secure verification tokens.
+5. **Newsletter Welcome**: Automated welcome greeting (`templates/emails/newsletter_welcome_email.html`) sent upon successful verification.
+6. **Subscriber Broadcasts**: Bulk broadcast engine (`templates/emails/newsletter_broadcast_email.html`) sent from `/admin/contact/broadcast/`.
+7. **Inquiry Replies**: Direct email replies sent from `/admin/contact/inquiries/<id>/`.
 
 ---
 
@@ -430,4 +443,4 @@ The application reads configuration from environment variables or a `.env` file 
 
 ---
 
-*Hotel Ichchha Hospitality Management Platform • Documentation Updated August 2026*
+*Hotel Ichchha Hospitality Management Platform • Documentation Updated September 2026*
