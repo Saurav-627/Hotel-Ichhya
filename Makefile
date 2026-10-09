@@ -1,4 +1,4 @@
-.PHONY: help install sync migrate makemigrations collectstatic seed-all superuser run shell backup test clean docker-up docker-down docker-logs docker-clean setup
+.PHONY: help install sync migrate makemigrations migrations collectstatic seed-all superuser run shell backup test clean docker-up docker-down docker-logs docker-clean setup build-css watch-css
 
 # Default shell
 SHELL := /bin/bash
@@ -6,6 +6,10 @@ SHELL := /bin/bash
 # Detect uv and python path
 UV := $(shell which uv 2> /dev/null)
 PYTHON := $(if $(UV),uv run python,python)
+
+# Detect npm and npx path
+NPM := $(shell which npm 2> /dev/null)
+NPX := $(shell which npx 2> /dev/null)
 
 help: ## Show this help message (default)
 	@echo "Usage: make [target]"
@@ -25,7 +29,7 @@ help: ## Show this help message (default)
 	' $(MAKEFILE_LIST)
 
 ##@ Environment & Dependency Management
-install: ## Install/sync virtual environment and dependencies using uv (or fallback to pip)
+sync: ## Install/sync virtual environment and dependencies using uv (or fallback to pip)
 	@if [ -n "$(UV)" ]; then \
 		echo "Found uv. Syncing dependencies..."; \
 		uv sync; \
@@ -34,7 +38,8 @@ install: ## Install/sync virtual environment and dependencies using uv (or fallb
 		pip install -r requirements.txt; \
 	fi
 
-sync: install ## Alias for install
+install: sync build-css migrate seed-all ## Complete workspace setup (dependencies, CSS build, migrations, and seed all data)
+	@echo "Setup completed! Run 'make run' to start the development server."
 
 ##@ Development & Run
 run: ## Start the local development server (accessible from other devices)
@@ -44,7 +49,34 @@ shell: ## Open a Django shell with models and database access
 	$(PYTHON) manage.py shell
 
 build-css: ## Build minified production Tailwind CSS
-	npm run build:css
+	@if [ -n "$(NPM)" ]; then \
+		if [ ! -d "node_modules" ]; then \
+			echo "Installing frontend npm dependencies..."; \
+			npm install; \
+		fi; \
+		echo "Building production Tailwind CSS bundle..."; \
+		npm run build:css; \
+	elif [ -n "$(NPX)" ]; then \
+		echo "npm not found, but npx found. Compiling Tailwind CSS..."; \
+		npx tailwindcss -i static/css/input.css -o static/css/main.bundle.css --minify; \
+	else \
+		echo "Warning: Neither npm nor npx found. Skipping Tailwind CSS compilation."; \
+		echo "Ensure static/css/main.bundle.css is present or install Node.js/npm."; \
+	fi
+
+watch-css: ## Watch and compile Tailwind CSS in real time during development
+	@if [ -n "$(NPM)" ]; then \
+		if [ ! -d "node_modules" ]; then \
+			echo "Installing frontend npm dependencies..."; \
+			npm install; \
+		fi; \
+		npm run watch:css; \
+	elif [ -n "$(NPX)" ]; then \
+		npx tailwindcss -i static/css/input.css -o static/css/main.bundle.css --watch; \
+	else \
+		echo "Error: npm/npx is required to run Tailwind watch mode."; \
+		exit 1; \
+	fi
 
 collectstatic: build-css ## Collect static files into staticfiles directory
 	$(PYTHON) manage.py collectstatic --noinput --clear
@@ -55,6 +87,8 @@ mailpit: ## Run Mailpit local SMTP server (1025) & Web UI (8025) via Docker
 ##@ Database & Migrations
 makemigrations: ## Generate new migrations based on model changes
 	$(PYTHON) manage.py makemigrations
+
+migrations: makemigrations ## Alias for makemigrations
 
 migrate: ## Apply database migrations
 	$(PYTHON) manage.py migrate
@@ -89,5 +123,4 @@ clean: ## Clean Python cache files (__pycache__, .pyc, .pyo)
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	find . -type f -name "*.py[co]" -delete
 
-setup: install migrate seed-all ## Complete one-step workspace setup (install, migrate, import ALL YAML data)
-	@echo "Setup completed! Run 'make run' to start the development server."
+setup: install ## Complete one-step workspace setup (alias for install)
